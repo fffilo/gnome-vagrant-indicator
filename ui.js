@@ -13,6 +13,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Icons = Me.imports.icons;
 const Helper = Me.imports.helper;
+const Vagrant = Me.imports.vagrant;
 const _ = Helper.translate;
 
 /**
@@ -44,13 +45,15 @@ const Indicator = new Lang.Class({
      * @return {Void}
      */
     destroy: function() {
-        // to do
-
+        this.monitor.unlisten();
         this.parent();
     },
 
     _def: function() {
-        // to do
+        // to do: settings
+
+        this.monitor = new Vagrant.Monitor();
+        this.monitor.listen();
     },
 
     /**
@@ -73,6 +76,8 @@ const Indicator = new Lang.Class({
         this.preferences = new PopupMenu.PopupMenuItem(_("Preferences"));
         this.preferences.connect('activate', Lang.bind(this, this._handle_preferences));
         this.menu.addMenuItem(this.preferences);
+
+        // refresh machines menu
     },
 
     /**
