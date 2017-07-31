@@ -11,10 +11,9 @@ const Me = ExtensionUtils.getCurrentExtension();
 const DEFAULT = 'gnome-vagrant-indicator-symbolic';
 
 /**
- * Ui.Indicator constructor
+ * Append assets path to theme
  *
- * @param  {Object}
- * @return {Object}
+ * @return {Void}
  */
 const init = function() {
     let theme = imports.gi.Gtk.IconTheme.get_default();

@@ -90,7 +90,7 @@ const Monitor = new Lang.Class({
         if (!machine) return;
 
         let cwd = machine.vagrantfile_path;
-        this._exec(cwd, '%s %s %s'.format(this.command, cmd || '', id));
+        this._exec(cwd, '%s %s'.format(this.command, cmd || ''));
     },
 
     /**
@@ -184,8 +184,16 @@ const Monitor = new Lang.Class({
         this._monitor = null;
     },
 
+    vagrantfile: function(machine_id) {
+        let machine = this.machine[machine_id];
+        if (!machine) return;
+
+        let uri = GLib.filename_to_uri(machine.vagrantfile_path + '/Vagrantfile', null);
+        Gio.AppInfo.launch_default_for_uri(uri, null);
+    },
+
     /**
-     * Open terminal and execute command
+     * Open terminal at machine vagrantfile_path
      *
      * @param  {String} machine_id
      * @return {Void}
@@ -195,6 +203,20 @@ const Monitor = new Lang.Class({
         if (!machine) return;
 
         this._exec(machine.vagrantfile_path);
+    },
+
+    /**
+     * Open nautilus at machine vagrantfile_path
+     *
+     * @param  {String} machine_id
+     * @return {Void}
+     */
+    nautilus: function(machine_id) {
+        let machine = this.machine[machine_id];
+        if (!machine) return;
+
+        let uri = GLib.filename_to_uri(machine.vagrantfile_path, null);
+        Gio.AppInfo.launch_default_for_uri(uri, null);
     },
 
     /**
@@ -228,6 +250,17 @@ const Monitor = new Lang.Class({
      */
     up_and_provision: function(machine_id) {
         this._vagrant('up --provision', machine_id);
+    },
+
+    /**
+     * Open terminal and execute command:
+     * vagrant rdp
+     *
+     * @param  {String} machine_id
+     * @return {Void}
+     */
+    rdp: function(machine_id) {
+        this._vagrant('rdp', machine_id);
     },
 
     /**

@@ -12,8 +12,8 @@ const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Icons = Me.imports.icons;
-const Helper = Me.imports.helper;
 const Vagrant = Me.imports.vagrant;
+const Helper = Me.imports.helper;
 const _ = Helper.translate;
 
 /**
@@ -37,6 +37,7 @@ const Indicator = new Lang.Class({
 
         this._def();
         this._ui();
+        this.refresh();
     },
 
     /**
@@ -45,7 +46,9 @@ const Indicator = new Lang.Class({
      * @return {Void}
      */
     destroy: function() {
-        this.monitor.unlisten();
+        if (this.monitor)
+            this.monitor.unlisten();
+
         this.parent();
     },
 
@@ -53,6 +56,7 @@ const Indicator = new Lang.Class({
         // to do: settings
 
         this.monitor = new Vagrant.Monitor();
+        this.monitor.connect('changed', Lang.bind(this, this._handle_monitor));
         this.monitor.listen();
     },
 
@@ -63,6 +67,7 @@ const Indicator = new Lang.Class({
      */
     _ui: function() {
         this.actor.add_style_class_name('panel-status-button');
+        this.actor.add_style_class_name('gnome-vagrant-indicator');
 
         this.icon = new St.Icon({
             icon_name: Icons.DEFAULT,
@@ -70,14 +75,32 @@ const Indicator = new Lang.Class({
         });
         this.actor.add_actor(this.icon);
 
-        this.machines = new Machines(this);
-        this.machines.connect('click', Lang.bind(this, this._handle_machines));
+        this.machine = new MachineMenu(this);
+        this.machine.connect('click', Lang.bind(this, this._handle_machines));
 
         this.preferences = new PopupMenu.PopupMenuItem(_("Preferences"));
         this.preferences.connect('activate', Lang.bind(this, this._handle_preferences));
         this.menu.addMenuItem(this.preferences);
+    },
 
-        // refresh machines menu
+    refresh: function() {
+        this.machine.clear();
+
+        for (let id in this.monitor.machine) {
+            let machine = this.monitor.machine[id];
+            this.machine.add(id, machine.vagrantfile_path, machine.state);
+        }
+    },
+
+    /**
+     * Handle monitor machine index file change
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handle_monitor: function(widget, event) {
+        this._refresh();
     },
 
     /**
@@ -88,7 +111,7 @@ const Indicator = new Lang.Class({
      * @return {Void}
      */
     _handle_machines: function(widget, event) {
-
+        this.monitor[event.method](event.id);
     },
 
     /**
@@ -99,7 +122,7 @@ const Indicator = new Lang.Class({
      * @return {Void}
      */
     _handle_preferences: function(widget, event) {
-
+        // to do
     },
 
     /* --- */
@@ -107,14 +130,14 @@ const Indicator = new Lang.Class({
 });
 
 /**
- * Ui.Machines constructor
+ * Ui.MachineMenu constructor
  *
  * @param  {Object}
  * @return {Object}
  */
-const Machines = new Lang.Class({
+const MachineMenu = new Lang.Class({
 
-    Name: 'Ui.Machines',
+    Name: 'Ui.MachineMenu',
     Extends: PopupMenu.PopupMenuSection,
 
     /**
@@ -138,9 +161,9 @@ const Machines = new Lang.Class({
     clear: function() {
         this.removeAll();
 
-        let item = new PopupMenu.PopupMenuItem(_("No Vagrant machines found"));
-        item.setSensitive(false);
-        this.addMenuItem(item);
+        this.empty = new PopupMenu.PopupMenuItem(_("No Vagrant machines found"));
+        this.empty.setSensitive(false);
+        this.addMenuItem(this.empty);
     },
 
     /**
@@ -148,8 +171,50 @@ const Machines = new Lang.Class({
      *
      * @return {Void}
      */
-    add: function() {
+    add: function(id, path, state) {
+        if (this.empty)
+            this.empty.destroy();
+        this.empty = null;
 
+        let item = new PopupMenu.PopupSubMenuMenuItem(path);
+        item.id = id;
+        item.actor.add_style_class_name('gnome-vagrant-indicator-machine-item');
+        item.actor.add_style_class_name(state);
+        item.setOrnament(PopupMenu.Ornament.DOT);
+        this.addMenuItem(item);
+
+        let txt = [
+            'up', _("Up"),
+            'provision', _("Provision"),
+            //'up_and_provision', _("Up and provision"),
+            'ssh', _("SSH"),
+            'rdp', _("RDP"),
+            'resume', _("Resume"),
+            'suspend', _("Suspend"),
+            'halt', _("Halt"),
+            'destroy', _("Destroy"),
+            '', '---',
+            'vagrantfile', _("Edit Vagrantfile"),
+            'terminal', _("Open in Terminal"),
+            'nautilus', _("Open in Nautilus"),
+        ];
+        for (let i = 0; i < txt.length; i += 2) {
+            let subitem;
+            if (txt[i]) {
+                subitem = new PopupMenu.PopupMenuItem(txt[i + 1]);
+                subitem.id = id;
+                subitem.method = txt[i];
+                subitem.actor.add_style_class_name('gnome-vagrant-indicator-machine-item-subitem');
+                subitem.actor.add_style_class_name(subitem.method);
+                subitem.connect('activate', Lang.bind(this, this._handle_menu_item));
+            }
+            else {
+                subitem = new PopupMenu.PopupSeparatorMenuItem();
+                subitem._separator.add_style_class_name('gnome-vagrant-indicator-machine-item-separator');
+            }
+
+            item.menu.addMenuItem(subitem);
+        }
     },
 
     /**
@@ -158,6 +223,8 @@ const Machines = new Lang.Class({
      * @return {Void}
      */
     _ui: function() {
+        this.actor.add_style_class_name('gnome-vagrant-indicator-machine');
+
         this.indicator.menu.addMenuItem(this);
         this.indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
     },
@@ -171,8 +238,8 @@ const Machines = new Lang.Class({
      */
     _handle_menu_item: function(widget, event) {
         this.emit('click', {
-            title: widget.label.text,
-            url: widget.url,
+            id: widget.id,
+            method: widget.method,
         });
     },
 
@@ -180,4 +247,4 @@ const Machines = new Lang.Class({
 
 });
 
-Signals.addSignalMethods(Machines.prototype);
+Signals.addSignalMethods(MachineMenu.prototype);
