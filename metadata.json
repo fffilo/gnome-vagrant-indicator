@@ -1,0 +1,13 @@
+{
+    "url": "https://github.com/fffilo/gnome-vagrant-indicator",
+    "description": "GNOME Vagrant Indicator",
+    "email": "fffilo666@gmail.com",
+    "gettext-domain": "gnome-vagrant-indicator",
+    "license": "GPL",
+    "maintainer": "Franjo Filo",
+    "name": "GNOME Vagrant Indicator",
+    "settings-schema": "org.gnome.shell.extensions.gnome-vagrant-indicator",
+    "shell-version": ["3.18.5"],
+    "uuid": "gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com",
+    "version": "1"
+}
