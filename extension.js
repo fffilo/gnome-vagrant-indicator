@@ -9,6 +9,7 @@ const Gtk = imports.gi.Gtk;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
+const Icons = Me.imports.icons;
 const Ui = Me.imports.ui;
 
 /**
@@ -26,9 +27,7 @@ let indicator = null;
  */
 function init(extensionMeta) {
     Convenience.initTranslations();
-
-    let theme = imports.gi.Gtk.IconTheme.get_default();
-    theme.append_search_path(extensionMeta.path + '/icons');
+    Icons.init();
 }
 
 /**

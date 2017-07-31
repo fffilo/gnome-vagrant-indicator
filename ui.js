@@ -11,15 +11,9 @@ const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-
-/**
- * Icon for each player state
- *
- * @type {Object}
- */
-const Icons = Object.freeze({
-    DEFAULT: 'gnome-vagrant-indicator-symbolic',
-});
+const Icons = Me.imports.icons;
+const Helper = Me.imports.helper;
+const _ = Helper.translate;
 
 /**
  * Ui.Indicator constructor
@@ -50,6 +44,8 @@ const Indicator = new Lang.Class({
      * @return {Void}
      */
     destroy: function() {
+        // to do
+
         this.parent();
     },
 
@@ -74,7 +70,7 @@ const Indicator = new Lang.Class({
         this.machines = new Machines(this);
         this.machines.connect('click', Lang.bind(this, this._handle_machines));
 
-        this.preferences = new PopupMenu.PopupMenuItem('Preferences');
+        this.preferences = new PopupMenu.PopupMenuItem(_("Preferences"));
         this.preferences.connect('activate', Lang.bind(this, this._handle_preferences));
         this.menu.addMenuItem(this.preferences);
     },
@@ -137,7 +133,7 @@ const Machines = new Lang.Class({
     clear: function() {
         this.removeAll();
 
-        let item = new PopupMenu.PopupMenuItem('No Vagrant machines found');
+        let item = new PopupMenu.PopupMenuItem(_("No Vagrant machines found"));
         item.setSensitive(false);
         this.addMenuItem(item);
     },
