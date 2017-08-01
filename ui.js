@@ -7,8 +7,10 @@
 const Lang = imports.lang;
 const Signals = imports.signals;
 const St = imports.gi.St;
+const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
+const MessageTray = imports.ui.messageTray;
 const Util = imports.misc.util;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -40,6 +42,8 @@ const Indicator = new Lang.Class({
         this._def();
         this._ui();
         this.refresh();
+
+        Main.panel.addToStatusArea(Me.metadata.uuid, this);
     },
 
     /**
@@ -62,6 +66,8 @@ const Indicator = new Lang.Class({
      * @return {Void}
      */
     _def: function() {
+        this.notification = new Notification();
+
         this.settings = Convenience.getSettings();
         this.settings.connect('changed', Lang.bind(this, this._handle_settings));
 
@@ -123,6 +129,9 @@ const Indicator = new Lang.Class({
      */
     _handle_monitor: function(widget, event) {
         this.refresh();
+
+        if (this.settings.get_boolean('notifications'))
+            this.notification.show(Me.metadata.name, 'Machine state changed to IDK');
     },
 
     /**
@@ -273,3 +282,91 @@ const MachineMenu = new Lang.Class({
 });
 
 Signals.addSignalMethods(MachineMenu.prototype);
+
+/**
+ * Ui.Notification constructor
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
+const Notification = new Lang.Class({
+
+    Name: 'Ui.Notification',
+
+    /**
+     * Constructor
+     *
+     * @param  {String} title
+     * @param  {String} icon
+     * @return {Void}
+     */
+    _init: function(title, icon) {
+        this._title = title || Me.metadata.name;
+        this._icon = icon || Icons.DEFAULT;
+
+        this._source = null;
+    },
+
+    /**
+     * Prepare source
+     *
+     * @return {Void}
+     */
+    _prepare: function() {
+        if (this._source !== null)
+            return;
+
+        this._source = new MessageTray.Source(this._title, this._icon);
+        this._source.connect('destroy', Lang.bind(this, this._handle_destroy));
+
+        Main.messageTray.add(this._source);
+    },
+
+    /**
+     * Get existing notification from
+     * source or create new one
+     *
+     * @param  {String} title
+     * @param  {String} message
+     * @return {Object}
+     */
+    _notification: function(title, message) {
+        let result = null;
+        if (this._source.notifications.length) {
+            result = this._source.notifications[0];
+            result.update(title, message, {
+                clear: true,
+            });
+        }
+        else {
+            result = new MessageTray.Notification(this._source, title, message);
+            result.setTransient(true);
+            result.setResident(false);
+        }
+
+        return result;
+    },
+
+    /**
+     * Source destroy event handler:
+     * clear source
+     *
+     * @return {Void}
+     */
+    _handle_destroy: function() {
+        this._source = null;
+    },
+
+    /**
+     * Show notification
+     *
+     * @param  {String} title
+     * @param  {String} message
+     * @return {Void}
+     */
+    show: function(title, message) {
+        this._prepare();
+        this._source.notify(this._notification(title, message));
+    },
+
+});

@@ -4,7 +4,6 @@
 'use strict';
 
 // import modules
-const Main = imports.ui.main;
 const Gtk = imports.gi.Gtk;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -40,7 +39,6 @@ function enable() {
         return;
 
     indicator = new Ui.Indicator();
-    Main.panel.addToStatusArea(Me.metadata.uuid, indicator);
 }
 
 /**
