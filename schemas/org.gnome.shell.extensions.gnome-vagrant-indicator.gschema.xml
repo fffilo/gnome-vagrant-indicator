@@ -6,6 +6,11 @@
             <summary>Show notifications</summary>
             <description>Display notification vagrant machine state change</description>
         </key>
+        <key name="machine-full-path" type="b">
+            <default>false</default>
+            <summary>Show machine full path</summary>
+            <description>Show machine full path as instance name</description>
+        </key>
         <key name="menu-up" type="b">
             <default>true</default>
             <summary>Up</summary>

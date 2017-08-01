@@ -6,6 +6,7 @@
 // import modules
 const Lang = imports.lang;
 const Signals = imports.signals;
+const GLib = imports.gi.GLib;
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
@@ -102,9 +103,15 @@ const Indicator = new Lang.Class({
     refresh: function() {
         this.machine.clear();
 
+        let fullpath = this.settings.get_boolean('machine-full-path');
+
         for (let id in this.monitor.machine) {
             let machine = this.monitor.machine[id];
-            this.machine.add(id, machine.vagrantfile_path, machine.state);
+            let path = machine.vagrantfile_path
+            if (!fullpath)
+                path = GLib.basename(path);
+
+            this.machine.add(id, path, machine.state);
         }
     },
 
@@ -116,8 +123,10 @@ const Indicator = new Lang.Class({
      * @return {Void}
      */
     _handle_settings: function(widget, key) {
-        if (key.substr(0, 5) === 'menu-')
-            this.refresh();
+        if (key === 'notifications')
+            return;
+
+        this.refresh();
     },
 
     /**

@@ -115,6 +115,11 @@ const Widget = new GObject.Class({
         this.ui.settings.notifications.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.settings.page.actor.add(this.ui.settings.notifications);
 
+        this.ui.settings.machinefullpath = new InputSwitch('machine-full-path', this.settings.get_boolean('machine-full-path'), _("Show machine full path"), _("Show machine full path as instance name"));
+        this.ui.settings.machinefullpath.name = 'gnome-vagrant-prefs-page-settings-machine-full-path';
+        this.ui.settings.machinefullpath.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.settings.page.actor.add(this.ui.settings.machinefullpath);
+
         return this.ui.settings.page;
     },
 
