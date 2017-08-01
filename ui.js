@@ -72,7 +72,7 @@ const Indicator = new Lang.Class({
         this.settings.connect('changed', Lang.bind(this, this._handle_settings));
 
         this.monitor = new Vagrant.Monitor();
-        this.monitor.connect('changed', Lang.bind(this, this._handle_monitor));
+        this.monitor.connect('state', Lang.bind(this, this._handle_monitor));
         this.monitor.listen();
     },
 
@@ -130,8 +130,11 @@ const Indicator = new Lang.Class({
     _handle_monitor: function(widget, event) {
         this.refresh();
 
-        if (this.settings.get_boolean('notifications'))
-            this.notification.show(Me.metadata.name, 'Machine state changed to IDK');
+        if (!this.settings.get_boolean('notifications'))
+            return;
+
+        let machine = this.monitor.machine[event.id];
+        this.notification.show('Machine went %s'.format(machine.state), machine.vagrantfile_path);
     },
 
     /**

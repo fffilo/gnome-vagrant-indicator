@@ -30,7 +30,6 @@ const Monitor = new Lang.Class({
      */
     _init: function() {
         this._def();
-        this._handle_monitor_changed();
 
         if (!this._command)
             throw 'Unable to initialize Vagrant.Monitor (vagrant not installed)';
@@ -43,8 +42,8 @@ const Monitor = new Lang.Class({
      */
     _def: function() {
         this._file = Gio.File.new_for_path(INDEX);
+        this._index = this._parse();
         this._monitor = null;
-        this._index = {};
         this._command = null;
         this._version = null;
 
@@ -97,22 +96,23 @@ const Monitor = new Lang.Class({
      * Parse vagrant machine index file
      * and store data to this.machine
      *
-     * @return {Boolean}
+     * @return {String}
      */
     _parse: function() {
         let path = this._file.get_path();
         let [ok, content] = GLib.file_get_contents(path);
 
-        this._index = JSON.parse(content);
+        return JSON.parse(content);
     },
 
     /**
      * Vagrant machine index file change
      * event handler
      *
-     * to do: set 500ms timeout and cancel
-     * previous interval, so changed signal
-     * won't be emited too often???
+     * to do: optimize
+     * set 500ms timeout and cancel previous
+     * interval, so changed signal won't be
+     * emited too often???
      *
      * @param  {Object} file
      * @param  {Object} otherFile
@@ -120,10 +120,41 @@ const Monitor = new Lang.Class({
      * @return {Void}
      */
     _handle_monitor_changed: function(file, otherFile, eventType) {
-        this._parse();
-        this.emit('changed', {
-            monitor: this.monitor,
-        });
+        let _old = this._index;
+        let _new = this._parse();
+        let emit = [];
+
+        // check actual changes
+        if (JSON.stringify(_old) === JSON.stringify(_new))
+            return;
+
+        // check if machine is missing
+        for (let id in _old.machines) {
+            if (!(id in _new.machines))
+                emit = emit.concat('remove', id);
+        }
+
+        // check if machine is added
+        for (let id in _new.machines) {
+            if (!(id in _old.machines))
+                emit = emit.concat('add', id);
+        }
+
+        // check if state changed
+        for (let id in _new.machines) {
+            if (id in _old.machines && _new.machines[id].state !== _old.machines[id].state)
+                emit = emit.concat('state', id);
+        }
+
+        // save state
+        this._index = _new;
+
+        // emit signal
+        for (let i = 0; i < emit.length; i += 2) {
+            this.emit(emit[i], {
+                id: emit[i + 1],
+            });
+        }
     },
 
     /**
