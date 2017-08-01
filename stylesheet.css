@@ -1,4 +1,5 @@
 .gnome-vagrant-indicator-machine-item .popup-menu-ornament { font-size: 1.5em; }
 .gnome-vagrant-indicator-machine-item.running .popup-menu-ornament { color: lime; }
+.gnome-vagrant-indicator-machine-item.aborted .popup-menu-ornament { color: red; }
 .gnome-vagrant-indicator-machine-item .popup-separator-menu-item { background: red; }
-.gnome-vagrant-indicator-machine-item-separator { height: 1px; box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.8); }
+.gnome-vagrant-indicator-machine-item-separator { height: 1px; box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.5); }

@@ -9,8 +9,10 @@ const Signals = imports.signals;
 const St = imports.gi.St;
 const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
+const Util = imports.misc.util;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+const Convenience = Me.imports.convenience;
 const Icons = Me.imports.icons;
 const Vagrant = Me.imports.vagrant;
 const Helper = Me.imports.helper;
@@ -48,12 +50,20 @@ const Indicator = new Lang.Class({
     destroy: function() {
         if (this.monitor)
             this.monitor.unlisten();
+        if (this.settings)
+            this.settings.run_dispose();
 
         this.parent();
     },
 
+    /**
+     * Initialize object properties
+     *
+     * @return {Void}
+     */
     _def: function() {
-        // to do: settings
+        this.settings = Convenience.getSettings();
+        this.settings.connect('changed', Lang.bind(this, this._handle_settings));
 
         this.monitor = new Vagrant.Monitor();
         this.monitor.connect('changed', Lang.bind(this, this._handle_monitor));
@@ -93,18 +103,30 @@ const Indicator = new Lang.Class({
     },
 
     /**
-     * Handle monitor machine index file change
+     * Settings changed event handler
+     *
+     * @param  {Object} widget
+     * @param  {String} key
+     * @return {Void}
+     */
+    _handle_settings: function(widget, key) {
+        if (key.substr(0, 5) === 'menu-')
+            this.refresh();
+    },
+
+    /**
+     * Monitor machine index file change event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
      * @return {Void}
      */
     _handle_monitor: function(widget, event) {
-        this._refresh();
+        this.refresh();
     },
 
     /**
-     * Handle machines item click
+     * Machines item click event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
@@ -115,14 +137,14 @@ const Indicator = new Lang.Class({
     },
 
     /**
-     * Handle preferences click
+     * Preferences click event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
      * @return {Void}
      */
     _handle_preferences: function(widget, event) {
-        // to do
+        Util.spawn(['gnome-shell-extension-prefs', Me.metadata.uuid]);
     },
 
     /* --- */
@@ -143,12 +165,14 @@ const MachineMenu = new Lang.Class({
     /**
      * Constructor
      *
+     * @param  {Object} indicator
      * @return {Void}
      */
     _init: function(indicator) {
         this.parent();
 
         this.indicator = indicator;
+
         this._ui();
         this.clear();
     },
@@ -183,27 +207,28 @@ const MachineMenu = new Lang.Class({
         item.setOrnament(PopupMenu.Ornament.DOT);
         this.addMenuItem(item);
 
-        let txt = [
-            'up', _("Up"),
-            'provision', _("Provision"),
-            //'up_and_provision', _("Up and provision"),
-            'ssh', _("SSH"),
-            'rdp', _("RDP"),
-            'resume', _("Resume"),
-            'suspend', _("Suspend"),
-            'halt', _("Halt"),
-            'destroy', _("Destroy"),
-            '', '---',
-            'vagrantfile', _("Edit Vagrantfile"),
+        let settings = this.indicator.settings;
+        let menu = [
             'terminal', _("Open in Terminal"),
             'nautilus', _("Open in Nautilus"),
+            'vagrantfile', _("Edit Vagrantfile"),
+            '', '---',
         ];
-        for (let i = 0; i < txt.length; i += 2) {
+        if (settings.get_boolean('menu-up')) menu = menu.concat([ 'up', _("Up") ]);
+        if (settings.get_boolean('menu-provision')) menu = menu.concat([ 'provision', _("Provision") ]);
+        if (settings.get_boolean('menu-ssh')) menu = menu.concat([ 'ssh', _("SSH") ]);
+        if (settings.get_boolean('menu-rdp')) menu = menu.concat([ 'rdp', _("RDP") ]);
+        if (settings.get_boolean('menu-resume')) menu = menu.concat([ 'resume', _("Resume") ]);
+        if (settings.get_boolean('menu-suspend')) menu = menu.concat([ 'suspend', _("Suspend") ]);
+        if (settings.get_boolean('menu-halt')) menu = menu.concat([ 'halt', _("Halt") ]);
+        if (settings.get_boolean('menu-destroy')) menu = menu.concat([ 'destroy', _("Destroy") ]);
+
+        for (let i = 0; i < menu.length; i += 2) {
             let subitem;
-            if (txt[i]) {
-                subitem = new PopupMenu.PopupMenuItem(txt[i + 1]);
+            if (menu[i]) {
+                subitem = new PopupMenu.PopupMenuItem(menu[i + 1]);
                 subitem.id = id;
-                subitem.method = txt[i];
+                subitem.method = menu[i];
                 subitem.actor.add_style_class_name('gnome-vagrant-indicator-machine-item-subitem');
                 subitem.actor.add_style_class_name(subitem.method);
                 subitem.connect('activate', Lang.bind(this, this._handle_menu_item));
@@ -230,7 +255,7 @@ const MachineMenu = new Lang.Class({
     },
 
     /**
-     * Handle subitem click
+     * Subitem click event handler
      *
      * @param  {Object} widget
      * @param  {Object} event

@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schemalist gettext-domain="gnome-vagrant-indicator">
+    <schema path="/org/gnome/shell/extensions/gnome-vagrant-indicator/" id="org.gnome.shell.extensions.gnome-vagrant-indicator">
+        <key name="notifications" type="b">
+            <default>true</default>
+            <summary>Show notifications</summary>
+            <description>Display notification vagrant machine state change</description>
+        </key>
+        <key name="menu-up" type="b">
+            <default>true</default>
+            <summary>Up</summary>
+            <description>Display menu for `vagrant up` command</description>
+        </key>
+        <key name="menu-provision" type="b">
+            <default>false</default>
+            <summary>Provision</summary>
+            <description>Display menu for `vagrant provision` command</description>
+        </key>
+        <key name="menu-ssh" type="b">
+            <default>true</default>
+            <summary>SSH</summary>
+            <description>Display menu for `vagrant ssh` command</description>
+        </key>
+        <key name="menu-rdp" type="b">
+            <default>false</default>
+            <summary>RDP</summary>
+            <description>Display menu for `vagrant rdp` command</description>
+        </key>
+        <key name="menu-resume" type="b">
+            <default>false</default>
+            <summary>Resume</summary>
+            <description>Display menu for `vagrant resume` command</description>
+        </key>
+        <key name="menu-suspend" type="b">
+            <default>false</default>
+            <summary>Suspend</summary>
+            <description>Display menu for `vagrant suspend` command</description>
+        </key>
+        <key name="menu-halt" type="b">
+            <default>true</default>
+            <summary>Halt</summary>
+            <description>Display menu for `vagrant halt` command</description>
+        </key>
+        <key name="menu-destroy" type="b">
+            <default>false</default>
+            <summary>Destroy</summary>
+            <description>Display menu for `vagrant destroy` command</description>
+        </key>
+    </schema>
+</schemalist>
