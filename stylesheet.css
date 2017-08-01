@@ -1,7 +1,7 @@
-.gnome-vagrant-indicator-machine-item .popup-menu-ornament { font-size: 1.5em; }
-.gnome-vagrant-indicator-machine-item.preparing .popup-menu-ornament { color: yellow; }
-.gnome-vagrant-indicator-machine-item.running .popup-menu-ornament { color: lime; }
-.gnome-vagrant-indicator-machine-item.saved .popup-menu-ornament { color: orange; }
-.gnome-vagrant-indicator-machine-item.aborted .popup-menu-ornament { color: red; }
-.gnome-vagrant-indicator-machine-item .popup-separator-menu-item { background: red; }
-.gnome-vagrant-indicator-machine-item-separator { height: 1px; box-shadow: inset 0 0 1px rgba(0, 0, 0, 0.5); }
+.gnome-vagrant-indicator-machine-menu-item .popup-menu-ornament { font-size: 1.5em; }
+.gnome-vagrant-indicator-machine-menu-item.preparing .popup-menu-ornament { color: yellow; }
+.gnome-vagrant-indicator-machine-menu-item.running .popup-menu-ornament { color: lime; }
+.gnome-vagrant-indicator-machine-menu-item.saved .popup-menu-ornament { color: orange; }
+.gnome-vagrant-indicator-machine-menu-item.aborted .popup-menu-ornament { color: red; }
+.gnome-vagrant-indicator-machine-menu-item .popup-separator-menu-item { background: red; }
+.gnome-vagrant-indicator-machine-menu-item-subitem.title { margin-top: 1.5em; padding-left: 0.5em; font-size: 0.7em; }

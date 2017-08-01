@@ -178,7 +178,7 @@ const Indicator = new Lang.Class({
     },
 
     /**
-     * Machines item click event handler
+     * Machines item activate event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
@@ -189,7 +189,7 @@ const Indicator = new Lang.Class({
     },
 
     /**
-     * Preferences click event handler
+     * Preferences activate event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
@@ -246,57 +246,20 @@ const MachineMenu = new Lang.Class({
      * Add item to list
      *
      * @param  {String} id
-     * @param  {String} title
+     * @param  {String} path
      * @param  {String} state
      * @param  {Number} index (optional)
      * @return {Void}
      */
-    add: function(id, title, state, index) {
+    add: function(id, path, state, index) {
         if (this.empty)
             this.empty.destroy();
         this.empty = null;
 
-        let item = new PopupMenu.PopupSubMenuMenuItem(title);
-        item.id = id;
-        item.state = state;
-        item.actor.add_style_class_name('gnome-vagrant-indicator-machine-item');
-        item.actor.add_style_class_name(state);
-        item.setOrnament(PopupMenu.Ornament.DOT);
+        let item = new MachineMenuItem(id, path, state);
+        item.display = MachineMenuDisplay.ALL;
+        item.connect('click', Lang.bind(this, this._handle_menu_item));
         this.addMenuItem(item, index);
-
-        let settings = this.indicator.settings;
-        let menu = [
-            'terminal', _("Open in Terminal"),
-            'nautilus', _("Open in Nautilus"),
-            'vagrantfile', _("Edit Vagrantfile"),
-            '', '---',
-        ];
-        if (settings.get_boolean('menu-up')) menu = menu.concat([ 'up', _("Up") ]);
-        if (settings.get_boolean('menu-provision')) menu = menu.concat([ 'provision', _("Provision") ]);
-        if (settings.get_boolean('menu-ssh')) menu = menu.concat([ 'ssh', _("SSH") ]);
-        if (settings.get_boolean('menu-rdp')) menu = menu.concat([ 'rdp', _("RDP") ]);
-        if (settings.get_boolean('menu-resume')) menu = menu.concat([ 'resume', _("Resume") ]);
-        if (settings.get_boolean('menu-suspend')) menu = menu.concat([ 'suspend', _("Suspend") ]);
-        if (settings.get_boolean('menu-halt')) menu = menu.concat([ 'halt', _("Halt") ]);
-        if (settings.get_boolean('menu-destroy')) menu = menu.concat([ 'destroy', _("Destroy") ]);
-
-        for (let i = 0; i < menu.length; i += 2) {
-            let subitem;
-            if (menu[i]) {
-                subitem = new PopupMenu.PopupMenuItem(menu[i + 1]);
-                subitem.id = id;
-                subitem.method = menu[i];
-                subitem.actor.add_style_class_name('gnome-vagrant-indicator-machine-item-subitem');
-                subitem.actor.add_style_class_name(subitem.method);
-                subitem.connect('activate', Lang.bind(this, this._handle_menu_item));
-            }
-            else {
-                subitem = new PopupMenu.PopupSeparatorMenuItem();
-                subitem._separator.add_style_class_name('gnome-vagrant-indicator-machine-item-separator');
-            }
-
-            item.menu.addMenuItem(subitem);
-        }
     },
 
     /**
@@ -365,12 +328,276 @@ const MachineMenu = new Lang.Class({
                 return actor._delegate;
             })
             .filter(function(actor) {
-                return actor instanceof PopupMenu.PopupSubMenuMenuItem && (id ? actor.id === id : true);
+                return actor instanceof MachineMenuItem && (id ? actor.id === id : true);
             });
     },
 
     /**
-     * Subitem click event handler
+     * Subitem activate event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handle_menu_item: function(widget, event) {
+        this.emit('click', {
+            id: event.id,
+            method: event.method,
+        });
+    },
+
+    /* --- */
+
+});
+
+Signals.addSignalMethods(MachineMenu.prototype);
+
+/**
+ * Ui.MachineMenuItem constructor
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
+const MachineMenuItem = new Lang.Class({
+
+    Name: 'Ui.MachineMenuItem',
+    Extends: PopupMenu.PopupSubMenuMenuItem,
+
+    /**
+     * Constructor
+     *
+     * @param  {String} id
+     * @param  {String} path
+     * @param  {String} state
+     * @return {Void}
+     */
+    _init: function(id, path, state) {
+        this.parent('unknown');
+
+        this.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-item');
+        this.setOrnament(PopupMenu.Ornament.DOT);
+
+        this._id = 'unknown';
+        this._path = 'unknown';
+        this._state = 'unknown';
+
+        if (id) this.id = id;
+        if (path) this.path = path;
+        if (state) this.state = state;
+
+        this._ui();
+    },
+
+    /**
+     * Create user interface
+     *
+     * @return {Void}
+     */
+    _ui: function() {
+        this._ui_system();
+        this._ui_vagrant();
+    },
+
+    /**
+     * Create user interface for
+     * system commands menu
+     *
+     * @return {Void}
+     */
+    _ui_system: function() {
+        this.menuSystem = {};
+
+        let item = new PopupMenu.PopupMenuItem(_("SYSTEM COMMANDS"));
+        item.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-item-subitem');
+        item.actor.add_style_class_name('title');
+        item.setSensitive(false);
+        this.menu.addMenuItem(item);
+        this.menuSystem.title = item;
+
+        let menu = [
+            'terminal', _("Open in Terminal"),
+            'nautilus', _("Open in Nautilus"),
+            'vagrantfile', _("Edit Vagrantfile"),
+        ];
+
+        for (let i = 0; i < menu.length; i += 2) {
+            let item = new PopupMenu.PopupMenuItem(menu[i + 1]);
+            item.id = this.id;
+            item.method = menu[i];
+            item.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-item-subitem');
+            item.actor.add_style_class_name(item.method);
+            item.connect('activate', Lang.bind(this, this._handle_menu_item));
+
+            this.menu.addMenuItem(item);
+            this.menuSystem[menu[i]] = item;
+        }
+    },
+
+    /**
+     * Create user interface for
+     * vagrant commands menu
+     *
+     * @return {Void}
+     */
+    _ui_vagrant: function() {
+        this.menuVagrant = {};
+
+        let item = new PopupMenu.PopupMenuItem(_("VAGRANT COMMANDS"));
+        item.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-item-subitem');
+        item.actor.add_style_class_name('title');
+        item.setSensitive(false);
+        this.menu.addMenuItem(item);
+        this.menuVagrant.title = item;
+
+        let menu = [
+            'up', _("Up"),
+            'provision', _("Provision"),
+            'ssh', _("SSH"),
+            'rdp', _("RDP"),
+            'resume', _("Resume"),
+            'suspend', _("Suspend"),
+            'halt', _("Halt"),
+            'destroy', _("Destroy"),
+        ];
+
+        for (let i = 0; i < menu.length; i += 2) {
+            let item = new PopupMenu.PopupMenuItem(menu[i + 1]);
+            item.id = this.id;
+            item.method = menu[i];
+            item.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-item-subitem');
+            item.actor.add_style_class_name(item.method);
+            item.connect('activate', Lang.bind(this, this._handle_menu_item));
+
+            this.menu.addMenuItem(item);
+            this.menuVagrant[menu[i]] = item;
+        }
+    },
+
+    /**
+     * Property display getter
+     *
+     * @return {Number}
+     */
+    get display() {
+        let result = 0;
+        if (this.menuSystem.terminal.actor.visible) result += MachineMenuDisplay.TERMINAL;
+        if (this.menuSystem.nautilus.actor.visible) result += MachineMenuDisplay.NAUTILUS;
+        if (this.menuSystem.vagrantfile.actor.visible) result += MachineMenuDisplay.VAGRANTFILE;
+        if (this.menuVagrant.up.actor.visible) result += MachineMenuDisplay.UP;
+        if (this.menuVagrant.provision.actor.visible) result += MachineMenuDisplay.PROVISION;
+        if (this.menuVagrant.ssh.actor.visible) result += MachineMenuDisplay.SSH;
+        if (this.menuVagrant.rdp.actor.visible) result += MachineMenuDisplay.RDP;
+        if (this.menuVagrant.resume.actor.visible) result += MachineMenuDisplay.RESUME;
+        if (this.menuVagrant.suspend.actor.visible) result += MachineMenuDisplay.SUSPEND;
+        if (this.menuVagrant.halt.actor.visible) result += MachineMenuDisplay.HALT;
+        if (this.menuVagrant.destroy.actor.visible) result += MachineMenuDisplay.DESTROY;
+
+        return result;
+    },
+
+    /**
+     * Property display setter
+     *
+     * @param  {Number} value
+     * @return {Void}
+     */
+    set display(value) {
+        if (value < MachineMenuDisplay.NONE)
+            value = MachineMenuDisplay.NONE;
+        else if (value > MachineMenuDisplay.ALL)
+            value = MachineMenuDisplay.ALL;
+
+        this.menuSystem.terminal.actor.visible = !((value | MachineMenuDisplay.TERMINAL) > Math.max(value, MachineMenuDisplay.TERMINAL));
+        this.menuSystem.nautilus.actor.visible = !((value | MachineMenuDisplay.NAUTILUS) > Math.max(value, MachineMenuDisplay.NAUTILUS));
+        this.menuSystem.vagrantfile.actor.visible = !((value | MachineMenuDisplay.VAGRANTFILE) > Math.max(value, MachineMenuDisplay.VAGRANTFILE));
+        this.menuVagrant.up.actor.visible = !((value | MachineMenuDisplay.UP) > Math.max(value, MachineMenuDisplay.UP));
+        this.menuVagrant.provision.actor.visible = !((value | MachineMenuDisplay.PROVISION) > Math.max(value, MachineMenuDisplay.PROVISION));
+        this.menuVagrant.ssh.actor.visible = !((value | MachineMenuDisplay.SSH) > Math.max(value, MachineMenuDisplay.SSH));
+        this.menuVagrant.rdp.actor.visible = !((value | MachineMenuDisplay.RDP) > Math.max(value, MachineMenuDisplay.RDP));
+        this.menuVagrant.resume.actor.visible = !((value | MachineMenuDisplay.RESUME) > Math.max(value, MachineMenuDisplay.RESUME));
+        this.menuVagrant.suspend.actor.visible = !((value | MachineMenuDisplay.SUSPEND) > Math.max(value, MachineMenuDisplay.SUSPEND));
+        this.menuVagrant.halt.actor.visible = !((value | MachineMenuDisplay.HALT) > Math.max(value, MachineMenuDisplay.HALT));
+        this.menuVagrant.destroy.actor.visible = !((value | MachineMenuDisplay.DESTROY) > Math.max(value, MachineMenuDisplay.DESTROY));
+
+        this.menuSystem.title.actor.visible = false
+            || this.menuSystem.terminal.actor.visible
+            || this.menuSystem.nautilus.actor.visible
+            || this.menuSystem.vagrantfile.actor.visible;
+        this.menuVagrant.title.actor.visible = false
+            || this.menuVagrant.up.actor.visible
+            || this.menuVagrant.provision.actor.visible
+            || this.menuVagrant.ssh.actor.visible
+            || this.menuVagrant.rdp.actor.visible
+            || this.menuVagrant.resume.actor.visible
+            || this.menuVagrant.suspend.actor.visible
+            || this.menuVagrant.halt.actor.visible
+            || this.menuVagrant.destroy.actor.visible;
+    },
+
+    /**
+     * Property id getter
+     *
+     * @return {String}
+     */
+    get id() {
+        return this._id;
+    },
+
+    /**
+     * Property id setter
+     *
+     * @param  {String} value
+     * @return {Void}
+     */
+    set id(value) {
+        this._id = value;
+    },
+
+    /**
+     * Property path getter
+     *
+     * @return {String}
+     */
+    get path() {
+        return this._path;
+    },
+
+    /**
+     * Property path setter
+     *
+     * @param  {String} value
+     * @return {Void}
+     */
+    set path(value) {
+        this._path = value;
+
+        //this.label.text = this.path;
+    },
+
+    /**
+     * Property state getter
+     *
+     * @return {String}
+     */
+    get state() {
+        return this._state;
+    },
+
+    /**
+     * Property state setter
+     *
+     * @param  {String} value
+     * @return {Void}
+     */
+    set state(value) {
+        this.actor.remove_style_class_name(this.state);
+        this.actor.add_style_class_name(value);
+
+        this._state = value;
+    },
+
+    /**
+     * Menu item activate event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
@@ -387,7 +614,29 @@ const MachineMenu = new Lang.Class({
 
 });
 
-Signals.addSignalMethods(MachineMenu.prototype);
+Signals.addSignalMethods(MachineMenuItem.prototype);
+
+/**
+ * MachineMenuDisplay enum
+ *
+ * @type {Object}
+ */
+const MachineMenuDisplay = Object.freeze({
+    UNKNOWN: 0,
+    NONE: 1,
+    TERMINAL: 2,
+    NAUTILUS: 4,
+    VAGRANTFILE: 8,
+    UP: 16,
+    PROVISION: 32,
+    SSH: 64,
+    RDP: 128,
+    RESUME: 256,
+    SUSPEND: 512,
+    HALT: 1024,
+    DESTROY: 2048,
+    ALL: 4095,
+});
 
 /**
  * Ui.Notification constructor
