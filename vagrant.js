@@ -14,6 +14,17 @@ const HOME = GLib.getenv('VAGRANT_HOME') || GLib.getenv('HOME') + '/.vagrant.d';
 const INDEX = '%s/data/machine-index/index'.format(HOME);
 
 /**
+ * Terminal config
+ *
+ * @type {Object}
+ */
+const TerminalConfig = Object.freeze({
+    NONE: 0,
+    CLOSE_AFTER_EXEC: 1,
+    PAUSE_AND_CLOSE_AFTER_EXEC: 2,
+});
+
+/**
  * Vagrant.Monitor constructor
  *
  * @param  {Object}
@@ -46,6 +57,7 @@ const Monitor = new Lang.Class({
         this._monitor = null;
         this._command = null;
         this._version = null;
+        this._terminal_config = TerminalConfig.NONE;
 
         let ok, output, error, status;
         [ok, output, error, status] = GLib.spawn_sync(null, ['which', 'vagrant'], null, GLib.SpawnFlags.SEARCH_PATH, null);
@@ -88,8 +100,13 @@ const Monitor = new Lang.Class({
         let machine = this.machine[id];
         if (!machine) return;
 
+        let msg = _("Press any key to close terminal...");
         let cwd = machine.vagrantfile_path;
-        this._exec(cwd, '%s %s'.format(this.command, cmd || ''));
+        cmd = '%s %s'.format(this.command, cmd || '');
+        if (this.terminalConfig === TerminalConfig.CLOSE_AFTER_EXEC) cmd += ';exit';
+        if (this.terminalConfig === TerminalConfig.PAUSE_AND_CLOSE_AFTER_EXEC) cmd += ';echo \\"%s\\";read -n 1 -s;exit'.format(msg);
+
+        this._exec(cwd, cmd);
     },
 
     /**
@@ -153,6 +170,28 @@ const Monitor = new Lang.Class({
             this.emit(emit[i], {
                 id: emit[i + 1],
             });
+        }
+    },
+
+    /**
+     * Terminal config getter
+     *
+     * @return {Number}
+     */
+    get terminalConfig() {
+        return this._terminal_config;
+    },
+
+    /**
+     * Terminal config setter
+     *
+     * @param  {Number} value
+     * @return {Void}
+     */
+    set terminalConfig(value) {
+        for (let i in TerminalConfig) {
+            if (TerminalConfig[i] === value)
+                this._terminal_config = value;
         }
     },
 
