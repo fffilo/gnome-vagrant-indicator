@@ -4,7 +4,12 @@
         <key name="notifications" type="b">
             <default>true</default>
             <summary>Show notifications</summary>
-            <description>Display notification vagrant machine state change</description>
+            <description>Display notification on vagrant machine state change</description>
+        </key>
+        <key name="terminal-config" type="s">
+            <default>'0'</default>
+            <summary>Vagrant terminal</summary>
+            <description>Vagrant terminal action after `vagrant` command execution</description>
         </key>
         <key name="machine-full-path" type="b">
             <default>false</default>

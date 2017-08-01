@@ -125,10 +125,13 @@ const Indicator = new Lang.Class({
      * @return {Void}
      */
     _handle_settings: function(widget, key) {
-        if (key === 'notifications')
-            return;
-
-        this.refresh();
+        if (key === 'machine-full-path')
+            this.refresh();
+        else if (key === 'terminal-config')
+            this.monitor.terminalConfig = parseInt(widget.get_string(key));
+        else if (key.substr(0, 5) === 'menu-') {
+            this.refresh();
+        }
     },
 
     /**

@@ -103,8 +103,10 @@ const Monitor = new Lang.Class({
         let msg = _("Press any key to close terminal...");
         let cwd = machine.vagrantfile_path;
         cmd = '%s %s'.format(this.command, cmd || '');
-        if (this.terminalConfig === TerminalConfig.CLOSE_AFTER_EXEC) cmd += ';exit';
-        if (this.terminalConfig === TerminalConfig.PAUSE_AND_CLOSE_AFTER_EXEC) cmd += ';echo \\"%s\\";read -n 1 -s;exit'.format(msg);
+        if (this.terminalConfig === TerminalConfig.CLOSE_AFTER_EXEC)
+            cmd += ';exit';
+        if (this.terminalConfig === TerminalConfig.PAUSE_AND_CLOSE_AFTER_EXEC)
+            cmd += ';echo \\"%s\\";read -n 1 -s;exit'.format(msg);
 
         this._exec(cwd, cmd);
     },

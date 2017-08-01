@@ -110,7 +110,7 @@ const Widget = new GObject.Class({
         this.ui.settings.page = this._page();
         this.ui.settings.page.get_style_context().add_class('gnome-vagrant-prefs-page-settings');
 
-        this.ui.settings.notifications = new InputSwitch('notifications', this.settings.get_boolean('notifications'), _("Show notifications"), _("Display notification vagrant machine state change"));
+        this.ui.settings.notifications = new InputSwitch('notifications', this.settings.get_boolean('notifications'), _("Show notifications"), _("Display notification on vagrant machine state change"));
         this.ui.settings.notifications.name = 'gnome-vagrant-prefs-page-settings-notifications';
         this.ui.settings.notifications.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.settings.page.actor.add(this.ui.settings.notifications);
@@ -119,6 +119,11 @@ const Widget = new GObject.Class({
         this.ui.settings.machinefullpath.name = 'gnome-vagrant-prefs-page-settings-machine-full-path';
         this.ui.settings.machinefullpath.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.settings.page.actor.add(this.ui.settings.machinefullpath);
+
+        this.ui.settings.terminalconfig = new InputComboBox('terminal-config', this.settings.get_string('terminal-config'), _("Vagrant terminal"), _("Vagrant terminal action after `vagrant` command execution"), { '0': _("Leave opened"), '1': _("Close"), '2': _("Wait for keypress and close") });
+        this.ui.settings.terminalconfig.name = 'gnome-vagrant-prefs-page-settings-terminal-config';
+        this.ui.settings.terminalconfig.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.settings.page.actor.add(this.ui.settings.terminalconfig);
 
         return this.ui.settings.page;
     },
@@ -456,6 +461,80 @@ const InputSwitch = new GObject.Class({
      */
     set value(value) {
         this._widget.active = value;
+    },
+
+    /* --- */
+
+});
+
+/**
+ * InputComboBox constructor
+ * extends Gtk.Box
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
+const InputComboBox = new GObject.Class({
+
+    Name: 'Prefs.InputComboBox',
+    GTypeName: 'PrefsInputComboBox',
+    Extends: Input,
+
+    /**
+     * ComboBox initialization
+     *
+     * @param  {String} key
+     * @param  {Mixed}  value
+     * @param  {String} text
+     * @param  {String} tooltip
+     * @param  {Object} options
+     * @return {Void}
+     */
+    _init: function(key, value, text, tooltip, options) {
+        this.parent(key, text, tooltip);
+
+        this._widget = new Gtk.ComboBoxText();
+        this._widget.connect('notify::active', Lang.bind(this, this._handle_change));
+        this.actor.add(this._widget);
+
+        for (let id in options) {
+            this._widget.append(id, options[id]);
+        }
+
+        this.value = value;
+    },
+
+    /**
+     * Widget change event handler
+     *
+     * @param  {Object} widget
+     * @return {Void}
+     */
+    _handle_change: function(widget) {
+        this.emit('changed', {
+            key: this._key,
+            value: this.value,
+            type: 'string'
+        });
+    },
+
+    /**
+     * Value getter
+     *
+     * @return {Boolean}
+     */
+    get value() {
+        return this._widget.get_active_id();
+    },
+
+    /**
+     * Value setter
+     *
+     * @param  {Boolean} value
+     * @return {Void}
+     */
+    set value(value) {
+        this._widget.set_active_id(value);
     },
 
     /* --- */
