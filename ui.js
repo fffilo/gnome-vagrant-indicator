@@ -73,7 +73,9 @@ const Indicator = new Lang.Class({
         this.settings.connect('changed', Lang.bind(this, this._handle_settings));
 
         this.monitor = new Vagrant.Monitor();
-        this.monitor.connect('state', Lang.bind(this, this._handle_monitor));
+        this.monitor.connect('add', Lang.bind(this, this._handle_monitor_add));
+        this.monitor.connect('remove', Lang.bind(this, this._handle_monitor_remove));
+        this.monitor.connect('state', Lang.bind(this, this._handle_monitor_state));
         this.monitor.listen();
     },
 
@@ -107,7 +109,7 @@ const Indicator = new Lang.Class({
 
         for (let id in this.monitor.machine) {
             let machine = this.monitor.machine[id];
-            let path = machine.vagrantfile_path
+            let path = machine.vagrantfile_path;
             if (!fullpath)
                 path = GLib.basename(path);
 
@@ -130,20 +132,46 @@ const Indicator = new Lang.Class({
     },
 
     /**
-     * Monitor machine index file change event handler
+     * Monitor machine add event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_monitor: function(widget, event) {
-        this.refresh();
-
-        if (!this.settings.get_boolean('notifications'))
-            return;
-
+    _handle_monitor_add: function(widget, event) {
         let machine = this.monitor.machine[event.id];
-        this.notification.show('Machine went %s'.format(machine.state), machine.vagrantfile_path);
+        let index = Object.keys(this.monitor.machine).indexOf(event.id);
+        let path = machine.vagrantfile_path;
+        if (!this.settings.get_boolean('machine-full-path'))
+            path = GLib.basename(path);
+
+        this.machine.add(event.id, path, machine.state, index);
+    },
+
+    /**
+     * Monitor machine remove event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handle_monitor_remove: function(widget, event) {
+        this.machine.remove(event.id);
+    },
+
+    /**
+     * Monitor machine state change event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handle_monitor_state: function(widget, event) {
+        let machine = this.monitor.machine[event.id];
+        this.machine.state(event.id, machine.state);
+
+        if (this.settings.get_boolean('notifications'))
+            this.notification.show('Machine went %s'.format(machine.state), machine.vagrantfile_path);
     },
 
     /**
@@ -214,19 +242,24 @@ const MachineMenu = new Lang.Class({
     /**
      * Add item to list
      *
+     * @param  {String} id
+     * @param  {String} title
+     * @param  {String} state
+     * @param  {Number} index (optional)
      * @return {Void}
      */
-    add: function(id, path, state) {
+    add: function(id, title, state, index) {
         if (this.empty)
             this.empty.destroy();
         this.empty = null;
 
-        let item = new PopupMenu.PopupSubMenuMenuItem(path);
+        let item = new PopupMenu.PopupSubMenuMenuItem(title);
         item.id = id;
+        item.state = state;
         item.actor.add_style_class_name('gnome-vagrant-indicator-machine-item');
         item.actor.add_style_class_name(state);
         item.setOrnament(PopupMenu.Ornament.DOT);
-        this.addMenuItem(item);
+        this.addMenuItem(item, index);
 
         let settings = this.indicator.settings;
         let menu = [
@@ -264,6 +297,48 @@ const MachineMenu = new Lang.Class({
     },
 
     /**
+     * Remove item from list
+     *
+     * @return {Void}
+     */
+    remove: function(id) {
+        this._get_item(id).forEach(function(actor) {
+            actor.destroy();
+        });
+
+        if (!this._get_item().length)
+            this.clear();
+    },
+
+    /**
+     * Set item title
+     *
+     * @param  {String} id
+     * @param  {String} value
+     * @return {Void}
+     */
+    title: function(id, value) {
+        this._get_item(id).forEach(function(actor) {
+            actor.label.text = value;
+        });
+    },
+
+    /**
+     * Set item state
+     *
+     * @param  {String} id
+     * @param  {String} value
+     * @return {Void}
+     */
+    state: function(id, value) {
+        this._get_item(id).forEach(function(actor) {
+            actor.actor.remove_style_class_name(actor.state);
+            actor.actor.add_style_class_name(value);
+            actor.state = value;
+        });
+    },
+
+    /**
      * Create user interface
      *
      * @return {Void}
@@ -273,6 +348,22 @@ const MachineMenu = new Lang.Class({
 
         this.indicator.menu.addMenuItem(this);
         this.indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+    },
+
+    /**
+     * Get submenu item from menu list
+     *
+     * @param  {String} id (optional)
+     * @return {Object}
+     */
+    _get_item: function(id) {
+        return this.box.get_children()
+            .map(function(actor) {
+                return actor._delegate;
+            })
+            .filter(function(actor) {
+                return actor instanceof PopupMenu.PopupSubMenuMenuItem && (id ? actor.id === id : true);
+            });
     },
 
     /**

@@ -1,4 +1,5 @@
 .gnome-vagrant-indicator-machine-item .popup-menu-ornament { font-size: 1.5em; }
+.gnome-vagrant-indicator-machine-item.preparing .popup-menu-ornament { color: yellow; }
 .gnome-vagrant-indicator-machine-item.running .popup-menu-ornament { color: lime; }
 .gnome-vagrant-indicator-machine-item.saved .popup-menu-ornament { color: orange; }
 .gnome-vagrant-indicator-machine-item.aborted .popup-menu-ornament { color: red; }

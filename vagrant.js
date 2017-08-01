@@ -114,12 +114,11 @@ const Monitor = new Lang.Class({
      * interval, so changed signal won't be
      * emited too often???
      *
+     * @param  {Object} monitor
      * @param  {Object} file
-     * @param  {Object} otherFile
-     * @param  {Number} eventType
      * @return {Void}
      */
-    _handle_monitor_changed: function(file, otherFile, eventType) {
+    _handle_monitor_changed: function(monitor, file) {
         let _old = this._index;
         let _new = this._parse();
         let emit = [];
