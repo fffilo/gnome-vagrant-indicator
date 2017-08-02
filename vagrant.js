@@ -66,18 +66,6 @@ const Monitor = new Lang.Class({
      * @return {Void}
      */
     _init: function() {
-        this._def();
-
-        if (!this._command)
-            throw 'Unable to initialize Vagrant.Monitor (vagrant not installed)';
-    },
-
-    /**
-     * Define private properties
-     *
-     * @return {Void}
-     */
-    _def: function() {
         this._file = Gio.File.new_for_path(INDEX);
         this._index = this._parse();
         this._monitor = null;
@@ -85,14 +73,23 @@ const Monitor = new Lang.Class({
         this._version = null;
         this._post_terminal_action = PostTerminalAction.NONE;
 
-        let ok, output, error, status;
-        [ok, output, error, status] = GLib.spawn_sync(null, ['which', 'vagrant'], null, GLib.SpawnFlags.SEARCH_PATH, null);
-        if (!status && output)
-            this._command = output.toString().trim();
+        try {
+            let [ok, output, error, status] = GLib.spawn_sync(null, ['which', 'vagrant'], null, GLib.SpawnFlags.SEARCH_PATH, null);
+            if (!status && output)
+                this._command = output.toString().trim();
+        }
+        catch(e) {
+            // pass
+        }
 
-        [ok, output, error, status] = GLib.spawn_sync(null, ['vagrant', '--version'], null, GLib.SpawnFlags.SEARCH_PATH, null);
-        if (!status && output)
-            this._version = output.toString().trim();
+        try {
+            let [ok, output, error, status] = GLib.spawn_sync(null, ['vagrant', '--version'], null, GLib.SpawnFlags.SEARCH_PATH, null);
+            if (!status && output)
+                this._version = output.toString().trim();
+        }
+        catch(e) {
+            // pass
+        }
     },
 
     /**
@@ -103,6 +100,9 @@ const Monitor = new Lang.Class({
      * @return {Void}
      */
     _exec: function(cwd, cmd) {
+        if (!this.command)
+            return;
+
         cwd = cwd || '~';
         cmd = cmd || ':';
         cmd = cmd.replace(/;+$/, '');

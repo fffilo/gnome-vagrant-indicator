@@ -116,6 +116,11 @@ const Indicator = new Lang.Class({
      * @return {Void}
      */
     refresh: function() {
+        if (!this.monitor.command) {
+            this.machine.error(_("Vagrant not installed on your system"));
+            return;
+        }
+
         this.machine.clear();
 
         for (let id in this.monitor.machine) {
@@ -278,12 +283,13 @@ const MachineMenu = new Lang.Class({
     /**
      * Display error
      *
+     * @param  {String} msg
      * @return {Void}
      */
-    error: function() {
+    error: function(msg) {
         this.removeAll();
 
-        this.empty = new PopupMenu.PopupMenuItem(_("Vagrant not installed on your system"));
+        this.empty = new PopupMenu.PopupMenuItem(msg || 'ERROR');
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
     },
