@@ -7,6 +7,7 @@
 const Lang = imports.lang;
 const Signals = imports.signals;
 const GLib = imports.gi.GLib;
+const Clutter = imports.gi.Clutter;
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
@@ -222,7 +223,13 @@ const Indicator = new Lang.Class({
      * @return {Void}
      */
     _handle_machines: function(widget, event) {
-        this.monitor[event.method](event.id);
+        let id = event.id;
+        let method = event.method;
+
+        if (event.method === 'default')
+            method = 'terminal';
+
+        this.monitor[method](id);
     },
 
     /**
@@ -412,7 +419,7 @@ const MachineMenu = new Lang.Class({
     },
 
     /**
-     * Subitem activate event handler
+     * Subitem execute event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
@@ -458,7 +465,9 @@ const MachineMenuInstance = new Lang.Class({
         this._state = 'unknown';
         this._shorten = true;
         this._display = MachineMenuDisplay.NONE;
+
         this._ui();
+        this._bind();
 
         this.state = state;
         this.shorten = false;
@@ -540,6 +549,15 @@ const MachineMenuInstance = new Lang.Class({
             this.menu.addMenuItem(item);
             this.vagrant[item.method] = item;
         }
+    },
+
+    /**
+     * Bind events
+     *
+     * @return {Void}
+     */
+    _bind: function() {
+        this.connect('activate', Lang.bind(this, this._handle_activate));
     },
 
     /**
@@ -635,6 +653,21 @@ const MachineMenuInstance = new Lang.Class({
         this._refresh_menu();
     },
 
+
+    /**
+     * Act like PopupMenu.PopupMenuItem
+     * when submenu is empty
+     *
+     * @param  {Booelan} open
+     * @return {Void}
+     */
+    setSubmenuShown: function(open) {
+        this.parent(open);
+
+        if (!this.system.header.actor.visible && !this.vagrant.header.actor.visible)
+            this.emit('activate');
+    },
+
     /**
      *
      * Show/hide system/vagrant menu
@@ -645,6 +678,7 @@ const MachineMenuInstance = new Lang.Class({
     _refresh_menu: function() {
         this._refresh_menu_by_display();
         this._refresh_menu_by_state();
+        this._refresh_menu_dropdown();
         this._refresh_menu_headers();
     },
 
@@ -736,6 +770,29 @@ const MachineMenuInstance = new Lang.Class({
     },
 
     /**
+     * Show/hide dropdown arrow
+     *
+     * @return {Void}
+     */
+    _refresh_menu_dropdown: function() {
+        this._triangleBin.visible = false
+            || this.system.terminal.actor.visible
+            || this.system.nautilus.actor.visible
+            || this.system.vagrantfile.actor.visible
+            || this.vagrant.up.actor.visible
+            || this.vagrant.up_provision.actor.visible
+            || this.vagrant.up_ssh.actor.visible
+            || this.vagrant.up_rdp.actor.visible
+            || this.vagrant.provision.actor.visible
+            || this.vagrant.ssh.actor.visible
+            || this.vagrant.rdp.actor.visible
+            || this.vagrant.resume.actor.visible
+            || this.vagrant.suspend.actor.visible
+            || this.vagrant.halt.actor.visible
+            || this.vagrant.destroy.actor.visible;
+    },
+
+    /**
      * Show/hide system/vagrant menu
      * headers
      *
@@ -775,6 +832,21 @@ const MachineMenuInstance = new Lang.Class({
             .filter(function(actor) {
                 return actor instanceof MachineMenuInstance && (method ? actor.method === method : true);
             });
+    },
+
+    /**
+     * Menu item activate event handler
+     * (called only if submenu is empty)
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handle_activate: function(widget, event) {
+        this.emit('execute', {
+            id: this.id,
+            method: 'default',
+        });
     },
 
     /**
