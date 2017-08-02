@@ -125,7 +125,6 @@ const Widget = new GObject.Class({
         this.ui.settings.postterminalaction.name = 'gnome-vagrant-prefs-page-settings-post-terminal-action';
         this.ui.settings.postterminalaction.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.settings.page.actor.add(this.ui.settings.postterminalaction);
-        global.log("Vagrant", this.ui.settings.postterminalaction.value);
 
         return this.ui.settings.page;
     },

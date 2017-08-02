@@ -584,48 +584,7 @@ const MachineMenuInstance = new Lang.Class({
 
         this._display = value;
 
-        for (let method in this.system) {
-            if (method === 'header')
-                continue;
-
-            let menu = this.system[method];
-            let display = MachineMenuDisplay._from_string(method);
-            let visible = (value | display) === value;
-
-            global.log("Vagrant", method, visible);
-
-            menu.actor.visible = visible;
-        }
-
-        for (let method in this.vagrant) {
-            if (method === 'header')
-                continue;
-
-            let menu = this.vagrant[method];
-            let display = MachineMenuDisplay._from_string(method);
-            let visible = (value | display) === value;
-
-            global.log("Vagrant", method, visible);
-            menu.actor.visible = visible;
-        }
-
-        this.system.header.actor.visible = false
-            || this.system.terminal.actor.visible
-            || this.system.nautilus.actor.visible
-            || this.system.vagrantfile.actor.visible;
-
-        this.vagrant.header.actor.visible = false
-            || this.vagrant.up.actor.visible
-            || this.vagrant.up_provision.actor.visible
-            || this.vagrant.up_ssh.actor.visible
-            || this.vagrant.up_rdp.actor.visible
-            || this.vagrant.provision.actor.visible
-            || this.vagrant.ssh.actor.visible
-            || this.vagrant.rdp.actor.visible
-            || this.vagrant.resume.actor.visible
-            || this.vagrant.suspend.actor.visible
-            || this.vagrant.halt.actor.visible
-            || this.vagrant.destroy.actor.visible;
+        this._refresh_menu();
     },
 
     /**
@@ -666,6 +625,134 @@ const MachineMenuInstance = new Lang.Class({
         this.actor.add_style_class_name(value);
 
         this._state = value;
+
+        this._refresh_menu();
+    },
+
+    /**
+     *
+     * Show/hide system/vagrant menu
+     * items
+     *
+     * @return {Void}
+     */
+    _refresh_menu: function() {
+        this._refresh_menu_by_display();
+        this._refresh_menu_by_state();
+        this._refresh_menu_headers();
+    },
+
+    /**
+     * Show/hide system/vagrant menu
+     * items based on user display
+     * property
+     *
+     * @return {Void}
+     */
+    _refresh_menu_by_display: function() {
+        let value = this.display;
+
+        for (let method in this.system) {
+            if (method === 'header')
+                continue;
+
+            let menu = this.system[method];
+            let display = MachineMenuDisplay._from_string(method);
+            let visible = (value | display) === value;
+
+            menu.actor.visible = visible;
+        }
+
+        for (let method in this.vagrant) {
+            if (method === 'header')
+                continue;
+
+            let menu = this.vagrant[method];
+            let display = MachineMenuDisplay._from_string(method);
+            let visible = (value | display) === value;
+
+            menu.actor.visible = visible;
+        }
+    },
+
+    /**
+     * Hide vagrant menu items based
+     * on virtual machine state
+     *
+     * @return {Void}
+     */
+    _refresh_menu_by_state: function() {
+        if (this.state === 'poweroff') {
+            this.vagrant.provision.actor.visible = false;
+            this.vagrant.ssh.actor.visible = false;
+            this.vagrant.rdp.actor.visible = false;
+            this.vagrant.resume.actor.visible = false;
+            this.vagrant.suspend.actor.visible = false;
+            this.vagrant.halt.actor.visible = false;
+        }
+        else if (this.state === 'preparing') {
+            this.vagrant.up.actor.visible = false;
+            this.vagrant.up_provision.actor.visible = false;
+            this.vagrant.up_ssh.actor.visible = false;
+            this.vagrant.up_rdp.actor.visible = false;
+            this.vagrant.provision.actor.visible = false;
+            this.vagrant.ssh.actor.visible = false;
+            this.vagrant.rdp.actor.visible = false;
+            this.vagrant.resume.actor.visible = false;
+            this.vagrant.suspend.actor.visible = false;
+            this.vagrant.destroy.actor.visible = false;
+        }
+        else if (this.state === 'running') {
+            this.vagrant.up.actor.visible = false;
+            this.vagrant.up_provision.actor.visible = false;
+            this.vagrant.up_ssh.actor.visible = false;
+            this.vagrant.up_rdp.actor.visible = false;
+            this.vagrant.resume.actor.visible = false;
+            this.vagrant.suspend.actor.visible = false;
+            this.vagrant.destroy.actor.visible = false;
+        }
+        else if (this.state === 'saved') {
+            this.vagrant.up.actor.visible = false;
+            this.vagrant.up_provision.actor.visible = false;
+            this.vagrant.up_ssh.actor.visible = false;
+            this.vagrant.up_rdp.actor.visible = false;
+            this.vagrant.provision.actor.visible = false;
+            this.vagrant.ssh.actor.visible = false;
+            this.vagrant.rdp.actor.visible = false;
+            this.vagrant.suspend.actor.visible = false;
+            this.vagrant.halt.actor.visible = false;
+            this.vagrant.destroy.actor.visible = false;
+        }
+        //else if (this.state === 'aborted') {
+        //}
+        //else {
+        //}
+    },
+
+    /**
+     * Show/hide system/vagrant menu
+     * headers
+     *
+     * @return {Void}
+     */
+    _refresh_menu_headers: function() {
+        this.system.header.actor.visible = false
+            || this.system.terminal.actor.visible
+            || this.system.nautilus.actor.visible
+            || this.system.vagrantfile.actor.visible;
+
+        this.vagrant.header.actor.visible = false
+            || this.vagrant.up.actor.visible
+            || this.vagrant.up_provision.actor.visible
+            || this.vagrant.up_ssh.actor.visible
+            || this.vagrant.up_rdp.actor.visible
+            || this.vagrant.provision.actor.visible
+            || this.vagrant.ssh.actor.visible
+            || this.vagrant.rdp.actor.visible
+            || this.vagrant.resume.actor.visible
+            || this.vagrant.suspend.actor.visible
+            || this.vagrant.halt.actor.visible
+            || this.vagrant.destroy.actor.visible;
     },
 
     /**
