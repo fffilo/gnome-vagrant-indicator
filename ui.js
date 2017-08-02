@@ -72,7 +72,11 @@ const Indicator = new Lang.Class({
         this.settings = Convenience.getSettings();
         this.settings.connect('changed', Lang.bind(this, this._handle_settings));
 
+        let action = this.settings.get_string('post-terminal-action');
+        action = Vagrant.PostTerminalAction._from_string(action);
+
         this.monitor = new Vagrant.Monitor();
+        this.monitor.postTerminalAction = action;
         this.monitor.connect('add', Lang.bind(this, this._handle_monitor_add));
         this.monitor.connect('remove', Lang.bind(this, this._handle_monitor_remove));
         this.monitor.connect('state', Lang.bind(this, this._handle_monitor_state));
@@ -95,27 +99,54 @@ const Indicator = new Lang.Class({
         this.actor.add_actor(this.icon);
 
         this.machine = new MachineMenu(this);
-        this.machine.connect('click', Lang.bind(this, this._handle_machines));
+        this.machine.shorten = !this.settings.get_boolean('machine-full-path');
+        this.machine.display = this._get_settings_machine_menu_display();
+        this.machine.connect('execute', Lang.bind(this, this._handle_machines));
+        this.menu.addMenuItem(this.machine);
+        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
 
         this.preferences = new PopupMenu.PopupMenuItem(_("Preferences"));
         this.preferences.connect('activate', Lang.bind(this, this._handle_preferences));
         this.menu.addMenuItem(this.preferences);
     },
 
+    /**
+     * Refresh machine menu
+     *
+     * @return {Void}
+     */
     refresh: function() {
         this.machine.clear();
 
-        let fullpath = this.settings.get_boolean('machine-full-path');
-
         for (let id in this.monitor.machine) {
             let machine = this.monitor.machine[id];
-            let path = machine.vagrantfile_path;
-            if (!fullpath)
-                path = GLib.basename(path);
-
-            this.machine.add(id, path, machine.state);
+            this.machine.add(id, machine.vagrantfile_path, machine.state);
         }
     },
+
+    /**
+     * Convert settings boolean machine-menu-display
+     * values to MachineMenuDisplay value
+     *
+     * @return {Number}
+     */
+    _get_settings_machine_menu_display: function() {
+        return 0
+            | (this.settings.get_boolean("system-terminal") ? MachineMenuDisplay._from_string('terminal') : 0)
+            | (this.settings.get_boolean("system-nautilus") ? MachineMenuDisplay._from_string('nautilus') : 0)
+            | (this.settings.get_boolean("system-vagrantfile") ? MachineMenuDisplay._from_string('vagrantfile') : 0)
+            | (this.settings.get_boolean("vagrant-up") ? MachineMenuDisplay._from_string('up') : 0)
+            | (this.settings.get_boolean("vagrant-up-provision") ? MachineMenuDisplay._from_string('up-provision') : 0)
+            | (this.settings.get_boolean("vagrant-up-ssh") ? MachineMenuDisplay._from_string('up-ssh') : 0)
+            | (this.settings.get_boolean("vagrant-up-rdp") ? MachineMenuDisplay._from_string('up-rdp') : 0)
+            | (this.settings.get_boolean("vagrant-provision") ? MachineMenuDisplay._from_string('provision') : 0)
+            | (this.settings.get_boolean("vagrant-ssh") ? MachineMenuDisplay._from_string('ssh') : 0)
+            | (this.settings.get_boolean("vagrant-rdp") ? MachineMenuDisplay._from_string('rdp') : 0)
+            | (this.settings.get_boolean("vagrant-resume") ? MachineMenuDisplay._from_string('resume') : 0)
+            | (this.settings.get_boolean("vagrant-suspend") ? MachineMenuDisplay._from_string('suspend') : 0)
+            | (this.settings.get_boolean("vagrant-halt") ? MachineMenuDisplay._from_string('halt') : 0)
+            | (this.settings.get_boolean("vagrant-destroy") ? MachineMenuDisplay._from_string('destroy') : 0);
+        },
 
     /**
      * Settings changed event handler
@@ -125,13 +156,17 @@ const Indicator = new Lang.Class({
      * @return {Void}
      */
     _handle_settings: function(widget, key) {
-        if (key === 'machine-full-path')
-            this.refresh();
-        else if (key === 'terminal-config')
-            this.monitor.terminalConfig = parseInt(widget.get_string(key));
-        else if (key.substr(0, 5) === 'menu-') {
-            this.refresh();
+        if (key === 'post-terminal-action') {
+            let action = this.settings.get_string('post-terminal-action');
+            action = Vagrant.PostTerminalAction._from_string(action);
+            this.monitor.postTerminalAction = action;
         }
+        else if (key === 'machine-full-path')
+            this.machine.shorten = !widget.get_boolean(key);
+        else if (key.startsWith('system-'))
+            this.machine.display = this._get_settings_machine_menu_display();
+        else if (key.startsWith('vagrant-'))
+            this.machine.display = this._get_settings_machine_menu_display();
     },
 
     /**
@@ -144,11 +179,8 @@ const Indicator = new Lang.Class({
     _handle_monitor_add: function(widget, event) {
         let machine = this.monitor.machine[event.id];
         let index = Object.keys(this.monitor.machine).indexOf(event.id);
-        let path = machine.vagrantfile_path;
-        if (!this.settings.get_boolean('machine-full-path'))
-            path = GLib.basename(path);
 
-        this.machine.add(event.id, path, machine.state, index);
+        this.machine.add(event.id, machine.vagrantfile_path, machine.state, index);
     },
 
     /**
@@ -217,15 +249,16 @@ const MachineMenu = new Lang.Class({
     /**
      * Constructor
      *
-     * @param  {Object} indicator
      * @return {Void}
      */
-    _init: function(indicator) {
+    _init: function() {
         this.parent();
 
-        this.indicator = indicator;
+        this.actor.add_style_class_name('gnome-vagrant-indicator-machine');
 
-        this._ui();
+        this._shorten = false;
+        this._display = MachineMenuDisplay.ALL;
+
         this.clear();
     },
 
@@ -238,6 +271,19 @@ const MachineMenu = new Lang.Class({
         this.removeAll();
 
         this.empty = new PopupMenu.PopupMenuItem(_("No Vagrant machines found"));
+        this.empty.setSensitive(false);
+        this.addMenuItem(this.empty);
+    },
+
+    /**
+     * Display error
+     *
+     * @return {Void}
+     */
+    error: function() {
+        this.removeAll();
+
+        this.empty = new PopupMenu.PopupMenuItem(_("Vagrant not installed on your system"));
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
     },
@@ -256,9 +302,10 @@ const MachineMenu = new Lang.Class({
             this.empty.destroy();
         this.empty = null;
 
-        let item = new MachineMenuItem(id, path, state);
-        item.display = MachineMenuDisplay.ALL;
-        item.connect('click', Lang.bind(this, this._handle_menu_item));
+        let item = new MachineMenuInstance(id, path, state);
+        item.shorten = this.shorten;
+        item.display = this.display;
+        item.connect('execute', Lang.bind(this, this._handle_menu_item));
         this.addMenuItem(item, index);
     },
 
@@ -277,19 +324,6 @@ const MachineMenu = new Lang.Class({
     },
 
     /**
-     * Set item title
-     *
-     * @param  {String} id
-     * @param  {String} value
-     * @return {Void}
-     */
-    title: function(id, value) {
-        this._get_item(id).forEach(function(actor) {
-            actor.label.text = value;
-        });
-    },
-
-    /**
      * Set item state
      *
      * @param  {String} id
@@ -305,15 +339,54 @@ const MachineMenu = new Lang.Class({
     },
 
     /**
-     * Create user interface
+     * Property shorten getter
      *
+     * @return {Boolean}
+     */
+    get shorten() {
+        return this._shorten;
+    },
+
+    /**
+     * Property shorten setter
+     *
+     * @param  {Boolean} value
      * @return {Void}
      */
-    _ui: function() {
-        this.actor.add_style_class_name('gnome-vagrant-indicator-machine');
+    set shorten(value) {
+        this._shorten = !!value;
 
-        this.indicator.menu.addMenuItem(this);
-        this.indicator.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
+        this._get_item().forEach(function(actor) {
+            actor.shorten = value;
+        });
+    },
+
+    /**
+     * Property display getter
+     *
+     * @return {Number}
+     */
+    get display() {
+        return this._display;
+    },
+
+    /**
+     * Property display setter
+     *
+     * @param  {Number} value
+     * @return {Void}
+     */
+    set display(value) {
+        if (value < MachineMenuDisplay._min())
+            value = MachineMenuDisplay._min();
+        else if (value > MachineMenuDisplay._max())
+            value = MachineMenuDisplay._max();
+
+        this._display = value;
+
+        this._get_item().forEach(function(actor) {
+            actor.display = value;
+        });
     },
 
     /**
@@ -328,7 +401,7 @@ const MachineMenu = new Lang.Class({
                 return actor._delegate;
             })
             .filter(function(actor) {
-                return actor instanceof MachineMenuItem && (id ? actor.id === id : true);
+                return actor instanceof MachineMenuInstance && (id ? actor.id === id : true);
             });
     },
 
@@ -340,7 +413,7 @@ const MachineMenu = new Lang.Class({
      * @return {Void}
      */
     _handle_menu_item: function(widget, event) {
-        this.emit('click', {
+        this.emit('execute', {
             id: event.id,
             method: event.method,
         });
@@ -353,14 +426,14 @@ const MachineMenu = new Lang.Class({
 Signals.addSignalMethods(MachineMenu.prototype);
 
 /**
- * Ui.MachineMenuItem constructor
+ * Ui.MachineMenuInstance constructor
  *
  * @param  {Object}
  * @return {Object}
  */
-const MachineMenuItem = new Lang.Class({
+const MachineMenuInstance = new Lang.Class({
 
-    Name: 'Ui.MachineMenuItem',
+    Name: 'Ui.MachineMenuInstance',
     Extends: PopupMenu.PopupSubMenuMenuItem,
 
     /**
@@ -374,18 +447,16 @@ const MachineMenuItem = new Lang.Class({
     _init: function(id, path, state) {
         this.parent('unknown');
 
-        this.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-item');
-        this.setOrnament(PopupMenu.Ornament.DOT);
-
-        this._id = 'unknown';
-        this._path = 'unknown';
+        this._id = id;
+        this._path = path;
         this._state = 'unknown';
-
-        if (id) this.id = id;
-        if (path) this.path = path;
-        if (state) this.state = state;
-
+        this._shorten = true;
+        this._display = MachineMenuDisplay.NONE;
         this._ui();
+
+        this.state = state;
+        this.shorten = false;
+        this.display = MachineMenuDisplay.ALL;
     },
 
     /**
@@ -394,6 +465,9 @@ const MachineMenuItem = new Lang.Class({
      * @return {Void}
      */
     _ui: function() {
+        this.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-instance');
+        this.setOrnament(PopupMenu.Ornament.DOT);
+
         this._ui_system();
         this._ui_vagrant();
     },
@@ -405,14 +479,11 @@ const MachineMenuItem = new Lang.Class({
      * @return {Void}
      */
     _ui_system: function() {
-        this.menuSystem = {};
+        this.system = {};
 
-        let item = new PopupMenu.PopupMenuItem(_("SYSTEM COMMANDS"));
-        item.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-item-subitem');
-        item.actor.add_style_class_name('title');
-        item.setSensitive(false);
+        let item = new MachineMenuHeader(_("SYSTEM COMMANDS"));
         this.menu.addMenuItem(item);
-        this.menuSystem.title = item;
+        this.system.header = item;
 
         let menu = [
             'terminal', _("Open in Terminal"),
@@ -421,15 +492,11 @@ const MachineMenuItem = new Lang.Class({
         ];
 
         for (let i = 0; i < menu.length; i += 2) {
-            let item = new PopupMenu.PopupMenuItem(menu[i + 1]);
-            item.id = this.id;
+            let item = new MachineMenuCommand(menu[i + 1]);
             item.method = menu[i];
-            item.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-item-subitem');
-            item.actor.add_style_class_name(item.method);
-            item.connect('activate', Lang.bind(this, this._handle_menu_item));
-
+            item.connect('execute', Lang.bind(this, this._handle_execute));
             this.menu.addMenuItem(item);
-            this.menuSystem[menu[i]] = item;
+            this.system[item.method] = item;
         }
     },
 
@@ -440,17 +507,17 @@ const MachineMenuItem = new Lang.Class({
      * @return {Void}
      */
     _ui_vagrant: function() {
-        this.menuVagrant = {};
+        this.vagrant = {};
 
-        let item = new PopupMenu.PopupMenuItem(_("VAGRANT COMMANDS"));
-        item.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-item-subitem');
-        item.actor.add_style_class_name('title');
-        item.setSensitive(false);
+        let item = new MachineMenuHeader(_("VAGRANT COMMANDS"));
         this.menu.addMenuItem(item);
-        this.menuVagrant.title = item;
+        this.vagrant.header = item;
 
         let menu = [
             'up', _("Up"),
+            'up_provision', _("Up and Provision"),
+            'up_ssh', _("Up and SSH"),
+            'up_rdp', _("Up and RDP"),
             'provision', _("Provision"),
             'ssh', _("SSH"),
             'rdp', _("RDP"),
@@ -461,16 +528,37 @@ const MachineMenuItem = new Lang.Class({
         ];
 
         for (let i = 0; i < menu.length; i += 2) {
-            let item = new PopupMenu.PopupMenuItem(menu[i + 1]);
-            item.id = this.id;
+            let item = new MachineMenuCommand(menu[i + 1]);
             item.method = menu[i];
-            item.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-item-subitem');
-            item.actor.add_style_class_name(item.method);
-            item.connect('activate', Lang.bind(this, this._handle_menu_item));
-
+            item.connect('execute', Lang.bind(this, this._handle_execute));
             this.menu.addMenuItem(item);
-            this.menuVagrant[menu[i]] = item;
+            this.vagrant[item.method] = item;
         }
+    },
+
+    /**
+     * Property shorten getter
+     *
+     * @return {Boolean}
+     */
+    get shorten() {
+        return this._shorten;
+    },
+
+    /**
+     * Property shorten setter
+     *
+     * @param  {Boolean} value
+     * @return {Void}
+     */
+    set shorten(value) {
+        this._shorten = !!value;
+
+        let path = this.path;
+        if (this.shorten)
+            path = GLib.basename(path);
+
+        this.label.text = path;
     },
 
     /**
@@ -479,20 +567,7 @@ const MachineMenuItem = new Lang.Class({
      * @return {Number}
      */
     get display() {
-        let result = 0;
-        if (this.menuSystem.terminal.actor.visible) result += MachineMenuDisplay.TERMINAL;
-        if (this.menuSystem.nautilus.actor.visible) result += MachineMenuDisplay.NAUTILUS;
-        if (this.menuSystem.vagrantfile.actor.visible) result += MachineMenuDisplay.VAGRANTFILE;
-        if (this.menuVagrant.up.actor.visible) result += MachineMenuDisplay.UP;
-        if (this.menuVagrant.provision.actor.visible) result += MachineMenuDisplay.PROVISION;
-        if (this.menuVagrant.ssh.actor.visible) result += MachineMenuDisplay.SSH;
-        if (this.menuVagrant.rdp.actor.visible) result += MachineMenuDisplay.RDP;
-        if (this.menuVagrant.resume.actor.visible) result += MachineMenuDisplay.RESUME;
-        if (this.menuVagrant.suspend.actor.visible) result += MachineMenuDisplay.SUSPEND;
-        if (this.menuVagrant.halt.actor.visible) result += MachineMenuDisplay.HALT;
-        if (this.menuVagrant.destroy.actor.visible) result += MachineMenuDisplay.DESTROY;
-
-        return result;
+        return this._display;
     },
 
     /**
@@ -502,36 +577,55 @@ const MachineMenuItem = new Lang.Class({
      * @return {Void}
      */
     set display(value) {
-        if (value < MachineMenuDisplay.NONE)
-            value = MachineMenuDisplay.NONE;
-        else if (value > MachineMenuDisplay.ALL)
-            value = MachineMenuDisplay.ALL;
+        if (value < MachineMenuDisplay._min())
+            value = MachineMenuDisplay._min();
+        else if (value > MachineMenuDisplay._max())
+            value = MachineMenuDisplay._max();
 
-        this.menuSystem.terminal.actor.visible = !((value | MachineMenuDisplay.TERMINAL) > Math.max(value, MachineMenuDisplay.TERMINAL));
-        this.menuSystem.nautilus.actor.visible = !((value | MachineMenuDisplay.NAUTILUS) > Math.max(value, MachineMenuDisplay.NAUTILUS));
-        this.menuSystem.vagrantfile.actor.visible = !((value | MachineMenuDisplay.VAGRANTFILE) > Math.max(value, MachineMenuDisplay.VAGRANTFILE));
-        this.menuVagrant.up.actor.visible = !((value | MachineMenuDisplay.UP) > Math.max(value, MachineMenuDisplay.UP));
-        this.menuVagrant.provision.actor.visible = !((value | MachineMenuDisplay.PROVISION) > Math.max(value, MachineMenuDisplay.PROVISION));
-        this.menuVagrant.ssh.actor.visible = !((value | MachineMenuDisplay.SSH) > Math.max(value, MachineMenuDisplay.SSH));
-        this.menuVagrant.rdp.actor.visible = !((value | MachineMenuDisplay.RDP) > Math.max(value, MachineMenuDisplay.RDP));
-        this.menuVagrant.resume.actor.visible = !((value | MachineMenuDisplay.RESUME) > Math.max(value, MachineMenuDisplay.RESUME));
-        this.menuVagrant.suspend.actor.visible = !((value | MachineMenuDisplay.SUSPEND) > Math.max(value, MachineMenuDisplay.SUSPEND));
-        this.menuVagrant.halt.actor.visible = !((value | MachineMenuDisplay.HALT) > Math.max(value, MachineMenuDisplay.HALT));
-        this.menuVagrant.destroy.actor.visible = !((value | MachineMenuDisplay.DESTROY) > Math.max(value, MachineMenuDisplay.DESTROY));
+        this._display = value;
 
-        this.menuSystem.title.actor.visible = false
-            || this.menuSystem.terminal.actor.visible
-            || this.menuSystem.nautilus.actor.visible
-            || this.menuSystem.vagrantfile.actor.visible;
-        this.menuVagrant.title.actor.visible = false
-            || this.menuVagrant.up.actor.visible
-            || this.menuVagrant.provision.actor.visible
-            || this.menuVagrant.ssh.actor.visible
-            || this.menuVagrant.rdp.actor.visible
-            || this.menuVagrant.resume.actor.visible
-            || this.menuVagrant.suspend.actor.visible
-            || this.menuVagrant.halt.actor.visible
-            || this.menuVagrant.destroy.actor.visible;
+        for (let method in this.system) {
+            if (method === 'header')
+                continue;
+
+            let menu = this.system[method];
+            let display = MachineMenuDisplay._from_string(method);
+            let visible = (value | display) === value;
+
+            global.log("Vagrant", method, visible);
+
+            menu.actor.visible = visible;
+        }
+
+        for (let method in this.vagrant) {
+            if (method === 'header')
+                continue;
+
+            let menu = this.vagrant[method];
+            let display = MachineMenuDisplay._from_string(method);
+            let visible = (value | display) === value;
+
+            global.log("Vagrant", method, visible);
+            menu.actor.visible = visible;
+        }
+
+        this.system.header.actor.visible = false
+            || this.system.terminal.actor.visible
+            || this.system.nautilus.actor.visible
+            || this.system.vagrantfile.actor.visible;
+
+        this.vagrant.header.actor.visible = false
+            || this.vagrant.up.actor.visible
+            || this.vagrant.up_provision.actor.visible
+            || this.vagrant.up_ssh.actor.visible
+            || this.vagrant.up_rdp.actor.visible
+            || this.vagrant.provision.actor.visible
+            || this.vagrant.ssh.actor.visible
+            || this.vagrant.rdp.actor.visible
+            || this.vagrant.resume.actor.visible
+            || this.vagrant.suspend.actor.visible
+            || this.vagrant.halt.actor.visible
+            || this.vagrant.destroy.actor.visible;
     },
 
     /**
@@ -544,34 +638,12 @@ const MachineMenuItem = new Lang.Class({
     },
 
     /**
-     * Property id setter
-     *
-     * @param  {String} value
-     * @return {Void}
-     */
-    set id(value) {
-        this._id = value;
-    },
-
-    /**
      * Property path getter
      *
      * @return {String}
      */
     get path() {
         return this._path;
-    },
-
-    /**
-     * Property path setter
-     *
-     * @param  {String} value
-     * @return {Void}
-     */
-    set path(value) {
-        this._path = value;
-
-        //this.label.text = this.path;
     },
 
     /**
@@ -597,15 +669,31 @@ const MachineMenuItem = new Lang.Class({
     },
 
     /**
-     * Menu item activate event handler
+     * Get submenu item from menu list
+     *
+     * @param  {String} method (optional)
+     * @return {Object}
+     */
+    _get_item: function(method) {
+        return this.get_children()
+            .map(function(actor) {
+                return actor._delegate;
+            })
+            .filter(function(actor) {
+                return actor instanceof MachineMenuInstance && (method ? actor.method === method : true);
+            });
+    },
+
+    /**
+     * Menu subitem execute event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_menu_item: function(widget, event) {
-        this.emit('click', {
-            id: widget.id,
+    _handle_execute: function(widget, event) {
+        this.emit('execute', {
+            id: this.id,
             method: widget.method,
         });
     },
@@ -614,28 +702,171 @@ const MachineMenuItem = new Lang.Class({
 
 });
 
-Signals.addSignalMethods(MachineMenuItem.prototype);
+Signals.addSignalMethods(MachineMenuInstance.prototype);
+
+/**
+ * Ui.MachineMenuCommand constructor
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
+const MachineMenuCommand = new Lang.Class({
+
+    Name: 'Ui.MachineMenuInstance',
+    Extends: PopupMenu.PopupMenuItem,
+
+    /**
+     * Constructor
+     *
+     * @param  {String} title
+     * @param  {String} method
+     * @return {Void}
+     */
+    _init: function(title) {
+        this.parent(title);
+
+        this._def();
+        this._ui();
+        this._bind();
+    },
+
+    /**
+     * Initialize object properties
+     *
+     * @return {Void}
+     */
+    _def: function() {
+        this._method = 'unknown';
+    },
+
+    /**
+     * Create user interface
+     *
+     * @return {Void}
+     */
+    _ui: function() {
+        this.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-command');
+        this.actor.add_style_class_name(this.method);
+    },
+
+    /**
+     * Bind events
+     *
+     * @return {Void}
+     */
+    _bind: function() {
+        this.connect('activate', Lang.bind(this, this._handle_activate));
+    },
+
+    /**
+     * Activate event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handle_activate: function(widget, event) {
+        this.emit('execute', {});
+    },
+
+    /**
+     * Property method getter
+     *
+     * @return {String}
+     */
+    get method() {
+        return this._method;
+    },
+
+    /**
+     * Property method getter
+     *
+     * @param  {String} value
+     * @return {Void}
+     */
+    set method(value) {
+        this._method = value;
+    },
+
+    /* --- */
+
+});
+
+Signals.addSignalMethods(MachineMenuInstance.prototype);
+
+/**
+ * Ui.MachineMenuHeader constructor
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
+const MachineMenuHeader = new Lang.Class({
+
+    Name: 'Ui.MachineMenuHeader',
+    Extends: PopupMenu.PopupMenuItem,
+
+    /**
+     * Constructor
+     *
+     * @param  {String} title
+     * @return {Void}
+     */
+    _init: function(title) {
+        this.parent(title);
+
+        this.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-header');
+        this.setSensitive(false);
+    },
+
+});
 
 /**
  * MachineMenuDisplay enum
  *
  * @type {Object}
  */
-const MachineMenuDisplay = Object.freeze({
+let MachineMenuDisplay = Object.freeze({
     UNKNOWN: 0,
-    NONE: 1,
-    TERMINAL: 2,
-    NAUTILUS: 4,
-    VAGRANTFILE: 8,
-    UP: 16,
-    PROVISION: 32,
-    SSH: 64,
-    RDP: 128,
-    RESUME: 256,
-    SUSPEND: 512,
-    HALT: 1024,
-    DESTROY: 2048,
-    ALL: 4095,
+    NONE: Math.pow(2, 0),
+    TERMINAL: Math.pow(2, 1),
+    NAUTILUS: Math.pow(2, 2),
+    VAGRANTFILE: Math.pow(2, 3),
+    UP: Math.pow(2, 4),
+    UP_PROVISION: Math.pow(2, 5),
+    UP_SSH: Math.pow(2, 6),
+    UP_RDP: Math.pow(2, 7),
+    PROVISION: Math.pow(2, 8),
+    SSH: Math.pow(2, 9),
+    RDP: Math.pow(2, 10),
+    RESUME: Math.pow(2, 11),
+    SUSPEND: Math.pow(2, 12),
+    HALT: Math.pow(2, 13),
+    DESTROY: Math.pow(2, 14),
+    ALL: Math.pow(2, 15) - 1,
+    _min: function() {
+        return this.NONE;
+    },
+    _max: function() {
+        return this.ALL;
+    },
+    _from_string: function(str) {
+        str = str
+            .toString()
+            .toUpperCase()
+            .replace(/[^A-Za-z0-9]+/g, '_')
+            .replace(/^_|_$/g, '');
+
+        let props = Object.keys(this);
+        for (let i in props) {
+            let key = props[i];
+            let val = this[key];
+
+            if (!key.startsWith('_') && typeof val === 'number' && str === key)
+                return val;
+        }
+
+        return this.UNKNOWN;
+    },
 });
 
 /**

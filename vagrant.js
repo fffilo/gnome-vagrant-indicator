@@ -14,14 +14,40 @@ const HOME = GLib.getenv('VAGRANT_HOME') || GLib.getenv('HOME') + '/.vagrant.d';
 const INDEX = '%s/data/machine-index/index'.format(HOME);
 
 /**
- * Terminal config
+ * Post terminal action enum
  *
  * @type {Object}
  */
-const TerminalConfig = Object.freeze({
-    NONE: 0,
-    CLOSE_AFTER_EXEC: 1,
-    PAUSE_AND_CLOSE_AFTER_EXEC: 2,
+const PostTerminalAction = Object.freeze({
+    UNKNOWN: 0,
+    NONE: Math.pow(2, 0),
+    PAUSE: Math.pow(2, 1),
+    EXIT: Math.pow(2, 2),
+    ALL: Math.pow(2, 3) - 1,
+    _min: function() {
+        return this.NONE;
+    },
+    _max: function() {
+        return this.ALL;
+    },
+    _from_string: function(str) {
+        str = str
+            .toString()
+            .toUpperCase()
+            .replace(/[^A-Za-z0-9]+/g, '_')
+            .replace(/^_|_$/g, '');
+
+        let props = Object.keys(this);
+        for (let i in props) {
+            let key = props[i];
+            let val = this[key];
+
+            if (!key.startsWith('_') && typeof val === 'number' && str === key)
+                return val;
+        }
+
+        return this.UNKNOWN;
+    },
 });
 
 /**
@@ -57,7 +83,7 @@ const Monitor = new Lang.Class({
         this._monitor = null;
         this._command = null;
         this._version = null;
-        this._terminal_config = TerminalConfig.NONE;
+        this._post_terminal_action = PostTerminalAction.NONE;
 
         let ok, output, error, status;
         [ok, output, error, status] = GLib.spawn_sync(null, ['which', 'vagrant'], null, GLib.SpawnFlags.SEARCH_PATH, null);
@@ -77,13 +103,17 @@ const Monitor = new Lang.Class({
      * @return {Void}
      */
     _exec: function(cwd, cmd) {
-        let bash = '';
-        bash += 'cd %s; '.format(cwd || '~');
-        bash += '%s; '.format(cmd || ':');
-        bash += 'exec /bin/bash';
+        cwd = cwd || '~';
+        cmd = cmd || ':';
+        cmd = cmd.replace(/;+$/, '');
+
+        let exe = '';
+        exe += 'cd %s; '.format(cwd);
+        exe += '%s; '.format(cmd);
+        exe += 'exec /bin/bash';
 
         let subprocess = new Gio.Subprocess({
-            argv: [ 'x-terminal-emulator', '-e', '/bin/bash -c "%s"'.format(bash) ],
+            argv: [ 'x-terminal-emulator', '-e', '/bin/bash -c "%s"'.format(exe) ],
             flags: Gio.SubprocessFlags.STDOUT_PIPE,
         });
         subprocess.init(null);
@@ -92,7 +122,7 @@ const Monitor = new Lang.Class({
     /**
      * Open terminal and execute vagrant command
      *
-     * @param  {String} cmd
+     * @param  {Mixed}  cmd
      * @param  {String} id
      * @return {Void}
      */
@@ -102,13 +132,24 @@ const Monitor = new Lang.Class({
 
         let msg = _("Press any key to close terminal...");
         let cwd = machine.vagrantfile_path;
-        cmd = '%s %s'.format(this.command, cmd || '');
-        if (this.terminalConfig === TerminalConfig.CLOSE_AFTER_EXEC)
-            cmd += ';exit';
-        if (this.terminalConfig === TerminalConfig.PAUSE_AND_CLOSE_AFTER_EXEC)
-            cmd += ';echo \\"%s\\";read -n 1 -s;exit'.format(msg);
+        let exe = '';
 
-        this._exec(cwd, cmd);
+        if (cmd instanceof Array) {
+            for (let i in cmd) {
+                exe += '%s %s;'.format(this.command, cmd[i]);
+            }
+        }
+        else if (typeof cmd === 'string')
+            exe += '%s %s;'.format(this.command, cmd);
+        else
+            exe += this.command + ';';
+
+        if ((this.postTerminalAction | PostTerminalAction.PAUSE) === this.postTerminalAction)
+            exe += 'echo \\"%s\\";read -n 1 -s;'.format(msg);
+        if ((this.postTerminalAction | PostTerminalAction.EXIT) === this.postTerminalAction)
+            exe += 'exit;';
+
+        this._exec(cwd, exe);
     },
 
     /**
@@ -180,8 +221,8 @@ const Monitor = new Lang.Class({
      *
      * @return {Number}
      */
-    get terminalConfig() {
-        return this._terminal_config;
+    get postTerminalAction() {
+        return this._post_terminal_action;
     },
 
     /**
@@ -190,11 +231,13 @@ const Monitor = new Lang.Class({
      * @param  {Number} value
      * @return {Void}
      */
-    set terminalConfig(value) {
-        for (let i in TerminalConfig) {
-            if (TerminalConfig[i] === value)
-                this._terminal_config = value;
-        }
+    set postTerminalAction(value) {
+        if (value < PostTerminalAction._min())
+            value = PostTerminalAction._min();
+        else if (value > PostTerminalAction._max())
+            value = PostTerminalAction._max();
+
+        this._post_terminal_action = value;
     },
 
     /**
@@ -303,6 +346,39 @@ const Monitor = new Lang.Class({
 
     /**
      * Open terminal and execute command:
+     * vagrant up --provision
+     *
+     * @param  {String} machine_id
+     * @return {Void}
+     */
+    up_provision: function(machine_id) {
+        this._vagrant('up --provision', machine_id);
+    },
+
+    /**
+     * Open terminal and execute command:
+     * vagrant up;vagrant ssh
+     *
+     * @param  {String} machine_id
+     * @return {Void}
+     */
+    up_ssh: function(machine_id) {
+        this._vagrant([ 'up', 'ssh' ], machine_id);
+    },
+
+    /**
+     * Open terminal and execute command:
+     * vagrant up;vagrant rdp
+     *
+     * @param  {String} machine_id
+     * @return {Void}
+     */
+    up_rdp: function(machine_id) {
+        this._vagrant([ 'up', 'rdp' ], machine_id);
+    },
+
+    /**
+     * Open terminal and execute command:
      * vagrant provision
      *
      * @param  {String} machine_id
@@ -314,13 +390,13 @@ const Monitor = new Lang.Class({
 
     /**
      * Open terminal and execute command:
-     * vagrant up --provision
+     * vagrant ssh
      *
      * @param  {String} machine_id
      * @return {Void}
      */
-    up_and_provision: function(machine_id) {
-        this._vagrant('up --provision', machine_id);
+    ssh: function(machine_id) {
+        this._vagrant('ssh', machine_id);
     },
 
     /**
@@ -358,17 +434,6 @@ const Monitor = new Lang.Class({
 
     /**
      * Open terminal and execute command:
-     * vagrant ssh
-     *
-     * @param  {String} machine_id
-     * @return {Void}
-     */
-    ssh: function(machine_id) {
-        this._vagrant('ssh', machine_id);
-    },
-
-    /**
-     * Open terminal and execute command:
      * vagrant halt
      *
      * @param  {String} machine_id
@@ -380,13 +445,24 @@ const Monitor = new Lang.Class({
 
     /**
      * Open terminal and execute command:
-     * vagrant destroy --force
+     * vagrant destroy
      *
      * @param  {String} machine_id
      * @return {Void}
      */
     destroy: function(machine_id) {
         this._vagrant('destroy', machine_id);
+    },
+
+    /**
+     * Open terminal and execute command:
+     * vagrant destroy --force
+     *
+     * @param  {String} machine_id
+     * @return {Void}
+     */
+    destroy_force: function(machine_id) {
+        this._vagrant('destroy --force', machine_id);
     },
 
 });
