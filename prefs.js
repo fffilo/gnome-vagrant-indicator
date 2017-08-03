@@ -244,7 +244,7 @@ const Widget = new GObject.Class({
         this.ui.about.icon.get_style_context().add_class('gnome-vagrant-prefs-page-about-icon');
         this.ui.about.page.actor.add(this.ui.about.icon);
 
-        this.ui.about.desc = new Label({ label: Me.metadata.description, });
+        this.ui.about.desc = new Label({ label: Me.metadata.description2 || Me.metadata.description, });
         this.ui.about.desc.get_style_context().add_class('gnome-vagrant-prefs-page-about-description');
         this.ui.about.page.actor.add(this.ui.about.desc);
 
@@ -260,7 +260,7 @@ const Widget = new GObject.Class({
         this.ui.about.webpage.get_style_context().add_class('gnome-vagrant-prefs-page-about-webpage');
         this.ui.about.page.actor.add(this.ui.about.webpage);
 
-        this.ui.about.license = new Label({ label: Me.metadata.license, });
+        this.ui.about.license = new Label({ label: Me.metadata.license2 || Me.metadata.license, });
         this.ui.about.license.get_style_context().add_class('gnome-vagrant-prefs-page-about-license');
         this.ui.about.page.actor.pack_end(this.ui.about.license, false, false, 0);
 
