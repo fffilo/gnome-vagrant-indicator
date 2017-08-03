@@ -139,7 +139,7 @@ const Indicator = new Lang.Class({
     _get_settings_machine_menu_display: function() {
         return 0
             | (this.settings.get_boolean("system-terminal") ? MachineMenuDisplay._from_string('terminal') : 0)
-            | (this.settings.get_boolean("system-nautilus") ? MachineMenuDisplay._from_string('nautilus') : 0)
+            | (this.settings.get_boolean("system-file-manager") ? MachineMenuDisplay._from_string('file-manager') : 0)
             | (this.settings.get_boolean("system-vagrantfile") ? MachineMenuDisplay._from_string('vagrantfile') : 0)
             | (this.settings.get_boolean("vagrant-up") ? MachineMenuDisplay._from_string('up') : 0)
             | (this.settings.get_boolean("vagrant-up-provision") ? MachineMenuDisplay._from_string('up-provision') : 0)
@@ -502,7 +502,7 @@ const MachineMenuInstance = new Lang.Class({
 
         let menu = [
             'terminal', _("Open in Terminal"),
-            'nautilus', _("Open in Nautilus"),
+            'file_manager', _("Open in File Manager"),
             'vagrantfile', _("Edit Vagrantfile"),
         ];
 
@@ -777,7 +777,7 @@ const MachineMenuInstance = new Lang.Class({
     _refresh_menu_dropdown: function() {
         this._triangleBin.visible = false
             || this.system.terminal.actor.visible
-            || this.system.nautilus.actor.visible
+            || this.system.file_manager.actor.visible
             || this.system.vagrantfile.actor.visible
             || this.vagrant.up.actor.visible
             || this.vagrant.up_provision.actor.visible
@@ -801,7 +801,7 @@ const MachineMenuInstance = new Lang.Class({
     _refresh_menu_headers: function() {
         this.system.header.actor.visible = false
             || this.system.terminal.actor.visible
-            || this.system.nautilus.actor.visible
+            || this.system.file_manager.actor.visible
             || this.system.vagrantfile.actor.visible;
 
         this.vagrant.header.actor.visible = false
@@ -994,7 +994,7 @@ let MachineMenuDisplay = Object.freeze({
     UNKNOWN: 0,
     NONE: Math.pow(2, 0),
     TERMINAL: Math.pow(2, 1),
-    NAUTILUS: Math.pow(2, 2),
+    FILE_MANAGER: Math.pow(2, 2),
     VAGRANTFILE: Math.pow(2, 3),
     UP: Math.pow(2, 4),
     UP_PROVISION: Math.pow(2, 5),

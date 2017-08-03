@@ -144,10 +144,10 @@ const Widget = new GObject.Class({
         this.ui.system.terminal.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.system.page.actor.add(this.ui.system.terminal);
 
-        this.ui.system.nautilus = new InputSwitch('system-nautilus', this.settings.get_boolean('system-nautilus'), _("Open in Nautilus"), _("Display Open in Nautilus system menu"));
-        this.ui.system.nautilus.name = 'gnome-system-prefs-page-system-nautilus';
-        this.ui.system.nautilus.connect('changed', Lang.bind(this, this._handle_widget));
-        this.ui.system.page.actor.add(this.ui.system.nautilus);
+        this.ui.system.file_manager = new InputSwitch('system-file-manager', this.settings.get_boolean('system-file-manager'), _("Open in File Manager"), _("Display Open in File Manager system menu"));
+        this.ui.system.file_manager.name = 'gnome-system-prefs-page-system-file-manager';
+        this.ui.system.file_manager.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.system.page.actor.add(this.ui.system.file_manager);
 
         this.ui.system.vagrantfile = new InputSwitch('system-vagrantfile', this.settings.get_boolean('system-vagrantfile'), _("Edit Vagrantfile"), _("Display Edit Vagrantfile system menu"));
         this.ui.system.vagrantfile.name = 'gnome-system-prefs-page-system-vagrantfile';

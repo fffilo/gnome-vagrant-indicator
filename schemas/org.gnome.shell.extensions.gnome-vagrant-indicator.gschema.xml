@@ -27,10 +27,10 @@
             <summary>Open in Terminal</summary>
             <description>Display Open in Terminal system menu</description>
         </key>
-        <key name="system-nautilus" type="b">
+        <key name="system-file-manager" type="b">
             <default>true</default>
-            <summary>Open in Nautilus</summary>
-            <description>Display Open in Nautilus system menu</description>
+            <summary>Open in File Manager</summary>
+            <description>Display Open in File Manager system menu</description>
         </key>
         <key name="system-vagrantfile" type="b">
             <default>true</default>

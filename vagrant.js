@@ -320,12 +320,12 @@ const Monitor = new Lang.Class({
     },
 
     /**
-     * Open nautilus at machine vagrantfile_path
+     * Open file manager at machine vagrantfile_path
      *
      * @param  {String} machine_id
      * @return {Void}
      */
-    nautilus: function(machine_id) {
+    file_manager: function(machine_id) {
         let machine = this.machine[machine_id];
         if (!machine) return;
 
