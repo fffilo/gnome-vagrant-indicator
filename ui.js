@@ -481,38 +481,11 @@ const MachineMenuInstance = new Lang.Class({
      */
     _ui: function() {
         this.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-instance');
+        this.menu.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-submenu');
         this.setOrnament(PopupMenu.Ornament.DOT);
 
-        this._ui_system();
         this._ui_vagrant();
-    },
-
-    /**
-     * Create user interface for
-     * system commands menu
-     *
-     * @return {Void}
-     */
-    _ui_system: function() {
-        this.system = {};
-
-        let item = new MachineMenuHeader(_("SYSTEM COMMANDS"));
-        this.menu.addMenuItem(item);
-        this.system.header = item;
-
-        let menu = [
-            'terminal', _("Open in Terminal"),
-            'file_manager', _("Open in File Manager"),
-            'vagrantfile', _("Edit Vagrantfile"),
-        ];
-
-        for (let i = 0; i < menu.length; i += 2) {
-            let item = new MachineMenuCommand(menu[i + 1]);
-            item.method = menu[i];
-            item.connect('execute', Lang.bind(this, this._handle_execute));
-            this.menu.addMenuItem(item);
-            this.system[item.method] = item;
-        }
+        this._ui_system();
     },
 
     /**
@@ -548,6 +521,34 @@ const MachineMenuInstance = new Lang.Class({
             item.connect('execute', Lang.bind(this, this._handle_execute));
             this.menu.addMenuItem(item);
             this.vagrant[item.method] = item;
+        }
+    },
+
+    /**
+     * Create user interface for
+     * system commands menu
+     *
+     * @return {Void}
+     */
+    _ui_system: function() {
+        this.system = {};
+
+        let item = new MachineMenuHeader(_("SYSTEM COMMANDS"));
+        this.menu.addMenuItem(item);
+        this.system.header = item;
+
+        let menu = [
+            'terminal', _("Open in Terminal"),
+            'file_manager', _("Open in File Manager"),
+            'vagrantfile', _("Edit Vagrantfile"),
+        ];
+
+        for (let i = 0; i < menu.length; i += 2) {
+            let item = new MachineMenuCommand(menu[i + 1]);
+            item.method = menu[i];
+            item.connect('execute', Lang.bind(this, this._handle_execute));
+            this.menu.addMenuItem(item);
+            this.system[item.method] = item;
         }
     },
 
@@ -692,22 +693,22 @@ const MachineMenuInstance = new Lang.Class({
     _refresh_menu_by_display: function() {
         let value = this.display;
 
-        for (let method in this.system) {
+        for (let method in this.vagrant) {
             if (method === 'header')
                 continue;
 
-            let menu = this.system[method];
+            let menu = this.vagrant[method];
             let display = MachineMenuDisplay._from_string(method);
             let visible = (value | display) === value;
 
             menu.actor.visible = visible;
         }
 
-        for (let method in this.vagrant) {
+        for (let method in this.system) {
             if (method === 'header')
                 continue;
 
-            let menu = this.vagrant[method];
+            let menu = this.system[method];
             let display = MachineMenuDisplay._from_string(method);
             let visible = (value | display) === value;
 
@@ -799,11 +800,6 @@ const MachineMenuInstance = new Lang.Class({
      * @return {Void}
      */
     _refresh_menu_headers: function() {
-        this.system.header.actor.visible = false
-            || this.system.terminal.actor.visible
-            || this.system.file_manager.actor.visible
-            || this.system.vagrantfile.actor.visible;
-
         this.vagrant.header.actor.visible = false
             || this.vagrant.up.actor.visible
             || this.vagrant.up_provision.actor.visible
@@ -816,6 +812,11 @@ const MachineMenuInstance = new Lang.Class({
             || this.vagrant.suspend.actor.visible
             || this.vagrant.halt.actor.visible
             || this.vagrant.destroy.actor.visible;
+
+        this.system.header.actor.visible = false
+            || this.system.terminal.actor.visible
+            || this.system.file_manager.actor.visible
+            || this.system.vagrantfile.actor.visible;
     },
 
     /**
