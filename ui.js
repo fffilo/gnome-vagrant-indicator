@@ -723,6 +723,8 @@ const MachineMenuInstance = new Lang.Class({
      * @return {Void}
      */
     _refresh_menu_by_state: function() {
+        this.setSensitive(true);
+
         if (this.state === 'poweroff') {
             this.vagrant.provision.actor.visible = false;
             this.vagrant.ssh.actor.visible = false;
@@ -766,8 +768,10 @@ const MachineMenuInstance = new Lang.Class({
         }
         //else if (this.state === 'aborted') {
         //}
-        //else {
-        //}
+        else {
+            // disable menu on aborted or unknown state
+            this.setSensitive(false);
+        }
     },
 
     /**
