@@ -11,8 +11,8 @@ const Gio = imports.gi.Gio;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Enum = Me.imports.enum;
-const Helper = Me.imports.helper;
-const _ = Helper.translate;
+const Translation = Me.imports.translation;
+const _ = Translation.translate;
 
 // global properties
 const HOME = GLib.getenv('VAGRANT_HOME') || GLib.getenv('HOME') + '/.vagrant.d';

@@ -9,10 +9,10 @@ const Gdk = imports.gi.Gdk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
 const Icons = Me.imports.icons;
-const Helper = Me.imports.helper;
-const _ = Helper.translate;
+const Settings = Me.imports.settings;
+const Translation = Me.imports.translation;
+const _ = Translation.translate;
 
 /**
  * Extension preferences initialization
@@ -20,7 +20,7 @@ const _ = Helper.translate;
  * @return {Void}
  */
 function init() {
-    Convenience.initTranslations();
+    Translation.init();
 }
 
 /**
@@ -63,7 +63,7 @@ const Widget = new GObject.Class({
      * @return {Void}
      */
     _def: function() {
-        this.settings = Convenience.getSettings();
+        this.settings = Settings.settings();
         //this.settings.connect('changed', Lang.bind(this, this._handle_settings));
     },
 
@@ -75,7 +75,7 @@ const Widget = new GObject.Class({
     _ui: function() {
         let css = new Gtk.CssProvider();
         css.load_from_path(Me.path + '/prefs.css');
-        Gtk.StyleContext.add_provider_for_screen( Gdk.Screen.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION );
+        Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
 
         let notebook = new Gtk.Notebook();
         this.ui = {};
@@ -239,12 +239,12 @@ const Widget = new GObject.Class({
         this.ui.about.title.get_style_context().add_class('gnome-vagrant-prefs-page-about-title');
         this.ui.about.page.actor.add(this.ui.about.title);
 
-        let ico = GdkPixbuf.Pixbuf.new_from_file_at_scale(Me.path + '/assets/gnome-vagrant-indicator-symbolic.svg', 64, 64, null);
+        let ico = GdkPixbuf.Pixbuf.new_from_file_at_scale(Me.path + '/assets/%s.svg'.format(Icons.DEFAULT), 64, 64, null);
         this.ui.about.icon = Gtk.Image.new_from_pixbuf(ico);
         this.ui.about.icon.get_style_context().add_class('gnome-vagrant-prefs-page-about-icon');
         this.ui.about.page.actor.add(this.ui.about.icon);
 
-        this.ui.about.desc = new Label({ label: Me.metadata.description_html || Me.metadata.description, });
+        this.ui.about.desc = new Label({ label: Me.metadata['description-html'] || Me.metadata.description, });
         this.ui.about.desc.get_style_context().add_class('gnome-vagrant-prefs-page-about-description');
         this.ui.about.page.actor.add(this.ui.about.desc);
 
@@ -252,7 +252,7 @@ const Widget = new GObject.Class({
         this.ui.about.version.get_style_context().add_class('gnome-vagrant-prefs-page-about-version');
         this.ui.about.page.actor.add(this.ui.about.version);
 
-        this.ui.about.author = new Label({ label: Me.metadata.maintainer + ' <a href="mailto:' + Me.metadata.email + '">&lt;' + Me.metadata.email + '&gt;</a>', });
+        this.ui.about.author = new Label({ label: Me.metadata['original-author-html'] || Me.metadata['original-author'], });
         this.ui.about.author.get_style_context().add_class('gnome-vagrant-prefs-page-about-author');
         this.ui.about.page.actor.add(this.ui.about.author);
 
@@ -260,7 +260,7 @@ const Widget = new GObject.Class({
         this.ui.about.webpage.get_style_context().add_class('gnome-vagrant-prefs-page-about-webpage');
         this.ui.about.page.actor.add(this.ui.about.webpage);
 
-        this.ui.about.license = new Label({ label: Me.metadata.license_html || Me.metadata.license, });
+        this.ui.about.license = new Label({ label: Me.metadata['license-html'] || Me.metadata.license, });
         this.ui.about.license.get_style_context().add_class('gnome-vagrant-prefs-page-about-license');
         this.ui.about.page.actor.pack_end(this.ui.about.license, false, false, 0);
 

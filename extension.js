@@ -7,7 +7,7 @@
 const Gtk = imports.gi.Gtk;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
+const Translation = Me.imports.translation;
 const Icons = Me.imports.icons;
 const Ui = Me.imports.ui;
 
@@ -25,7 +25,7 @@ let indicator = null;
  * @return {Void}
  */
 function init(extensionMeta) {
-    Convenience.initTranslations();
+    Translation.init();
     Icons.init();
 }
 

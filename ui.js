@@ -7,7 +7,6 @@
 const Lang = imports.lang;
 const Signals = imports.signals;
 const GLib = imports.gi.GLib;
-const Clutter = imports.gi.Clutter;
 const St = imports.gi.St;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
@@ -16,12 +15,12 @@ const MessageTray = imports.ui.messageTray;
 const Util = imports.misc.util;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
-const Icons = Me.imports.icons;
 const Enum = Me.imports.enum;
 const Vagrant = Me.imports.vagrant;
-const Helper = Me.imports.helper;
-const _ = Helper.translate;
+const Icons = Me.imports.icons;
+const Settings = Me.imports.settings;
+const Translation = Me.imports.translation;
+const _ = Translation.translate;
 
 /**
  * Ui.Indicator constructor
@@ -71,7 +70,7 @@ const Indicator = new Lang.Class({
     _def: function() {
         this.notification = new Notification();
 
-        this.settings = Convenience.getSettings();
+        this.settings = Settings.settings();
         this.settings.connect('changed', Lang.bind(this, this._handle_settings));
 
         let action = this.settings.get_string('post-terminal-action');

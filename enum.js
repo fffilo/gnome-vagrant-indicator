@@ -92,4 +92,6 @@ const Enum = new Lang.Class({
         return this.UNKNOWN;
     },
 
+    /* --- */
+
 });
