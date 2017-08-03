@@ -80,8 +80,8 @@ const Widget = new GObject.Class({
         let notebook = new Gtk.Notebook();
         this.ui = {};
         notebook.append_page(this._page_settings(), new Gtk.Label({ label: _("Settings"), }));
-        notebook.append_page(this._page_system(), new Gtk.Label({ label: _("System"), }));
         notebook.append_page(this._page_vagrant(), new Gtk.Label({ label: _("Vagrant"), }));
+        notebook.append_page(this._page_system(), new Gtk.Label({ label: _("System"), }));
         notebook.append_page(this._page_about(), new Gtk.Label({ label: _("About"), }));
         this.add(notebook);
 
@@ -127,34 +127,6 @@ const Widget = new GObject.Class({
         this.ui.settings.page.actor.add(this.ui.settings.postterminalaction);
 
         return this.ui.settings.page;
-    },
-
-    /**
-     * Create new system page
-     *
-     * @return {Object}
-     */
-    _page_system: function() {
-        this.ui.system = {};
-        this.ui.system.page = this._page();
-        this.ui.system.page.get_style_context().add_class('gnome-vagrant-prefs-page-system');
-
-        this.ui.system.terminal = new InputSwitch('system-terminal', this.settings.get_boolean('system-terminal'), _("Open in Terminal"), _("Display Open in Terminal system menu"));
-        this.ui.system.terminal.name = 'gnome-system-prefs-page-system-terminal';
-        this.ui.system.terminal.connect('changed', Lang.bind(this, this._handle_widget));
-        this.ui.system.page.actor.add(this.ui.system.terminal);
-
-        this.ui.system.file_manager = new InputSwitch('system-file-manager', this.settings.get_boolean('system-file-manager'), _("Open in File Manager"), _("Display Open in File Manager system menu"));
-        this.ui.system.file_manager.name = 'gnome-system-prefs-page-system-file-manager';
-        this.ui.system.file_manager.connect('changed', Lang.bind(this, this._handle_widget));
-        this.ui.system.page.actor.add(this.ui.system.file_manager);
-
-        this.ui.system.vagrantfile = new InputSwitch('system-vagrantfile', this.settings.get_boolean('system-vagrantfile'), _("Edit Vagrantfile"), _("Display Edit Vagrantfile system menu"));
-        this.ui.system.vagrantfile.name = 'gnome-system-prefs-page-system-vagrantfile';
-        this.ui.system.vagrantfile.connect('changed', Lang.bind(this, this._handle_widget));
-        this.ui.system.page.actor.add(this.ui.system.vagrantfile);
-
-        return this.ui.system.page;
     },
 
     /**
@@ -223,6 +195,34 @@ const Widget = new GObject.Class({
         this.ui.vagrant.page.actor.add(this.ui.vagrant.destroy);
 
         return this.ui.vagrant.page;
+    },
+
+    /**
+     * Create new system page
+     *
+     * @return {Object}
+     */
+    _page_system: function() {
+        this.ui.system = {};
+        this.ui.system.page = this._page();
+        this.ui.system.page.get_style_context().add_class('gnome-vagrant-prefs-page-system');
+
+        this.ui.system.terminal = new InputSwitch('system-terminal', this.settings.get_boolean('system-terminal'), _("Open in Terminal"), _("Display Open in Terminal system menu"));
+        this.ui.system.terminal.name = 'gnome-system-prefs-page-system-terminal';
+        this.ui.system.terminal.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.system.page.actor.add(this.ui.system.terminal);
+
+        this.ui.system.file_manager = new InputSwitch('system-file-manager', this.settings.get_boolean('system-file-manager'), _("Open in File Manager"), _("Display Open in File Manager system menu"));
+        this.ui.system.file_manager.name = 'gnome-system-prefs-page-system-file-manager';
+        this.ui.system.file_manager.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.system.page.actor.add(this.ui.system.file_manager);
+
+        this.ui.system.vagrantfile = new InputSwitch('system-vagrantfile', this.settings.get_boolean('system-vagrantfile'), _("Edit Vagrantfile"), _("Display Edit Vagrantfile system menu"));
+        this.ui.system.vagrantfile.name = 'gnome-system-prefs-page-system-vagrantfile';
+        this.ui.system.vagrantfile.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.system.page.actor.add(this.ui.system.vagrantfile);
+
+        return this.ui.system.page;
     },
 
     /**
