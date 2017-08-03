@@ -7,7 +7,7 @@
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
-// Icon enums
+// Icons
 const DEFAULT = 'gnome-vagrant-indicator-symbolic';
 
 /**

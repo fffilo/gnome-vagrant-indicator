@@ -138,20 +138,20 @@ const Indicator = new Lang.Class({
      */
     _get_settings_machine_menu_display: function() {
         return 0
-            | (this.settings.get_boolean("system-terminal") ? MachineMenuDisplay._from_string('terminal') : 0)
-            | (this.settings.get_boolean("system-file-manager") ? MachineMenuDisplay._from_string('file-manager') : 0)
-            | (this.settings.get_boolean("system-vagrantfile") ? MachineMenuDisplay._from_string('vagrantfile') : 0)
-            | (this.settings.get_boolean("vagrant-up") ? MachineMenuDisplay._from_string('up') : 0)
-            | (this.settings.get_boolean("vagrant-up-provision") ? MachineMenuDisplay._from_string('up-provision') : 0)
-            | (this.settings.get_boolean("vagrant-up-ssh") ? MachineMenuDisplay._from_string('up-ssh') : 0)
-            | (this.settings.get_boolean("vagrant-up-rdp") ? MachineMenuDisplay._from_string('up-rdp') : 0)
-            | (this.settings.get_boolean("vagrant-provision") ? MachineMenuDisplay._from_string('provision') : 0)
-            | (this.settings.get_boolean("vagrant-ssh") ? MachineMenuDisplay._from_string('ssh') : 0)
-            | (this.settings.get_boolean("vagrant-rdp") ? MachineMenuDisplay._from_string('rdp') : 0)
-            | (this.settings.get_boolean("vagrant-resume") ? MachineMenuDisplay._from_string('resume') : 0)
-            | (this.settings.get_boolean("vagrant-suspend") ? MachineMenuDisplay._from_string('suspend') : 0)
-            | (this.settings.get_boolean("vagrant-halt") ? MachineMenuDisplay._from_string('halt') : 0)
-            | (this.settings.get_boolean("vagrant-destroy") ? MachineMenuDisplay._from_string('destroy') : 0);
+            | (this.settings.get_boolean('system-terminal') ? MachineMenuDisplay._from_string('terminal') : 0)
+            | (this.settings.get_boolean('system-file-manager') ? MachineMenuDisplay._from_string('file-manager') : 0)
+            | (this.settings.get_boolean('system-vagrantfile') ? MachineMenuDisplay._from_string('vagrantfile') : 0)
+            | (this.settings.get_boolean('vagrant-up') ? MachineMenuDisplay._from_string('up') : 0)
+            | (this.settings.get_boolean('vagrant-up-provision') ? MachineMenuDisplay._from_string('up-provision') : 0)
+            | (this.settings.get_boolean('vagrant-up-ssh') ? MachineMenuDisplay._from_string('up-ssh') : 0)
+            | (this.settings.get_boolean('vagrant-up-rdp') ? MachineMenuDisplay._from_string('up-rdp') : 0)
+            | (this.settings.get_boolean('vagrant-provision') ? MachineMenuDisplay._from_string('provision') : 0)
+            | (this.settings.get_boolean('vagrant-ssh') ? MachineMenuDisplay._from_string('ssh') : 0)
+            | (this.settings.get_boolean('vagrant-rdp') ? MachineMenuDisplay._from_string('rdp') : 0)
+            | (this.settings.get_boolean('vagrant-resume') ? MachineMenuDisplay._from_string('resume') : 0)
+            | (this.settings.get_boolean('vagrant-suspend') ? MachineMenuDisplay._from_string('suspend') : 0)
+            | (this.settings.get_boolean('vagrant-halt') ? MachineMenuDisplay._from_string('halt') : 0)
+            | (this.settings.get_boolean('vagrant-destroy') ? MachineMenuDisplay._from_string('destroy') : 0);
         },
 
     /**
