@@ -260,6 +260,10 @@ const Widget = new GObject.Class({
         this.ui.about.webpage.get_style_context().add_class('gnome-vagrant-prefs-page-about-webpage');
         this.ui.about.page.actor.add(this.ui.about.webpage);
 
+        this.ui.about.license = new Label({ label: Me.metadata.license, });
+        this.ui.about.license.get_style_context().add_class('gnome-vagrant-prefs-page-about-license');
+        this.ui.about.page.actor.pack_end(this.ui.about.license, false, false, 0);
+
         return this.ui.about.page;
     },
 

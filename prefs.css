@@ -2,5 +2,6 @@ PrefsBox { border: none; }
 PrefsInput { padding: 0.5em; }
 
 .gnome-vagrant-prefs-page { padding: 2em; }
-.gnome-vagrant-prefs-page-about-title { padding-bottom: 1em; font-weight: bold; }
-.gnome-vagrant-prefs-page-about-description { padding: 1em; }
+.gnome-vagrant-prefs-page-about-title { padding-bottom: 2em; font-weight: bold; }
+.gnome-vagrant-prefs-page-about-description { padding: 2em; }
+.gnome-vagrant-prefs-page-about-license { font-size: 0.8em; }
