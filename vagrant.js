@@ -8,6 +8,11 @@ const Lang = imports.lang;
 const Signals = imports.signals;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Enum = Me.imports.enum;
+const Helper = Me.imports.helper;
+const _ = Helper.translate;
 
 // global properties
 const HOME = GLib.getenv('VAGRANT_HOME') || GLib.getenv('HOME') + '/.vagrant.d';
@@ -18,37 +23,11 @@ const INDEX = '%s/data/machine-index/index'.format(HOME);
  *
  * @type {Object}
  */
-const PostTerminalAction = Object.freeze({
-    UNKNOWN: 0,
-    NONE: Math.pow(2, 0),
-    PAUSE: Math.pow(2, 1),
-    EXIT: Math.pow(2, 2),
-    ALL: Math.pow(2, 3) - 1,
-    _min: function() {
-        return this.NONE;
-    },
-    _max: function() {
-        return this.ALL;
-    },
-    _from_string: function(str) {
-        str = str
-            .toString()
-            .toUpperCase()
-            .replace(/[^A-Za-z0-9]+/g, '_')
-            .replace(/^_|_$/g, '');
-
-        let props = Object.keys(this);
-        for (let i in props) {
-            let key = props[i];
-            let val = this[key];
-
-            if (!key.startsWith('_') && typeof val === 'number' && str === key)
-                return val;
-        }
-
-        return this.UNKNOWN;
-    },
-});
+const PostTerminalAction = new Enum.Enum([
+    'NONE',
+    'PAUSE',
+    'EXIT',
+]);
 
 /**
  * Vagrant.Monitor constructor
@@ -232,10 +211,10 @@ const Monitor = new Lang.Class({
      * @return {Void}
      */
     set postTerminalAction(value) {
-        if (value < PostTerminalAction._min())
-            value = PostTerminalAction._min();
-        else if (value > PostTerminalAction._max())
-            value = PostTerminalAction._max();
+        if (value < PostTerminalAction.min())
+            value = PostTerminalAction.min();
+        else if (value > PostTerminalAction.max())
+            value = PostTerminalAction.max();
 
         this._post_terminal_action = value;
     },

@@ -18,6 +18,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 const Icons = Me.imports.icons;
+const Enum = Me.imports.enum;
 const Vagrant = Me.imports.vagrant;
 const Helper = Me.imports.helper;
 const _ = Helper.translate;
@@ -74,7 +75,7 @@ const Indicator = new Lang.Class({
         this.settings.connect('changed', Lang.bind(this, this._handle_settings));
 
         let action = this.settings.get_string('post-terminal-action');
-        action = Vagrant.PostTerminalAction._from_string(action);
+        action = Vagrant.PostTerminalAction.from_string(action);
 
         this.monitor = new Vagrant.Monitor();
         this.monitor.postTerminalAction = action;
@@ -138,20 +139,20 @@ const Indicator = new Lang.Class({
      */
     _get_settings_machine_menu_display: function() {
         return 0
-            | (this.settings.get_boolean('system-terminal') ? MachineMenuDisplay._from_string('terminal') : 0)
-            | (this.settings.get_boolean('system-file-manager') ? MachineMenuDisplay._from_string('file-manager') : 0)
-            | (this.settings.get_boolean('system-vagrantfile') ? MachineMenuDisplay._from_string('vagrantfile') : 0)
-            | (this.settings.get_boolean('vagrant-up') ? MachineMenuDisplay._from_string('up') : 0)
-            | (this.settings.get_boolean('vagrant-up-provision') ? MachineMenuDisplay._from_string('up-provision') : 0)
-            | (this.settings.get_boolean('vagrant-up-ssh') ? MachineMenuDisplay._from_string('up-ssh') : 0)
-            | (this.settings.get_boolean('vagrant-up-rdp') ? MachineMenuDisplay._from_string('up-rdp') : 0)
-            | (this.settings.get_boolean('vagrant-provision') ? MachineMenuDisplay._from_string('provision') : 0)
-            | (this.settings.get_boolean('vagrant-ssh') ? MachineMenuDisplay._from_string('ssh') : 0)
-            | (this.settings.get_boolean('vagrant-rdp') ? MachineMenuDisplay._from_string('rdp') : 0)
-            | (this.settings.get_boolean('vagrant-resume') ? MachineMenuDisplay._from_string('resume') : 0)
-            | (this.settings.get_boolean('vagrant-suspend') ? MachineMenuDisplay._from_string('suspend') : 0)
-            | (this.settings.get_boolean('vagrant-halt') ? MachineMenuDisplay._from_string('halt') : 0)
-            | (this.settings.get_boolean('vagrant-destroy') ? MachineMenuDisplay._from_string('destroy') : 0);
+            | (this.settings.get_boolean('system-terminal') ? MachineMenuDisplay.from_string('terminal') : 0)
+            | (this.settings.get_boolean('system-file-manager') ? MachineMenuDisplay.from_string('file-manager') : 0)
+            | (this.settings.get_boolean('system-vagrantfile') ? MachineMenuDisplay.from_string('vagrantfile') : 0)
+            | (this.settings.get_boolean('vagrant-up') ? MachineMenuDisplay.from_string('up') : 0)
+            | (this.settings.get_boolean('vagrant-up-provision') ? MachineMenuDisplay.from_string('up-provision') : 0)
+            | (this.settings.get_boolean('vagrant-up-ssh') ? MachineMenuDisplay.from_string('up-ssh') : 0)
+            | (this.settings.get_boolean('vagrant-up-rdp') ? MachineMenuDisplay.from_string('up-rdp') : 0)
+            | (this.settings.get_boolean('vagrant-provision') ? MachineMenuDisplay.from_string('provision') : 0)
+            | (this.settings.get_boolean('vagrant-ssh') ? MachineMenuDisplay.from_string('ssh') : 0)
+            | (this.settings.get_boolean('vagrant-rdp') ? MachineMenuDisplay.from_string('rdp') : 0)
+            | (this.settings.get_boolean('vagrant-resume') ? MachineMenuDisplay.from_string('resume') : 0)
+            | (this.settings.get_boolean('vagrant-suspend') ? MachineMenuDisplay.from_string('suspend') : 0)
+            | (this.settings.get_boolean('vagrant-halt') ? MachineMenuDisplay.from_string('halt') : 0)
+            | (this.settings.get_boolean('vagrant-destroy') ? MachineMenuDisplay.from_string('destroy') : 0);
         },
 
     /**
@@ -164,7 +165,7 @@ const Indicator = new Lang.Class({
     _handle_settings: function(widget, key) {
         if (key === 'post-terminal-action') {
             let action = this.settings.get_string('post-terminal-action');
-            action = Vagrant.PostTerminalAction._from_string(action);
+            action = Vagrant.PostTerminalAction.from_string(action);
             this.monitor.postTerminalAction = action;
         }
         else if (key === 'machine-full-path')
@@ -390,10 +391,10 @@ const MachineMenu = new Lang.Class({
      * @return {Void}
      */
     set display(value) {
-        if (value < MachineMenuDisplay._min())
-            value = MachineMenuDisplay._min();
-        else if (value > MachineMenuDisplay._max())
-            value = MachineMenuDisplay._max();
+        if (value < MachineMenuDisplay.min())
+            value = MachineMenuDisplay.min();
+        else if (value > MachineMenuDisplay.max())
+            value = MachineMenuDisplay.max();
 
         this._display = value;
 
@@ -602,10 +603,10 @@ const MachineMenuInstance = new Lang.Class({
      * @return {Void}
      */
     set display(value) {
-        if (value < MachineMenuDisplay._min())
-            value = MachineMenuDisplay._min();
-        else if (value > MachineMenuDisplay._max())
-            value = MachineMenuDisplay._max();
+        if (value < MachineMenuDisplay.min())
+            value = MachineMenuDisplay.min();
+        else if (value > MachineMenuDisplay.max())
+            value = MachineMenuDisplay.max();
 
         this._display = value;
 
@@ -698,7 +699,7 @@ const MachineMenuInstance = new Lang.Class({
                 continue;
 
             let menu = this.vagrant[method];
-            let display = MachineMenuDisplay._from_string(method);
+            let display = MachineMenuDisplay.from_string(method);
             let visible = (value | display) === value;
 
             menu.actor.visible = visible;
@@ -709,7 +710,7 @@ const MachineMenuInstance = new Lang.Class({
                 continue;
 
             let menu = this.system[method];
-            let display = MachineMenuDisplay._from_string(method);
+            let display = MachineMenuDisplay.from_string(method);
             let visible = (value | display) === value;
 
             menu.actor.visible = visible;
@@ -995,49 +996,23 @@ const MachineMenuHeader = new Lang.Class({
  *
  * @type {Object}
  */
-let MachineMenuDisplay = Object.freeze({
-    UNKNOWN: 0,
-    NONE: Math.pow(2, 0),
-    TERMINAL: Math.pow(2, 1),
-    FILE_MANAGER: Math.pow(2, 2),
-    VAGRANTFILE: Math.pow(2, 3),
-    UP: Math.pow(2, 4),
-    UP_PROVISION: Math.pow(2, 5),
-    UP_SSH: Math.pow(2, 6),
-    UP_RDP: Math.pow(2, 7),
-    PROVISION: Math.pow(2, 8),
-    SSH: Math.pow(2, 9),
-    RDP: Math.pow(2, 10),
-    RESUME: Math.pow(2, 11),
-    SUSPEND: Math.pow(2, 12),
-    HALT: Math.pow(2, 13),
-    DESTROY: Math.pow(2, 14),
-    ALL: Math.pow(2, 15) - 1,
-    _min: function() {
-        return this.NONE;
-    },
-    _max: function() {
-        return this.ALL;
-    },
-    _from_string: function(str) {
-        str = str
-            .toString()
-            .toUpperCase()
-            .replace(/[^A-Za-z0-9]+/g, '_')
-            .replace(/^_|_$/g, '');
-
-        let props = Object.keys(this);
-        for (let i in props) {
-            let key = props[i];
-            let val = this[key];
-
-            if (!key.startsWith('_') && typeof val === 'number' && str === key)
-                return val;
-        }
-
-        return this.UNKNOWN;
-    },
-});
+const MachineMenuDisplay = new Enum.Enum([
+    'NONE',
+    'TERMINAL',
+    'FILE_MANAGER',
+    'VAGRANTFILE',
+    'UP',
+    'UP_PROVISION',
+    'UP_SSH',
+    'UP_RDP',
+    'PROVISION',
+    'SSH',
+    'RDP',
+    'RESUME',
+    'SUSPEND',
+    'HALT',
+    'DESTROY',
+]);
 
 /**
  * Ui.Notification constructor
