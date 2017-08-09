@@ -1,7 +1,7 @@
 INSTALL_PATH = ~/.local/share/gnome-shell/extensions
 INSTALL_NAME = gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com
 BUILD_DIR = _build
-FILES = assets/ convenience.js COPYING enum.js extension.js icons.js metadata.json prefs.css prefs.js README.md schemas/ screenshot.png settings.js stylesheet.css translation.js ui.js vagrant.js
+FILES = assets/ CHANGELOG.md convenience.js COPYING enum.js extension.js icons.js metadata.json prefs.css prefs.js README.md schemas/ screenshot.png settings.js stylesheet.css translation.js ui.js vagrant.js
 
 install: build
 	rm -rf $(INSTALL_PATH)/$(INSTALL_NAME)
