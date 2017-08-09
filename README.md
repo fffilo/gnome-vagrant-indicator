@@ -36,6 +36,8 @@ on your system.
 - build and install from source
 	- download source from GitHub (clone repository or download zip)
 	- from `gnome-vagrant-indicator` directory execute `make install`
+- bash one-liner
+	- `wget https://raw.githubusercontent.com/fffilo/gnome-vagrant-indicator/master/install.sh -O - | sh`
 
 ## Credits
 
