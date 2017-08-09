@@ -4,7 +4,6 @@
 'use strict';
 
 // import modules
-const Gtk = imports.gi.Gtk;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Translation = Me.imports.translation;

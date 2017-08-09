@@ -32,8 +32,7 @@ virtualbox, the state in indicator won't change.
 To have working indicator, [vagrant](https://www.vagrantup.com/) must be installed
 on your system.
 
-- install using [GNOME Shell extension website](https://extensions.gnome.org/)
-  (to do: add URL on extension approve)
+- install using [GNOME Shell extension website](https://extensions.gnome.org/extension/1269/gnome-vagrant-indicator/)
 - build and install from source
 	- download source from GitHub (clone repository or download zip)
 	- from `gnome-vagrant-indicator` directory execute `make install`

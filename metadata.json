@@ -1,5 +1,4 @@
 {
-    "url": "https://github.com/fffilo/gnome-vagrant-indicator",
     "description": "Easily manage your vagrant machines from status area",
     "description-html": "Inspired by <a href=\"https://github.com/candidtim/vagrant-appindicator\">vgapplet</a>,\n<b>GNOME Vagrant Indicator</b> lets you easily manage your vagrant machines from status area.",
     "gettext-domain": "gnome-vagrant-indicator",
@@ -10,6 +9,7 @@
     "original-author-html": "Franjo Filo &lt;<a href=\"mailto:fffilo666@gmail.com\">fffilo666@gmail.com&gt;</a>",
     "settings-schema": "org.gnome.shell.extensions.gnome-vagrant-indicator",
     "shell-version": ["3.18.5"],
+    "url": "https://github.com/fffilo/gnome-vagrant-indicator",
     "uuid": "gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com",
     "version": "1"
 }
