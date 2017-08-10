@@ -149,9 +149,9 @@ const Monitor = new Lang.Class({
      * event handler
      *
      * to do: optimize
-     * set 500ms timeout and cancel previous
-     * interval, so changed signal won't be
-     * emited too often???
+     * set 250ms timeout and cancel previous
+     * interval, so handler won't be executed
+     * too often???
      *
      * @param  {Object} monitor
      * @param  {Object} file
@@ -443,6 +443,8 @@ const Monitor = new Lang.Class({
     destroy_force: function(machine_id) {
         this._vagrant('destroy --force', machine_id);
     },
+
+    /* --- */
 
 });
 

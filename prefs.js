@@ -42,7 +42,7 @@ function buildPrefsWidget() {
 const Widget = new GObject.Class({
 
     Name: 'Prefs.Widget',
-    GTypeName: 'Widget',
+    GTypeName: 'GnomeVagrantIndicatorPrefsWidget',
     Extends: Gtk.Box,
 
     /**
@@ -326,7 +326,7 @@ const Widget = new GObject.Class({
 const Box = new GObject.Class({
 
     Name: 'Prefs.Box',
-    GTypeName: 'PrefsBox',
+    GTypeName: 'GnomeVagrantIndicatorPrefsBox',
     Extends: Gtk.Frame,
 
     _init: function() {
@@ -354,7 +354,7 @@ const Box = new GObject.Class({
 const Label = new GObject.Class({
 
     Name: 'Prefs.Label',
-    GTypeName: 'PrefsLabel',
+    GTypeName: 'GnomeVagrantIndicatorPrefsLabel',
     Extends: Gtk.Label,
 
     /**
@@ -390,7 +390,7 @@ const Label = new GObject.Class({
 const Input = new GObject.Class({
 
     Name: 'Prefs.Input',
-    GTypeName: 'PrefsInput',
+    GTypeName: 'GnomeVagrantIndicatorPrefsInput',
     Extends: Box,
 
     /**
@@ -462,7 +462,7 @@ Signals.addSignalMethods(Input.prototype);
 const InputSwitch = new GObject.Class({
 
     Name: 'Prefs.InputSwitch',
-    GTypeName: 'PrefsInputSwitch',
+    GTypeName: 'GnomeVagrantIndicatorPrefsInputSwitch',
     Extends: Input,
 
     /**
@@ -525,7 +525,7 @@ const InputSwitch = new GObject.Class({
 const InputComboBox = new GObject.Class({
 
     Name: 'Prefs.InputComboBox',
-    GTypeName: 'PrefsInputComboBox',
+    GTypeName: 'GnomeVagrantIndicatorPrefsInputComboBox',
     Extends: Input,
 
     /**

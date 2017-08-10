@@ -1,9 +1,9 @@
-.gnome-vagrant-indicator-machine-menu-instance .popup-menu-ornament { font-size: 1.5em; }
-.gnome-vagrant-indicator-machine-menu-instance .popup-menu-ornament { color: black; }
-.gnome-vagrant-indicator-machine-menu-instance.poweroff .popup-menu-ornament { color: inherit; }
-.gnome-vagrant-indicator-machine-menu-instance.preparing .popup-menu-ornament { color: yellow; }
-.gnome-vagrant-indicator-machine-menu-instance.running .popup-menu-ornament { color: lime; }
-.gnome-vagrant-indicator-machine-menu-instance.saved .popup-menu-ornament { color: orange; }
-.gnome-vagrant-indicator-machine-menu-instance.aborted .popup-menu-ornament { color: red; }
-.gnome-vagrant-indicator-machine-menu-submenu { padding-bottom: 1em; }
-.gnome-vagrant-indicator-machine-menu-header { margin-top: 1.5em; padding-left: 0.5em; font-size: 0.7em; }
+.gnome-vagrant-indicator-menu-path .popup-menu-ornament { font-size: 1.5em; }
+.gnome-vagrant-indicator-menu-path .popup-menu-ornament { color: black; }
+.gnome-vagrant-indicator-menu-path.poweroff .popup-menu-ornament { color: inherit; }
+.gnome-vagrant-indicator-menu-path.preparing .popup-menu-ornament { color: yellow; }
+.gnome-vagrant-indicator-menu-path.running .popup-menu-ornament { color: lime; }
+.gnome-vagrant-indicator-menu-path.saved .popup-menu-ornament { color: orange; }
+.gnome-vagrant-indicator-menu-path.aborted .popup-menu-ornament { color: red; }
+.gnome-vagrant-indicator-menu-submenu { padding-bottom: 1em; }
+.gnome-vagrant-indicator-menu-header { margin-top: 1.5em; padding-left: 0.5em; font-size: 0.7em; }

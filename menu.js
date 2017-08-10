@@ -5,258 +5,53 @@
 
 // import modules
 const Lang = imports.lang;
-const Signals = imports.signals;
 const GLib = imports.gi.GLib;
-const St = imports.gi.St;
-const Main = imports.ui.main;
-const PanelMenu = imports.ui.panelMenu;
 const PopupMenu = imports.ui.popupMenu;
-const MessageTray = imports.ui.messageTray;
-const Util = imports.misc.util;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Enum = Me.imports.enum;
-const Vagrant = Me.imports.vagrant;
-const Icons = Me.imports.icons;
-const Settings = Me.imports.settings;
 const Translation = Me.imports.translation;
 const _ = Translation.translate;
 
+// PopupMenu proxies
+const Separator = PopupMenu.PopupSeparatorMenuItem;
+const Item = PopupMenu.PopupMenuItem;
+const SubMenu = PopupMenu.PopupSubMenuMenuItem;
+const Section = PopupMenu.PopupMenuSection;
+
 /**
- * Ui.Indicator constructor
+ * Display enum
+ *
+ * @type {Object}
+ */
+const Display = new Enum.Enum([
+    'NONE',
+    'TERMINAL',
+    'FILE_MANAGER',
+    'VAGRANTFILE',
+    'UP',
+    'UP_PROVISION',
+    'UP_SSH',
+    'UP_RDP',
+    'PROVISION',
+    'SSH',
+    'RDP',
+    'RESUME',
+    'SUSPEND',
+    'HALT',
+    'DESTROY',
+]);
+
+/**
+ * Menu.Machine constructor
  *
  * @param  {Object}
  * @return {Object}
  */
-const Indicator = new Lang.Class({
+const Machine = new Lang.Class({
 
-    Name: 'Ui.Indicator',
-    Extends: PanelMenu.Button,
-
-    /**
-     * Constructor
-     *
-     * @return {Void}
-     */
-    _init: function() {
-        this.parent(null, Me.metadata.name);
-
-        this._def();
-        this._ui();
-        this.refresh();
-
-        Main.panel.addToStatusArea(Me.metadata.uuid, this);
-    },
-
-    /**
-     * Destructor
-     *
-     * @return {Void}
-     */
-    destroy: function() {
-        if (this.monitor)
-            this.monitor.unlisten();
-        if (this.settings)
-            this.settings.run_dispose();
-
-        this.parent();
-    },
-
-    /**
-     * Initialize object properties
-     *
-     * @return {Void}
-     */
-    _def: function() {
-        this.notification = new Notification();
-
-        this.settings = Settings.settings();
-        this.settings.connect('changed', Lang.bind(this, this._handle_settings));
-
-        let action = this.settings.get_string('post-terminal-action');
-        action = Vagrant.PostTerminalAction.from_string(action);
-
-        this.monitor = new Vagrant.Monitor();
-        this.monitor.postTerminalAction = action;
-        this.monitor.connect('add', Lang.bind(this, this._handle_monitor_add));
-        this.monitor.connect('remove', Lang.bind(this, this._handle_monitor_remove));
-        this.monitor.connect('state', Lang.bind(this, this._handle_monitor_state));
-        this.monitor.listen();
-    },
-
-    /**
-     * Create user interface
-     *
-     * @return {Void}
-     */
-    _ui: function() {
-        this.actor.add_style_class_name('panel-status-button');
-        this.actor.add_style_class_name('gnome-vagrant-indicator');
-
-        this.icon = new St.Icon({
-            icon_name: Icons.DEFAULT,
-            style_class: 'system-status-icon',
-        });
-        this.actor.add_actor(this.icon);
-
-        this.machine = new MachineMenu(this);
-        this.machine.shorten = !this.settings.get_boolean('machine-full-path');
-        this.machine.display = this._get_settings_machine_menu_display();
-        this.machine.connect('execute', Lang.bind(this, this._handle_machines));
-        this.menu.addMenuItem(this.machine);
-        this.menu.addMenuItem(new PopupMenu.PopupSeparatorMenuItem());
-
-        this.preferences = new PopupMenu.PopupMenuItem(_("Preferences"));
-        this.preferences.connect('activate', Lang.bind(this, this._handle_preferences));
-        this.menu.addMenuItem(this.preferences);
-    },
-
-    /**
-     * Refresh machine menu
-     *
-     * @return {Void}
-     */
-    refresh: function() {
-        if (!this.monitor.command) {
-            this.machine.error(_("Vagrant not installed on your system"));
-            return;
-        }
-
-        this.machine.clear();
-
-        for (let id in this.monitor.machine) {
-            let machine = this.monitor.machine[id];
-            this.machine.add(id, machine.vagrantfile_path, machine.state);
-        }
-    },
-
-    /**
-     * Convert settings boolean machine-menu-display
-     * values to MachineMenuDisplay value
-     *
-     * @return {Number}
-     */
-    _get_settings_machine_menu_display: function() {
-        return 0
-            | (this.settings.get_boolean('system-terminal') ? MachineMenuDisplay.from_string('terminal') : 0)
-            | (this.settings.get_boolean('system-file-manager') ? MachineMenuDisplay.from_string('file-manager') : 0)
-            | (this.settings.get_boolean('system-vagrantfile') ? MachineMenuDisplay.from_string('vagrantfile') : 0)
-            | (this.settings.get_boolean('vagrant-up') ? MachineMenuDisplay.from_string('up') : 0)
-            | (this.settings.get_boolean('vagrant-up-provision') ? MachineMenuDisplay.from_string('up-provision') : 0)
-            | (this.settings.get_boolean('vagrant-up-ssh') ? MachineMenuDisplay.from_string('up-ssh') : 0)
-            | (this.settings.get_boolean('vagrant-up-rdp') ? MachineMenuDisplay.from_string('up-rdp') : 0)
-            | (this.settings.get_boolean('vagrant-provision') ? MachineMenuDisplay.from_string('provision') : 0)
-            | (this.settings.get_boolean('vagrant-ssh') ? MachineMenuDisplay.from_string('ssh') : 0)
-            | (this.settings.get_boolean('vagrant-rdp') ? MachineMenuDisplay.from_string('rdp') : 0)
-            | (this.settings.get_boolean('vagrant-resume') ? MachineMenuDisplay.from_string('resume') : 0)
-            | (this.settings.get_boolean('vagrant-suspend') ? MachineMenuDisplay.from_string('suspend') : 0)
-            | (this.settings.get_boolean('vagrant-halt') ? MachineMenuDisplay.from_string('halt') : 0)
-            | (this.settings.get_boolean('vagrant-destroy') ? MachineMenuDisplay.from_string('destroy') : 0);
-        },
-
-    /**
-     * Settings changed event handler
-     *
-     * @param  {Object} widget
-     * @param  {String} key
-     * @return {Void}
-     */
-    _handle_settings: function(widget, key) {
-        if (key === 'post-terminal-action') {
-            let action = this.settings.get_string('post-terminal-action');
-            action = Vagrant.PostTerminalAction.from_string(action);
-            this.monitor.postTerminalAction = action;
-        }
-        else if (key === 'machine-full-path')
-            this.machine.shorten = !widget.get_boolean(key);
-        else if (key.startsWith('system-'))
-            this.machine.display = this._get_settings_machine_menu_display();
-        else if (key.startsWith('vagrant-'))
-            this.machine.display = this._get_settings_machine_menu_display();
-    },
-
-    /**
-     * Monitor machine add event handler
-     *
-     * @param  {Object} widget
-     * @param  {Object} event
-     * @return {Void}
-     */
-    _handle_monitor_add: function(widget, event) {
-        let machine = this.monitor.machine[event.id];
-        let index = Object.keys(this.monitor.machine).indexOf(event.id);
-
-        this.machine.add(event.id, machine.vagrantfile_path, machine.state, index);
-    },
-
-    /**
-     * Monitor machine remove event handler
-     *
-     * @param  {Object} widget
-     * @param  {Object} event
-     * @return {Void}
-     */
-    _handle_monitor_remove: function(widget, event) {
-        this.machine.remove(event.id);
-    },
-
-    /**
-     * Monitor machine state change event handler
-     *
-     * @param  {Object} widget
-     * @param  {Object} event
-     * @return {Void}
-     */
-    _handle_monitor_state: function(widget, event) {
-        let machine = this.monitor.machine[event.id];
-        this.machine.state(event.id, machine.state);
-
-        if (this.settings.get_boolean('notifications'))
-            this.notification.show('Machine went %s'.format(machine.state), machine.vagrantfile_path);
-    },
-
-    /**
-     * Machines item activate event handler
-     *
-     * @param  {Object} widget
-     * @param  {Object} event
-     * @return {Void}
-     */
-    _handle_machines: function(widget, event) {
-        let id = event.id;
-        let method = event.method;
-
-        if (event.method === 'default')
-            method = 'terminal';
-
-        this.monitor[method](id);
-    },
-
-    /**
-     * Preferences activate event handler
-     *
-     * @param  {Object} widget
-     * @param  {Object} event
-     * @return {Void}
-     */
-    _handle_preferences: function(widget, event) {
-        Util.spawn(['gnome-shell-extension-prefs', Me.metadata.uuid]);
-    },
-
-    /* --- */
-
-});
-
-/**
- * Ui.MachineMenu constructor
- *
- * @param  {Object}
- * @return {Object}
- */
-const MachineMenu = new Lang.Class({
-
-    Name: 'Ui.MachineMenu',
-    Extends: PopupMenu.PopupMenuSection,
+    Name: 'Menu.Machine',
+    Extends: Section,
 
     /**
      * Constructor
@@ -266,10 +61,10 @@ const MachineMenu = new Lang.Class({
     _init: function() {
         this.parent();
 
-        this.actor.add_style_class_name('gnome-vagrant-indicator-machine');
+        this.actor.add_style_class_name('gnome-vagrant-indicator-menu-machine');
 
         this._shorten = false;
-        this._display = MachineMenuDisplay.ALL;
+        this._display = Display.ALL;
 
         this.clear();
     },
@@ -282,7 +77,7 @@ const MachineMenu = new Lang.Class({
     clear: function() {
         this.removeAll();
 
-        this.empty = new PopupMenu.PopupMenuItem(_("No Vagrant machines found"));
+        this.empty = new Item(_("No Vagrant machines found"));
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
     },
@@ -296,7 +91,7 @@ const MachineMenu = new Lang.Class({
     error: function(msg) {
         this.removeAll();
 
-        this.empty = new PopupMenu.PopupMenuItem(msg || 'ERROR');
+        this.empty = new Item(msg || 'ERROR');
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
     },
@@ -315,7 +110,7 @@ const MachineMenu = new Lang.Class({
             this.empty.destroy();
         this.empty = null;
 
-        let item = new MachineMenuInstance(id, path, state);
+        let item = new Path(id, path, state);
         item.shorten = this.shorten;
         item.display = this.display;
         item.connect('execute', Lang.bind(this, this._handle_menu_item));
@@ -390,10 +185,10 @@ const MachineMenu = new Lang.Class({
      * @return {Void}
      */
     set display(value) {
-        if (value < MachineMenuDisplay.min())
-            value = MachineMenuDisplay.min();
-        else if (value > MachineMenuDisplay.max())
-            value = MachineMenuDisplay.max();
+        if (value < Display.min())
+            value = Display.min();
+        else if (value > Display.max())
+            value = Display.max();
 
         this._display = value;
 
@@ -414,7 +209,7 @@ const MachineMenu = new Lang.Class({
                 return actor._delegate;
             })
             .filter(function(actor) {
-                return actor instanceof MachineMenuInstance && (id ? actor.id === id : true);
+                return actor instanceof Path && (id ? actor.id === id : true);
             });
     },
 
@@ -436,18 +231,16 @@ const MachineMenu = new Lang.Class({
 
 });
 
-Signals.addSignalMethods(MachineMenu.prototype);
-
 /**
- * Ui.MachineMenuInstance constructor
+ * Menu.Path constructor
  *
  * @param  {Object}
  * @return {Object}
  */
-const MachineMenuInstance = new Lang.Class({
+const Path = new Lang.Class({
 
-    Name: 'Ui.MachineMenuInstance',
-    Extends: PopupMenu.PopupSubMenuMenuItem,
+    Name: 'Menu.Path',
+    Extends: SubMenu,
 
     /**
      * Constructor
@@ -464,14 +257,14 @@ const MachineMenuInstance = new Lang.Class({
         this._path = path;
         this._state = 'unknown';
         this._shorten = true;
-        this._display = MachineMenuDisplay.NONE;
+        this._display = Display.NONE;
 
         this._ui();
         this._bind();
 
         this.state = state;
         this.shorten = false;
-        this.display = MachineMenuDisplay.ALL;
+        this.display = Display.ALL;
     },
 
     /**
@@ -480,8 +273,8 @@ const MachineMenuInstance = new Lang.Class({
      * @return {Void}
      */
     _ui: function() {
-        this.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-instance');
-        this.menu.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-submenu');
+        this.actor.add_style_class_name('gnome-vagrant-indicator-menu-path');
+        this.menu.actor.add_style_class_name('gnome-vagrant-indicator-menu-submenu');
         this.setOrnament(PopupMenu.Ornament.DOT);
 
         this._ui_vagrant();
@@ -497,7 +290,7 @@ const MachineMenuInstance = new Lang.Class({
     _ui_vagrant: function() {
         this.vagrant = {};
 
-        let item = new MachineMenuHeader(_("VAGRANT COMMANDS"));
+        let item = new Header(_("VAGRANT COMMANDS"));
         this.menu.addMenuItem(item);
         this.vagrant.header = item;
 
@@ -516,7 +309,7 @@ const MachineMenuInstance = new Lang.Class({
         ];
 
         for (let i = 0; i < menu.length; i += 2) {
-            let item = new MachineMenuCommand(menu[i + 1]);
+            let item = new Command(menu[i + 1]);
             item.method = menu[i];
             item.connect('execute', Lang.bind(this, this._handle_execute));
             this.menu.addMenuItem(item);
@@ -533,7 +326,7 @@ const MachineMenuInstance = new Lang.Class({
     _ui_system: function() {
         this.system = {};
 
-        let item = new MachineMenuHeader(_("SYSTEM COMMANDS"));
+        let item = new Header(_("SYSTEM COMMANDS"));
         this.menu.addMenuItem(item);
         this.system.header = item;
 
@@ -544,7 +337,7 @@ const MachineMenuInstance = new Lang.Class({
         ];
 
         for (let i = 0; i < menu.length; i += 2) {
-            let item = new MachineMenuCommand(menu[i + 1]);
+            let item = new Command(menu[i + 1]);
             item.method = menu[i];
             item.connect('execute', Lang.bind(this, this._handle_execute));
             this.menu.addMenuItem(item);
@@ -602,10 +395,10 @@ const MachineMenuInstance = new Lang.Class({
      * @return {Void}
      */
     set display(value) {
-        if (value < MachineMenuDisplay.min())
-            value = MachineMenuDisplay.min();
-        else if (value > MachineMenuDisplay.max())
-            value = MachineMenuDisplay.max();
+        if (value < Display.min())
+            value = Display.min();
+        else if (value > Display.max())
+            value = Display.max();
 
         this._display = value;
 
@@ -698,7 +491,7 @@ const MachineMenuInstance = new Lang.Class({
                 continue;
 
             let menu = this.vagrant[method];
-            let display = MachineMenuDisplay.from_string(method);
+            let display = Display.from_string(method);
             let visible = (value | display) === value;
 
             menu.actor.visible = visible;
@@ -709,7 +502,7 @@ const MachineMenuInstance = new Lang.Class({
                 continue;
 
             let menu = this.system[method];
-            let display = MachineMenuDisplay.from_string(method);
+            let display = Display.from_string(method);
             let visible = (value | display) === value;
 
             menu.actor.visible = visible;
@@ -835,7 +628,7 @@ const MachineMenuInstance = new Lang.Class({
                 return actor._delegate;
             })
             .filter(function(actor) {
-                return actor instanceof MachineMenuInstance && (method ? actor.method === method : true);
+                return actor instanceof Path && (method ? actor.method === method : true);
             });
     },
 
@@ -872,18 +665,16 @@ const MachineMenuInstance = new Lang.Class({
 
 });
 
-Signals.addSignalMethods(MachineMenuInstance.prototype);
-
 /**
- * Ui.MachineMenuCommand constructor
+ * Menu.Command constructor
  *
  * @param  {Object}
  * @return {Object}
  */
-const MachineMenuCommand = new Lang.Class({
+const Command = new Lang.Class({
 
-    Name: 'Ui.MachineMenuInstance',
-    Extends: PopupMenu.PopupMenuItem,
+    Name: 'Menu.Command',
+    Extends: Item,
 
     /**
      * Constructor
@@ -915,7 +706,7 @@ const MachineMenuCommand = new Lang.Class({
      * @return {Void}
      */
     _ui: function() {
-        this.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-command');
+        this.actor.add_style_class_name('gnome-vagrant-indicator-menu-command');
         this.actor.add_style_class_name(this.method);
     },
 
@@ -962,18 +753,16 @@ const MachineMenuCommand = new Lang.Class({
 
 });
 
-Signals.addSignalMethods(MachineMenuInstance.prototype);
-
 /**
- * Ui.MachineMenuHeader constructor
+ * Menu.Header constructor
  *
  * @param  {Object}
  * @return {Object}
  */
-const MachineMenuHeader = new Lang.Class({
+const Header = new Lang.Class({
 
-    Name: 'Ui.MachineMenuHeader',
-    Extends: PopupMenu.PopupMenuItem,
+    Name: 'Menu.Header',
+    Extends: Item,
 
     /**
      * Constructor
@@ -984,119 +773,10 @@ const MachineMenuHeader = new Lang.Class({
     _init: function(title) {
         this.parent(title);
 
-        this.actor.add_style_class_name('gnome-vagrant-indicator-machine-menu-header');
+        this.actor.add_style_class_name('gnome-vagrant-indicator-menu-header');
         this.setSensitive(false);
     },
 
-});
-
-/**
- * MachineMenuDisplay enum
- *
- * @type {Object}
- */
-const MachineMenuDisplay = new Enum.Enum([
-    'NONE',
-    'TERMINAL',
-    'FILE_MANAGER',
-    'VAGRANTFILE',
-    'UP',
-    'UP_PROVISION',
-    'UP_SSH',
-    'UP_RDP',
-    'PROVISION',
-    'SSH',
-    'RDP',
-    'RESUME',
-    'SUSPEND',
-    'HALT',
-    'DESTROY',
-]);
-
-/**
- * Ui.Notification constructor
- *
- * @param  {Object}
- * @return {Object}
- */
-const Notification = new Lang.Class({
-
-    Name: 'Ui.Notification',
-
-    /**
-     * Constructor
-     *
-     * @param  {String} title
-     * @param  {String} icon
-     * @return {Void}
-     */
-    _init: function(title, icon) {
-        this._title = title || Me.metadata.name;
-        this._icon = icon || Icons.DEFAULT;
-
-        this._source = null;
-    },
-
-    /**
-     * Prepare source
-     *
-     * @return {Void}
-     */
-    _prepare: function() {
-        if (this._source !== null)
-            return;
-
-        this._source = new MessageTray.Source(this._title, this._icon);
-        this._source.connect('destroy', Lang.bind(this, this._handle_destroy));
-
-        Main.messageTray.add(this._source);
-    },
-
-    /**
-     * Get existing notification from
-     * source or create new one
-     *
-     * @param  {String} title
-     * @param  {String} message
-     * @return {Object}
-     */
-    _notification: function(title, message) {
-        let result = null;
-        if (this._source.notifications.length) {
-            result = this._source.notifications[0];
-            result.update(title, message, {
-                clear: true,
-            });
-        }
-        else {
-            result = new MessageTray.Notification(this._source, title, message);
-            result.setTransient(true);
-            result.setResident(false);
-        }
-
-        return result;
-    },
-
-    /**
-     * Source destroy event handler:
-     * clear source
-     *
-     * @return {Void}
-     */
-    _handle_destroy: function() {
-        this._source = null;
-    },
-
-    /**
-     * Show notification
-     *
-     * @param  {String} title
-     * @param  {String} message
-     * @return {Void}
-     */
-    show: function(title, message) {
-        this._prepare();
-        this._source.notify(this._notification(title, message));
-    },
+    /* --- */
 
 });

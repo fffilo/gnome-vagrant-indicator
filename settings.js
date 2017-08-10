@@ -11,6 +11,8 @@ const Convenience = Me.imports.convenience;
 /**
  * Get settings for schema
  *
+ * proxy for Convenience.getSettings
+ *
  * @param  {String} schema (optional)
  * @return {Object}
  */

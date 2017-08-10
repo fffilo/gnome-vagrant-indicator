@@ -12,6 +12,8 @@ const Convenience = Me.imports.convenience;
 /**
  * Init translation for domain
  *
+ * proxy for Convenience.initTranslations
+ *
  * @param  {String} domain (optional)
  * @return {Void}
  */

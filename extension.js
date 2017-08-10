@@ -8,7 +8,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Translation = Me.imports.translation;
 const Icons = Me.imports.icons;
-const Ui = Me.imports.ui;
+const Indicator = Me.imports.indicator;
 
 /**
  * Global indicator object
@@ -37,7 +37,7 @@ function enable() {
     if (indicator)
         return;
 
-    indicator = new Ui.Indicator();
+    indicator = new Indicator.Base();
 }
 
 /**

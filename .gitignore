@@ -1,2 +1,4 @@
 .2do
-gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com.zip
+prod
+*.sublime-project
+*.sublime-workspace

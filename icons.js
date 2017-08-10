@@ -4,6 +4,7 @@
 'use strict';
 
 // import modules
+const IconTheme = imports.gi.Gtk.IconTheme;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
@@ -16,6 +17,5 @@ const DEFAULT = 'gnome-vagrant-indicator-symbolic';
  * @return {Void}
  */
 const init = function() {
-    let theme = imports.gi.Gtk.IconTheme.get_default();
-    theme.append_search_path(Me.path + '/assets');
+    IconTheme.get_default().append_search_path(Me.path + '/assets');
 }
