@@ -10,6 +10,11 @@ install: build
 	rm -rf $(BUILD_DIR)
 	echo Installed in $(INSTALL_PATH)/$(INSTALL_NAME)
 
+archive: build
+	cd ${BUILD_DIR} && zip -r ../archive.zip *
+	rm -rf $(BUILD_DIR)
+	echo Archive created
+
 build: compile-schema
 	rm -rf $(BUILD_DIR)
 	mkdir $(BUILD_DIR)
