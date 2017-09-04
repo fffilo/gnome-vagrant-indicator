@@ -75,9 +75,11 @@ const Base = new Lang.Class({
 
         this.monitor = new Vagrant.Monitor();
         this.monitor.postTerminalAction = action;
+        this.monitor.emulator = this.settings.get_string('emulator');
         this.monitor.connect('add', Lang.bind(this, this._handle_monitor_add));
         this.monitor.connect('remove', Lang.bind(this, this._handle_monitor_remove));
         this.monitor.connect('state', Lang.bind(this, this._handle_monitor_state));
+        this.monitor.connect('error', Lang.bind(this, this._handle_monitor_error));
         this.monitor.listen();
     },
 
@@ -164,6 +166,8 @@ const Base = new Lang.Class({
             action = Vagrant.PostTerminalAction.from_string(action);
             this.monitor.postTerminalAction = action;
         }
+        else if (key === 'emulator')
+            this.monitor.emulator = this.settings.get_string('emulator');
         else if (key === 'machine-full-path')
             this.machine.shorten = !widget.get_boolean(key);
         else if (key.startsWith('system-'))
@@ -210,6 +214,18 @@ const Base = new Lang.Class({
 
         if (this.settings.get_boolean('notifications'))
             this.notification.show('Machine went %s'.format(machine.state), machine.vagrantfile_path);
+    },
+
+    /**
+     * Monitor error event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handle_monitor_error: function(widget, event) {
+        if (this.settings.get_boolean('notifications'))
+            this.notification.show(event.title, event.message);
     },
 
     /**

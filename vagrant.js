@@ -17,6 +17,7 @@ const _ = Translation.translate;
 // global properties
 const HOME = GLib.getenv('VAGRANT_HOME') || GLib.getenv('HOME') + '/.vagrant.d';
 const INDEX = '%s/data/machine-index/index'.format(HOME);
+const EMULATOR = '/usr/bin/x-terminal-emulator';
 
 /**
  * Post terminal action enum
@@ -46,6 +47,7 @@ const Monitor = new Lang.Class({
      */
     _init: function() {
         this._file = Gio.File.new_for_path(INDEX);
+        this._emulator = EMULATOR;
         this._index = this._parse();
         this._monitor = null;
         this._command = null;
@@ -91,11 +93,19 @@ const Monitor = new Lang.Class({
         exe += '%s; '.format(cmd);
         exe += 'exec /bin/bash';
 
-        let subprocess = new Gio.Subprocess({
-            argv: [ 'x-terminal-emulator', '-e', '/bin/bash -c "%s"'.format(exe) ],
-            flags: Gio.SubprocessFlags.STDOUT_PIPE,
-        });
-        subprocess.init(null);
+        try {
+            let subprocess = new Gio.Subprocess({
+                argv: [ this._emulator, '-e', '/bin/bash -c "%s"'.format(exe) ],
+                flags: Gio.SubprocessFlags.STDOUT_PIPE,
+            });
+            subprocess.init(null);
+        }
+        catch(e) {
+            this.emit('error', {
+                title: _("Terminal emulator"),
+                message: e.toString(),
+            });
+        }
     },
 
     /**
@@ -193,6 +203,25 @@ const Monitor = new Lang.Class({
                 id: emit[i + 1],
             });
         }
+    },
+
+    /**
+     * Get terminal emulator path
+     *
+     * @return {String}
+     */
+    get emulator() {
+        return this._emulator;
+    },
+
+    /**
+     * Set terminal emulator path
+     *
+     * @param  {String} value
+     * @return {Void}
+     */
+    set emulator(value) {
+        this._emulator = value || EMULATOR;
     },
 
     /**

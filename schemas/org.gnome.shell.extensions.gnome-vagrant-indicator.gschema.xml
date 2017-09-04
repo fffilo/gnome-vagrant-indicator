@@ -12,15 +12,20 @@
             <summary>Show notifications</summary>
             <description>Display notification on vagrant machine state change</description>
         </key>
-        <key name="post-terminal-action" enum="org.gnome.shell.extensions.gnome-vagrant-indicator.post-terminal-action">
-            <default>'NONE'</default>
-            <summary>Post terminal action</summary>
-            <description>Action after `vagrant` command execution</description>
-        </key>
         <key name="machine-full-path" type="b">
             <default>false</default>
             <summary>Show machine full path</summary>
             <description>Show machine full path as instance name</description>
+        </key>
+        <key name="emulator" type="s">
+            <default>'/usr/bin/x-terminal-emulator'</default>
+            <summary>Terminal emulator</summary>
+            <description>Terminal emulator path</description>
+        </key>
+        <key name="post-terminal-action" enum="org.gnome.shell.extensions.gnome-vagrant-indicator.post-terminal-action">
+            <default>'NONE'</default>
+            <summary>Post terminal action</summary>
+            <description>Action after `vagrant` command execution</description>
         </key>
         <key name="system-terminal" type="b">
             <default>true</default>

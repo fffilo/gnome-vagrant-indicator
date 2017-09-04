@@ -9,6 +9,7 @@ const Gdk = imports.gi.Gdk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
+const Vagrant = Me.imports.vagrant;
 const Icons = Me.imports.icons;
 const Settings = Me.imports.settings;
 const Translation = Me.imports.translation;
@@ -55,6 +56,7 @@ const Widget = new GObject.Class({
 
         this._def();
         this._ui();
+        this._bind();
     },
 
     /**
@@ -120,6 +122,11 @@ const Widget = new GObject.Class({
         this.ui.settings.machinefullpath.name = 'gnome-vagrant-prefs-page-settings-machine-full-path';
         this.ui.settings.machinefullpath.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.settings.page.actor.add(this.ui.settings.machinefullpath);
+
+        this.ui.settings.emulator = new InputEntry('emulator', this.settings.get_string('emulator'), _("Terminal emulator"), _("Terminal emulator path"));
+        this.ui.settings.emulator.name = 'gnome-vagrant-prefs-page-settings-emulator';
+        this.ui.settings.emulator.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.settings.page.actor.add(this.ui.settings.emulator);
 
         this.ui.settings.postterminalaction = new InputComboBox('post-terminal-action', this.settings.get_string('post-terminal-action'), _("Post terminal action"), _("Vagrant terminal action after `vagrant` command execution"), { 'NONE': _("Leave opened"), /*'PAUSE': _("Wait for keypress"),*/ 'EXIT': _("Close"), 'ALL': _("Wait for keypress and close") });
         this.ui.settings.postterminalaction.name = 'gnome-vagrant-prefs-page-settings-post-terminal-action';
@@ -189,10 +196,10 @@ const Widget = new GObject.Class({
         this.ui.vagrant.halt.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.halt);
 
-        this.ui.vagrant.destroy = new InputSwitch('vagrant-destroy', this.settings.get_boolean('vagrant-destroy'), _("Destroy"), _("Display menu for `vagrant destroy` command"));
-        this.ui.vagrant.destroy.name = 'gnome-vagrant-prefs-page-vagrant-destroy';
-        this.ui.vagrant.destroy.connect('changed', Lang.bind(this, this._handle_widget));
-        this.ui.vagrant.page.actor.add(this.ui.vagrant.destroy);
+        this.ui.vagrant.destroy_ = new InputSwitch('vagrant-destroy', this.settings.get_boolean('vagrant-destroy'), _("Destroy"), _("Display menu for `vagrant destroy` command"));
+        this.ui.vagrant.destroy_.name = 'gnome-vagrant-prefs-page-vagrant-destroy';
+        this.ui.vagrant.destroy_.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.page.actor.add(this.ui.vagrant.destroy_);
 
         return this.ui.vagrant.page;
     },
@@ -284,10 +291,20 @@ const Widget = new GObject.Class({
      * @return {Void}
      */
     _handle_destroy: function(widget, event) {
+        if (!this.settings.get_string('emulator'))
+            this.settings.set_string('emulator', Vagrant.EMULATOR);
+
         if (this.settings)
             this.settings.run_dispose();
     },
 
+    /**
+     * Settings widget change event handler
+     *
+     * @param  {String} widget
+     * @param  {String} event
+     * @return {Void}
+     */
     _handle_widget: function(widget, event) {
         let old_value = this.settings['get_' + event.type](event.key);
 
@@ -299,10 +316,10 @@ const Widget = new GObject.Class({
      * Settings changed event handler
      *
      * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {String} key
      * @return {Void}
      */
-    _handle_settings: function(widget, event) {
+    _handle_settings: function(widget, key) {
         // pass
     },
 
@@ -451,6 +468,69 @@ const Input = new GObject.Class({
 
 Signals.addSignalMethods(Input.prototype);
 
+/**
+ * InputEntry constructor
+ * extends Input
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
+const InputEntry = new GObject.Class({
+
+    Name: 'Prefs.InputEntry',
+    GTypeName: 'GnomeVagrantIndicatorPrefsInputEntry',
+    Extends: Input,
+
+    /**
+     * Constructor
+     *
+     * @return {Void}
+     */
+    _init: function(key, value, text, tooltip) {
+        this.parent(key, text, tooltip);
+
+        this._widget = new Gtk.Entry({ text: value });
+        this._widget.connect('notify::text', Lang.bind(this, this._handle_change));
+        this.actor.add(this._widget);
+    },
+
+    /**
+     * Input change event handler
+     *
+     * @param  {Object} actor
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handle_change: function(actor, event) {
+        this.emit('changed', {
+            key: this._key,
+            value: this.value,
+            type: 'string',
+        });
+    },
+
+    /**
+     * Value getter
+     *
+     * @return {String}
+     */
+    get value() {
+        return this._widget.text;
+    },
+
+    /**
+     * Value setter
+     *
+     * @param  {String} value
+     * @return {Void}
+     */
+    set value(value) {
+        this._widget.text = value;
+    },
+
+    /* --- */
+
+});
 
 /**
  * InputSwitch constructor
