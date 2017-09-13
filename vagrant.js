@@ -59,6 +59,15 @@ const Monitor = new Lang.Class({
     },
 
     /**
+     * Destructor
+     *
+     * @return {Void}
+     */
+    destroy: function() {
+        this.unlisten();
+    },
+
+    /**
      * Find exe path and vagrant version
      *
      * @return {Void}
@@ -306,9 +315,6 @@ const Monitor = new Lang.Class({
     /**
      * Monitor vagrant machine index
      * file change
-     *
-     * warning: make sure you use
-     * this.stop() on destructor
      *
      * @return {Void}
      */
