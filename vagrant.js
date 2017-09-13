@@ -109,12 +109,16 @@ const Monitor = new Lang.Class({
     _validate: function(machine_id, title) {
         let error, machine = this.machine[machine_id];
 
-        // vagrant installed?
+        // recheck vagrant installation
         if (!this.command)
             this._which();
 
         // set error
         if (!this.command)
+            error = _("Vagrant not installed on your system");
+        else if (!GLib.file_test(this.command, GLib.FileTest.EXISTS))
+            error = _("Vagrant not installed on your system");
+        else if (!GLib.file_test(this.command, GLib.FileTest.IS_EXECUTABLE))
             error = _("Vagrant not installed on your system");
         else if (!machine)
             error = _("Invalid machine id");
@@ -286,7 +290,7 @@ const Monitor = new Lang.Class({
     },
 
     /**
-     * Vagrand command
+     * Vagrant command
      *
      * @return {String}
      */
