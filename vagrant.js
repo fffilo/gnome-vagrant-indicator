@@ -55,6 +55,18 @@ const Monitor = new Lang.Class({
         this._version = null;
         this._post_terminal_action = PostTerminalAction.NONE;
 
+        this._which();
+    },
+
+    /**
+     * Find exe path and vagrant version
+     *
+     * @return {Void}
+     */
+    _which: function() {
+        this._command = null;
+        this._version = null;
+
         try {
             let [ok, output, error, status] = GLib.spawn_sync(null, ['which', EXE], null, GLib.SpawnFlags.SEARCH_PATH, null);
             if (!status && output)
@@ -88,6 +100,11 @@ const Monitor = new Lang.Class({
     _validate: function(machine_id, title) {
         let error, machine = this.machine[machine_id];
 
+        // vagrant installed?
+        if (!this.command)
+            this._which();
+
+        // set error
         if (!this.command)
             error = _("Vagrant not installed on your system");
         else if (!machine)
@@ -105,6 +122,7 @@ const Monitor = new Lang.Class({
         else if (!GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.IS_REGULAR))
             error = _("Missing Vagrantfile");
 
+        // emit error
         if (error && title) {
             this.emit('error', {
                 title: title,
