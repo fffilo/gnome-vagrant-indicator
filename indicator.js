@@ -116,11 +116,6 @@ const Base = new Lang.Class({
      * @return {Void}
      */
     refresh: function() {
-        if (!this.monitor.command) {
-            this.machine.error(_("Vagrant not installed on your system"));
-            return;
-        }
-
         this.machine.clear();
 
         for (let id in this.monitor.machine) {

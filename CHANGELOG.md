@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## Version 4 - 2017-09-13
+### Changed
+- Error handling improvements
+
 ## Version 3 - 2017-09-04
 ### Changed
 - Preferenes 'Terminal emulator' option

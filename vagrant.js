@@ -15,6 +15,7 @@ const Translation = Me.imports.translation;
 const _ = Translation.translate;
 
 // global properties
+const EXE = 'vagrant';
 const HOME = GLib.getenv('VAGRANT_HOME') || GLib.getenv('HOME') + '/.vagrant.d';
 const INDEX = '%s/data/machine-index/index'.format(HOME);
 const EMULATOR = '/usr/bin/x-terminal-emulator';
@@ -55,7 +56,7 @@ const Monitor = new Lang.Class({
         this._post_terminal_action = PostTerminalAction.NONE;
 
         try {
-            let [ok, output, error, status] = GLib.spawn_sync(null, ['which', 'vagrant'], null, GLib.SpawnFlags.SEARCH_PATH, null);
+            let [ok, output, error, status] = GLib.spawn_sync(null, ['which', EXE], null, GLib.SpawnFlags.SEARCH_PATH, null);
             if (!status && output)
                 this._command = output.toString().trim();
         }
@@ -64,13 +65,54 @@ const Monitor = new Lang.Class({
         }
 
         try {
-            let [ok, output, error, status] = GLib.spawn_sync(null, ['vagrant', '--version'], null, GLib.SpawnFlags.SEARCH_PATH, null);
+            let [ok, output, error, status] = GLib.spawn_sync(null, [EXE, '--version'], null, GLib.SpawnFlags.SEARCH_PATH, null);
             if (!status && output)
                 this._version = output.toString().trim();
         }
         catch(e) {
             // pass
         }
+    },
+
+    /**
+     * Validate vagrant command and vagrant machine id:
+     * on check fail error signal will be emited with
+     * error as message and provided title as title
+     * (if no title is provided signal won't be
+     * emited)
+     *
+     * @param  {String}  machine_id
+     * @param  {String}  title      (optional)
+     * @return {Boolean}
+     */
+    _validate: function(machine_id, title) {
+        let error, machine = this.machine[machine_id];
+
+        if (!this.command)
+            error = _("Vagrant not installed on your system");
+        else if (!machine)
+            error = _("Invalid machine id");
+        else if (typeof machine !== 'object')
+            error = _("Corrupted data");
+        else if (!machine.vagrantfile_path)
+            error = _("Path does not exist");
+        else if (!GLib.file_test(machine.vagrantfile_path, GLib.FileTest.EXISTS))
+            error = _("Path does not exist");
+        else if (!GLib.file_test(machine.vagrantfile_path, GLib.FileTest.IS_DIR))
+            error = _("Path does not exist");
+        else if (!GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.EXISTS))
+            error = _("Missing Vagrantfile");
+        else if (!GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.IS_REGULAR))
+            error = _("Missing Vagrantfile");
+
+        if (error && title) {
+            this.emit('error', {
+                title: title,
+                message: error,
+            });
+        }
+
+        return !error;
     },
 
     /**
@@ -81,9 +123,6 @@ const Monitor = new Lang.Class({
      * @return {Void}
      */
     _exec: function(cwd, cmd) {
-        if (!this.command)
-            return;
-
         cwd = cwd || '~';
         cmd = cmd || ':';
         cmd = cmd.replace(/;+$/, '');
@@ -116,11 +155,11 @@ const Monitor = new Lang.Class({
      * @return {Void}
      */
     _vagrant: function(cmd, id) {
-        let machine = this.machine[id];
-        if (!machine) return;
+        if (!this._validate(id, _("Vagrant Command")))
+            return;
 
         let msg = _("Press any key to close terminal...");
-        let cwd = machine.vagrantfile_path;
+        let cwd = this.machine[id].vagrantfile_path;
         let exe = '';
 
         if (cmd instanceof Array) {
@@ -143,66 +182,37 @@ const Monitor = new Lang.Class({
 
     /**
      * Parse vagrant machine index file
-     * and store data to this.machine
      *
-     * @return {String}
+     * @return {Object}
      */
     _parse: function() {
-        let path = this._file.get_path();
-        let [ok, content] = GLib.file_get_contents(path);
+        try {
+            let path = this._file.get_path();
+            let [ok, content] = GLib.file_get_contents(path);
 
-        return JSON.parse(content);
+            return JSON.parse(content);
+        }
+        catch(e) {
+            // pass
+        }
+
+        // empty result on no file found or invalid file content
+        return {
+            version: 0,
+            machines: {},
+        };
     },
 
     /**
      * Vagrant machine index file change
      * event handler
      *
-     * to do: optimize
-     * set 250ms timeout and cancel previous
-     * interval, so handler won't be executed
-     * too often???
-     *
      * @param  {Object} monitor
      * @param  {Object} file
      * @return {Void}
      */
     _handle_monitor_changed: function(monitor, file) {
-        let _old = this._index;
-        let _new = this._parse();
-        let emit = [];
-
-        // check actual changes
-        if (JSON.stringify(_old) === JSON.stringify(_new))
-            return;
-
-        // check if machine is missing
-        for (let id in _old.machines) {
-            if (!(id in _new.machines))
-                emit = emit.concat('remove', id);
-        }
-
-        // check if machine is added
-        for (let id in _new.machines) {
-            if (!(id in _old.machines))
-                emit = emit.concat('add', id);
-        }
-
-        // check if state changed
-        for (let id in _new.machines) {
-            if (id in _old.machines && _new.machines[id].state !== _old.machines[id].state)
-                emit = emit.concat('state', id);
-        }
-
-        // save state
-        this._index = _new;
-
-        // emit signal
-        for (let i = 0; i < emit.length; i += 2) {
-            this.emit(emit[i], {
-                id: emit[i + 1],
-            });
-        }
+        this.refresh();
     },
 
     /**
@@ -306,11 +316,62 @@ const Monitor = new Lang.Class({
         this._monitor = null;
     },
 
-    vagrantfile: function(machine_id) {
-        let machine = this.machine[machine_id];
-        if (!machine) return;
+    /**
+     * Read vagrant machine index file,
+     * parse data and emit signals
+     *
+     *
+     * @return {Void}
+     */
+    refresh: function() {
+        let _old = this._index;
+        let _new = this._parse();
+        let emit = [];
 
-        let uri = GLib.filename_to_uri(machine.vagrantfile_path + '/Vagrantfile', null);
+        // check actual changes
+        if (JSON.stringify(_old) === JSON.stringify(_new))
+            return;
+
+        // check if machine is missing
+        for (let id in _old.machines) {
+            if (!(id in _new.machines))
+                emit = emit.concat('remove', id);
+        }
+
+        // check if machine is added
+        for (let id in _new.machines) {
+            if (!(id in _old.machines))
+                emit = emit.concat('add', id);
+        }
+
+        // check if state changed
+        for (let id in _new.machines) {
+            if (id in _old.machines && _new.machines[id].state !== _old.machines[id].state)
+                emit = emit.concat('state', id);
+        }
+
+        // save state
+        this._index = _new;
+
+        // emit signal
+        for (let i = 0; i < emit.length; i += 2) {
+            this.emit(emit[i], {
+                id: emit[i + 1],
+            });
+        }
+    },
+
+    /**
+     * Open Vagrantfile
+     *
+     * @param  {String} machine_id
+     * @return {Void}
+     */
+    vagrantfile: function(machine_id) {
+        if (!this._validate(machine_id, _("Vagrantfile")))
+            return;
+
+        let uri = GLib.filename_to_uri(this.machine[machine_id].vagrantfile_path + '/Vagrantfile', null);
         Gio.AppInfo.launch_default_for_uri(uri, null);
     },
 
@@ -321,10 +382,10 @@ const Monitor = new Lang.Class({
      * @return {Void}
      */
     terminal: function(machine_id) {
-        let machine = this.machine[machine_id];
-        if (!machine) return;
+        if (!this._validate(machine_id, _("Terminal")))
+            return;
 
-        this._exec(machine.vagrantfile_path);
+        this._exec(this.machine[machine_id].vagrantfile_path);
     },
 
     /**
@@ -334,10 +395,10 @@ const Monitor = new Lang.Class({
      * @return {Void}
      */
     file_manager: function(machine_id) {
-        let machine = this.machine[machine_id];
-        if (!machine) return;
+        if (!this._validate(machine_id, _("File Manager")))
+            return;
 
-        let uri = GLib.filename_to_uri(machine.vagrantfile_path, null);
+        let uri = GLib.filename_to_uri(this.machine[machine_id].vagrantfile_path, null);
         Gio.AppInfo.launch_default_for_uri(uri, null);
     },
 
