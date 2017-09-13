@@ -63,7 +63,7 @@ const Monitor = new Lang.Class({
      *
      * @return {Void}
      */
-    destroy: function() {
+    run_dispose: function() {
         this.unlisten();
     },
 

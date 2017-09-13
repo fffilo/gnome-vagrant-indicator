@@ -52,7 +52,7 @@ const Base = new Lang.Class({
      */
     destroy: function() {
         if (this.monitor)
-            this.monitor.destroy();
+            this.monitor.run_dispose();
         if (this.settings)
             this.settings.run_dispose();
 
