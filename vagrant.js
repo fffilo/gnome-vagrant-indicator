@@ -32,6 +32,38 @@ const PostTerminalAction = new Enum.Enum([
 ]);
 
 /**
+ * Vagrant.Exception constructor
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
+const Exception = new Lang.Class({
+
+    Name: 'Vagrant.Exception',
+
+    _init: function(title, message) {
+        this._title = title;
+        this._message = message;
+    },
+
+    get title() {
+        return this._title;
+    },
+
+    get message() {
+        return this._message;
+    },
+
+    toString: function() {
+        return ''
+            + (this.title || '')
+            + (this.title && this.message ? ' - ' : '')
+            + (this.message || '');
+    },
+
+});
+
+/**
  * Vagrant.Monitor constructor
  *
  * @param  {Object}
