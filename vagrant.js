@@ -82,7 +82,7 @@ const Monitor = new Lang.Class({
                 this._command = output.toString().trim();
         }
         catch(e) {
-            // pass
+            return;
         }
 
         try {
@@ -91,7 +91,7 @@ const Monitor = new Lang.Class({
                 this._version = output.toString().trim();
         }
         catch(e) {
-            // pass
+            return;
         }
     },
 
@@ -114,25 +114,15 @@ const Monitor = new Lang.Class({
             this._which();
 
         // set error
-        if (!this.command)
-            error = _("Vagrant not installed on your system");
-        else if (!GLib.file_test(this.command, GLib.FileTest.EXISTS))
-            error = _("Vagrant not installed on your system");
-        else if (!GLib.file_test(this.command, GLib.FileTest.IS_EXECUTABLE))
+        if (!this.command || !GLib.file_test(this.command, GLib.FileTest.EXISTS) || !GLib.file_test(this.command, GLib.FileTest.IS_EXECUTABLE))
             error = _("Vagrant not installed on your system");
         else if (!machine)
             error = _("Invalid machine id");
         else if (typeof machine !== 'object')
             error = _("Corrupted data");
-        else if (!machine.vagrantfile_path)
+        else if (!machine.vagrantfile_path || !GLib.file_test(machine.vagrantfile_path, GLib.FileTest.EXISTS) || !GLib.file_test(machine.vagrantfile_path, GLib.FileTest.IS_DIR))
             error = _("Path does not exist");
-        else if (!GLib.file_test(machine.vagrantfile_path, GLib.FileTest.EXISTS))
-            error = _("Path does not exist");
-        else if (!GLib.file_test(machine.vagrantfile_path, GLib.FileTest.IS_DIR))
-            error = _("Path does not exist");
-        else if (!GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.EXISTS))
-            error = _("Missing Vagrantfile");
-        else if (!GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.IS_REGULAR))
+        else if (!GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.EXISTS) || !GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.IS_REGULAR))
             error = _("Missing Vagrantfile");
 
         // emit error
