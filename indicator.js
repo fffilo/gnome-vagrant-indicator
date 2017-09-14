@@ -71,7 +71,6 @@ const Base = new Lang.Class({
         this.settings.connect('changed', Lang.bind(this, this._handle_settings));
 
         this.vagrant = new Vagrant.Emulator();
-        this.vagrant.terminal = this.settings.get_string('emulator');
         this.vagrant.connect('error', Lang.bind(this, this._handle_vagrant_error));
         this.vagrant.monitor.connect('add', Lang.bind(this, this._handle_vagrant_add));
         this.vagrant.monitor.connect('remove', Lang.bind(this, this._handle_vagrant_remove));
@@ -153,9 +152,7 @@ const Base = new Lang.Class({
      * @return {Void}
      */
     _handle_settings: function(widget, key) {
-        if (key === 'emulator')
-            this.vagrant.terminal = this.settings.get_string('emulator');
-        else if (key === 'machine-full-path')
+        if (key === 'machine-full-path')
             this.machine.shorten = !widget.get_boolean(key);
         else if (key.startsWith('system-'))
             this.machine.display = this._get_settings_machine_menu_display();

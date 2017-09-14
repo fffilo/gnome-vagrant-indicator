@@ -37,12 +37,11 @@ const Gio = imports.gi.Gio;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Enum = Me.imports.enum;
+const Terminal = Me.imports.terminal;
 const Translation = Me.imports.translation;
 const _ = Translation.translate;
 
 // global properties
-const BASH_PATH = '/bin/bash';
-const TERMINAL_PATH = '/usr/bin/x-terminal-emulator';
 const VAGRANT_EXE = 'vagrant';
 const VAGRANT_HOME = GLib.getenv('VAGRANT_HOME') || GLib.getenv('HOME') + '/.vagrant.d';
 const VAGRANT_INDEX = '%s/data/machine-index/index'.format(VAGRANT_HOME);
@@ -385,7 +384,7 @@ const Emulator = new Lang.Class({
         this._monitor = new Monitor();
         this._monitor.connect('change', Lang.bind(this, this._handle_monitor_change));
 
-        this._terminal = TERMINAL_PATH;
+        this._terminal = new Terminal.Emulator();
     },
 
     /**
@@ -435,38 +434,6 @@ const Emulator = new Lang.Class({
     },
 
     /**
-     * Open terminal and execute command
-     *
-     * @param  {String} cwd
-     * @param  {String} cmd
-     * @return {Void}
-     */
-    _popup: function(cwd, cmd) {
-        cwd = cwd || '~';
-        cmd = cmd || ':';
-        cmd = cmd.replace(/;+$/, '');
-
-        let exe = '';
-        exe += 'cd %s; '.format(cwd);
-        exe += '%s; '.format(cmd);
-        exe += 'exec %s'.format(BASH_PATH);
-
-        try {
-            let subprocess = new Gio.Subprocess({
-                argv: [ this.terminal, '-e', '%s -c "%s"'.format(BASH_PATH, exe) ],
-                flags: Gio.SubprocessFlags.STDOUT_PIPE,
-            });
-            subprocess.init(null);
-        }
-        catch(e) {
-            this.emit('error', {
-                title: _("Vagrant Terminal"),
-                message: e.toString(),
-            });
-        }
-    },
-
-    /**
      * Open terminal and execute vagrant command
      *
      * @param  {String} id     machine id
@@ -499,7 +466,7 @@ const Emulator = new Lang.Class({
                 exe += 'exit;';
         }
 
-        this._popup(cwd, exe);
+        this.terminal.popup(cwd, exe);
     },
 
     /**
@@ -534,22 +501,12 @@ const Emulator = new Lang.Class({
 
     /**
      * Property terminal getter:
-     * terminal executable file path
+     * terminal emulator
      *
-     * @return {String}
+     * @return {Object}
      */
     get terminal() {
         return this._terminal;
-    },
-
-    /**
-     * Property terminal setter
-     *
-     * @param  {String} value
-     * @return {Void}
-     */
-    set terminal(value) {
-        this._terminal = value;
     },
 
     /**
@@ -617,16 +574,24 @@ const Emulator = new Lang.Class({
         if (!this._validate(id, _("System Command")))
             return;
 
-        if ((cmd | CommandSystem.TERMINAL) === cmd) {
-            this._popup(this.index.machines[id].vagrantfile_path);
+        try {
+            if ((cmd | CommandSystem.TERMINAL) === cmd) {
+                this.terminal.popup(this.index.machines[id].vagrantfile_path);
+            }
+            if ((cmd | CommandSystem.VAGRANTFILE) === cmd) {
+                let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path + '/Vagrantfile', null);
+                Gio.AppInfo.launch_default_for_uri(uri, null);
+            }
+            if ((cmd | CommandSystem.FILE_MANAGER) === cmd) {
+                let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path, null);
+                Gio.AppInfo.launch_default_for_uri(uri, null);
+            }
         }
-        if ((cmd | CommandSystem.VAGRANTFILE) === cmd) {
-            let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path + '/Vagrantfile', null);
-            Gio.AppInfo.launch_default_for_uri(uri, null);
-        }
-        if ((cmd | CommandSystem.FILE_MANAGER) === cmd) {
-            let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path, null);
-            Gio.AppInfo.launch_default_for_uri(uri, null);
+        catch(e) {
+            this.emit('error', {
+                title: _("System Command"),
+                message: e.toString(),
+            });
         }
     },
 
