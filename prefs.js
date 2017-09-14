@@ -9,7 +9,6 @@ const Gdk = imports.gi.Gdk;
 const GdkPixbuf = imports.gi.GdkPixbuf;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Vagrant = Me.imports.vagrant;
 const Icons = Me.imports.icons;
 const Settings = Me.imports.settings;
 const Translation = Me.imports.translation;
@@ -122,11 +121,6 @@ const Widget = new GObject.Class({
         this.ui.settings.machinefullpath.name = 'gnome-vagrant-prefs-page-settings-machine-full-path';
         this.ui.settings.machinefullpath.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.settings.page.actor.add(this.ui.settings.machinefullpath);
-
-        this.ui.settings.emulator = new InputEntry('emulator', this.settings.get_string('emulator'), _("Terminal emulator"), _("Terminal emulator path"));
-        this.ui.settings.emulator.name = 'gnome-vagrant-prefs-page-settings-emulator';
-        this.ui.settings.emulator.connect('changed', Lang.bind(this, this._handle_widget));
-        this.ui.settings.page.actor.add(this.ui.settings.emulator);
 
         this.ui.settings.postterminalaction = new InputComboBox('post-terminal-action', this.settings.get_string('post-terminal-action'), _("Post terminal action"), _("Vagrant terminal action after `vagrant` command execution"), { 'NONE': _("Leave opened"), /*'PAUSE': _("Wait for keypress"),*/ 'EXIT': _("Close"), 'ALL': _("Wait for keypress and close") });
         this.ui.settings.postterminalaction.name = 'gnome-vagrant-prefs-page-settings-post-terminal-action';
@@ -291,9 +285,6 @@ const Widget = new GObject.Class({
      * @return {Void}
      */
     _handle_destroy: function(widget, event) {
-        if (!this.settings.get_string('emulator'))
-            this.settings.set_string('emulator', Vagrant.EMULATOR);
-
         if (this.settings)
             this.settings.run_dispose();
     },

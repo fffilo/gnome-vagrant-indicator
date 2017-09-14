@@ -17,11 +17,6 @@
             <summary>Show machine full path</summary>
             <description>Show machine full path as instance name</description>
         </key>
-        <key name="emulator" type="s">
-            <default>'/usr/bin/x-terminal-emulator'</default>
-            <summary>Terminal emulator</summary>
-            <description>Terminal emulator path</description>
-        </key>
         <key name="post-terminal-action" enum="org.gnome.shell.extensions.gnome-vagrant-indicator.post-terminal-action">
             <default>'NONE'</default>
             <summary>Post terminal action</summary>
