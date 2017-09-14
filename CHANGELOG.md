@@ -1,14 +1,13 @@
 # Changelog
 
 ## [Unreleased]
-
-## Version 4 - 2017-09-13
-### Changed
+- 'Terminal emulator' option from preferences (always use default one)
 - Error handling improvements
+- Code refactoring
 
 ## Version 3 - 2017-09-04
 ### Changed
-- Preferenes 'Terminal emulator' option
+- Preferences 'Terminal emulator' option
 - Metadata shell-version
 
 ## Version 2 - 2017-08-10
