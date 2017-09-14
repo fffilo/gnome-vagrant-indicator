@@ -18,7 +18,7 @@ wget -O ${BUILD}/${UUID}.zip ${URL}/${UUID}/archive/${BRANCH}.zip
 unzip ${BUILD}/${UUID}.zip -d ${BUILD}
 
 # install
-make --directory=${BUILD}/${UUID}-master install
+make --directory=${BUILD}/${UUID}-${BRANCH} install
 
 # clear
 rm -rf ${BUILD}/${UUID}*
