@@ -10,6 +10,7 @@ const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Enum = Me.imports.enum;
+const Vagrant = Me.imports.vagrant;
 const Translation = Me.imports.translation;
 const _ = Translation.translate;
 
@@ -113,7 +114,8 @@ const Machine = new Lang.Class({
         let item = new Path(id, path, state);
         item.shorten = this.shorten;
         item.display = this.display;
-        item.connect('execute', Lang.bind(this, this._handle_menu_item));
+        item.connect('system', Lang.bind(this, this._handle_system));
+        item.connect('vagrant', Lang.bind(this, this._handle_vagrant));
         this.addMenuItem(item, index);
     },
 
@@ -214,16 +216,32 @@ const Machine = new Lang.Class({
     },
 
     /**
-     * Subitem execute event handler
+     * Menu subitem (system command)
+     * execute event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_menu_item: function(widget, event) {
-        this.emit('execute', {
+    _handle_system: function(widget, event) {
+        this.emit('system', {
             id: event.id,
-            method: event.method,
+            command: event.command,
+        });
+    },
+
+    /**
+     * Menu subitem (vagrant command)
+     * execute event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handle_vagrant: function(widget, event) {
+        this.emit('vagrant', {
+            id: event.id,
+            command: event.command,
         });
     },
 
@@ -295,25 +313,29 @@ const Path = new Lang.Class({
         this.vagrant.header = item;
 
         let menu = [
-            'up', _("Up"),
-            'up_provision', _("Up and Provision"),
-            'up_ssh', _("Up and SSH"),
-            'up_rdp', _("Up and RDP"),
-            'provision', _("Provision"),
-            'ssh', _("SSH"),
-            'rdp', _("RDP"),
-            'resume', _("Resume"),
-            'suspend', _("Suspend"),
-            'halt', _("Halt"),
-            'destroy', _("Destroy"),
+            'up', Vagrant.CommandVagrant.UP, _("Up"),
+            'up_provision', Vagrant.CommandVagrant.UP_PROVISION, _("Up and Provision"),
+            'up_ssh', Vagrant.CommandVagrant.UP_SSH, _("Up and SSH"),
+            'up_rdp', Vagrant.CommandVagrant.UP_RDP, _("Up and RDP"),
+            'provision', Vagrant.CommandVagrant.PROVISION, _("Provision"),
+            'ssh', Vagrant.CommandVagrant.SSH, _("SSH"),
+            'rdp', Vagrant.CommandVagrant.RDP, _("RDP"),
+            'resume', Vagrant.CommandVagrant.RESUME, _("Resume"),
+            'suspend', Vagrant.CommandVagrant.SUSPEND, _("Suspend"),
+            'halt', Vagrant.CommandVagrant.HALT, _("Halt"),
+            'destroy', Vagrant.CommandVagrant.DESTROY, _("Destroy"),
         ];
 
-        for (let i = 0; i < menu.length; i += 2) {
-            let item = new Command(menu[i + 1]);
-            item.method = menu[i];
-            item.connect('execute', Lang.bind(this, this._handle_execute));
+        for (let i = 0; i < menu.length; i += 3) {
+            let id = menu[i];
+            let cmd = menu[i + 1];
+            let label = menu[i + 2];
+
+            let item = new Command(label);
+            item.command = cmd;
+            item.connect('execute', Lang.bind(this, this._handle_vagrant));
             this.menu.addMenuItem(item);
-            this.vagrant[item.method] = item;
+            this.vagrant[id] = item;
         }
     },
 
@@ -331,17 +353,21 @@ const Path = new Lang.Class({
         this.system.header = item;
 
         let menu = [
-            'terminal', _("Open in Terminal"),
-            'file_manager', _("Open in File Manager"),
-            'vagrantfile', _("Edit Vagrantfile"),
+            'terminal', Vagrant.CommandSystem.TERMINAL, _("Open in Terminal"),
+            'file_manager', Vagrant.CommandSystem.FILE_MANAGER, _("Open in File Manager"),
+            'vagrantfile', Vagrant.CommandSystem.VAGRANTFILE, _("Edit Vagrantfile"),
         ];
 
-        for (let i = 0; i < menu.length; i += 2) {
-            let item = new Command(menu[i + 1]);
-            item.method = menu[i];
-            item.connect('execute', Lang.bind(this, this._handle_execute));
+        for (let i = 0; i < menu.length; i += 3) {
+            let id = menu[i];
+            let cmd = menu[i + 1];
+            let label = menu[i + 2];
+
+            let item = new Command(label);
+            item.command = cmd;
+            item.connect('execute', Lang.bind(this, this._handle_system));
             this.menu.addMenuItem(item);
-            this.system[item.method] = item;
+            this.system[id] = item;
         }
     },
 
@@ -446,7 +472,6 @@ const Path = new Lang.Class({
 
         this._refresh_menu();
     },
-
 
     /**
      * Act like PopupMenu.PopupMenuItem
@@ -643,21 +668,38 @@ const Path = new Lang.Class({
     _handle_activate: function(widget, event) {
         this.emit('execute', {
             id: this.id,
-            method: 'default',
+            type: 'system',
+            method: Vagrant.SystemCommand.TERMINAL,
         });
     },
 
     /**
-     * Menu subitem execute event handler
+     * Menu subitem (system command)
+     * execute event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_execute: function(widget, event) {
-        this.emit('execute', {
+    _handle_system: function(widget, event) {
+        this.emit('system', {
             id: this.id,
-            method: widget.method,
+            command: widget.command,
+        });
+    },
+
+    /**
+     * Menu subitem (vagrant command)
+     * execute event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handle_vagrant: function(widget, event) {
+        this.emit('vagrant', {
+            id: this.id,
+            command: widget.command,
         });
     },
 

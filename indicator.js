@@ -51,8 +51,8 @@ const Base = new Lang.Class({
      * @return {Void}
      */
     destroy: function() {
-        if (this.monitor)
-            this.monitor.run_dispose();
+        if (this.vagrant)
+            this.vagrant.destroy();
         if (this.settings)
             this.settings.run_dispose();
 
@@ -70,17 +70,13 @@ const Base = new Lang.Class({
         this.settings = Settings.settings();
         this.settings.connect('changed', Lang.bind(this, this._handle_settings));
 
-        let action = this.settings.get_string('post-terminal-action');
-        action = Vagrant.PostTerminalAction.from_string(action);
-
-        this.monitor = new Vagrant.Monitor();
-        this.monitor.postTerminalAction = action;
-        this.monitor.emulator = this.settings.get_string('emulator');
-        this.monitor.connect('add', Lang.bind(this, this._handle_monitor_add));
-        this.monitor.connect('remove', Lang.bind(this, this._handle_monitor_remove));
-        this.monitor.connect('state', Lang.bind(this, this._handle_monitor_state));
-        this.monitor.connect('error', Lang.bind(this, this._handle_monitor_error));
-        this.monitor.listen();
+        this.vagrant = new Vagrant.Emulator();
+        this.vagrant.terminal = this.settings.get_string('emulator');
+        this.vagrant.connect('error', Lang.bind(this, this._handle_vagrant_error));
+        this.vagrant.monitor.connect('add', Lang.bind(this, this._handle_vagrant_add));
+        this.vagrant.monitor.connect('remove', Lang.bind(this, this._handle_vagrant_remove));
+        this.vagrant.monitor.connect('state', Lang.bind(this, this._handle_vagrant_state));
+        this.vagrant.monitor.start();
     },
 
     /**
@@ -101,7 +97,8 @@ const Base = new Lang.Class({
         this.machine = new Menu.Machine(this);
         this.machine.shorten = !this.settings.get_boolean('machine-full-path');
         this.machine.display = this._get_settings_machine_menu_display();
-        this.machine.connect('execute', Lang.bind(this, this._handle_machines));
+        this.machine.connect('system', Lang.bind(this, this._handle_machine_system));
+        this.machine.connect('vagrant', Lang.bind(this, this._handle_machine_vagrant));
         this.menu.addMenuItem(this.machine);
         this.menu.addMenuItem(new Menu.Separator());
 
@@ -118,8 +115,8 @@ const Base = new Lang.Class({
     refresh: function() {
         this.machine.clear();
 
-        for (let id in this.monitor.machine) {
-            let machine = this.monitor.machine[id];
+        for (let id in this.vagrant.index.machines) {
+            let machine = this.vagrant.index.machines[id];
             this.machine.add(id, machine.vagrantfile_path, machine.state);
         }
     },
@@ -156,13 +153,8 @@ const Base = new Lang.Class({
      * @return {Void}
      */
     _handle_settings: function(widget, key) {
-        if (key === 'post-terminal-action') {
-            let action = this.settings.get_string('post-terminal-action');
-            action = Vagrant.PostTerminalAction.from_string(action);
-            this.monitor.postTerminalAction = action;
-        }
-        else if (key === 'emulator')
-            this.monitor.emulator = this.settings.get_string('emulator');
+        if (key === 'emulator')
+            this.vagrant.terminal = this.settings.get_string('emulator');
         else if (key === 'machine-full-path')
             this.machine.shorten = !widget.get_boolean(key);
         else if (key.startsWith('system-'))
@@ -178,9 +170,9 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_monitor_add: function(widget, event) {
-        let machine = this.monitor.machine[event.id];
-        let index = Object.keys(this.monitor.machine).indexOf(event.id);
+    _handle_vagrant_add: function(widget, event) {
+        let machine = this.vagrant.index.machines[event.id];
+        let index = Object.keys(this.vagrant.index.machines).indexOf(event.id);
 
         this.machine.add(event.id, machine.vagrantfile_path, machine.state, index);
     },
@@ -192,7 +184,7 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_monitor_remove: function(widget, event) {
+    _handle_vagrant_remove: function(widget, event) {
         this.machine.remove(event.id);
     },
 
@@ -203,8 +195,8 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_monitor_state: function(widget, event) {
-        let machine = this.monitor.machine[event.id];
+    _handle_vagrant_state: function(widget, event) {
+        let machine = this.vagrant.index.machines[event.id];
         this.machine.state(event.id, machine.state);
 
         if (this.settings.get_boolean('notifications'))
@@ -218,26 +210,36 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_monitor_error: function(widget, event) {
+    _handle_vagrant_error: function(widget, event) {
         if (this.settings.get_boolean('notifications'))
             this.notification.show(event.title, event.message);
     },
 
     /**
-     * Machines item activate event handler
+     * Machines item (system command)
+     * activate event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_machines: function(widget, event) {
-        let id = event.id;
-        let method = event.method;
+    _handle_machine_system: function(widget, event) {
+        this.vagrant.open(event.id, event.command);
+    },
 
-        if (event.method === 'default')
-            method = 'terminal';
+    /**
+     * Machines item (vagrant command)
+     * activate event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handle_machine_vagrant: function(widget, event) {
+        let action = this.settings.get_string('post-terminal-action');
+        action = Vagrant.PostTerminalAction.from_string(action);
 
-        this.monitor[method](id);
+        this.vagrant.execute(event.id, event.command, action);
     },
 
     /**
