@@ -65,7 +65,7 @@ const Machine = new Lang.Class({
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-machine');
 
         this._shorten = false;
-        this._display = Display.ALL;
+        this._display = Display._sum();
 
         this.clear();
     },
@@ -187,10 +187,10 @@ const Machine = new Lang.Class({
      * @return {Void}
      */
     set display(value) {
-        if (value < Display.min())
-            value = Display.min();
-        else if (value > Display.max())
-            value = Display.max();
+        if (value < Display._min())
+            value = Display._min();
+        else if (value > Display._sum())
+            value = Display._sum();
 
         this._display = value;
 
@@ -282,7 +282,7 @@ const Path = new Lang.Class({
 
         this.state = state;
         this.shorten = false;
-        this.display = Display.ALL;
+        this.display = Display._sum();
     },
 
     /**
@@ -421,10 +421,10 @@ const Path = new Lang.Class({
      * @return {Void}
      */
     set display(value) {
-        if (value < Display.min())
-            value = Display.min();
-        else if (value > Display.max())
-            value = Display.max();
+        if (value < Display._min())
+            value = Display._min();
+        else if (value > Display._sum())
+            value = Display._sum();
 
         this._display = value;
 
@@ -516,7 +516,7 @@ const Path = new Lang.Class({
                 continue;
 
             let menu = this.vagrant[method];
-            let display = Display.from_string(method);
+            let display = Display._from_string(method.toUpperCase());
             let visible = (value | display) === value;
 
             menu.actor.visible = visible;
@@ -527,7 +527,7 @@ const Path = new Lang.Class({
                 continue;
 
             let menu = this.system[method];
-            let display = Display.from_string(method);
+            let display = Display._from_string(method.toUpperCase());
             let visible = (value | display) === value;
 
             menu.actor.visible = visible;

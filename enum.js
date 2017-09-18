@@ -33,7 +33,109 @@
 const Lang = imports.lang;
 
 /**
+ * Enum.Member constructor
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
+const Member = new Lang.Class({
+
+    Name: 'Enum.Member',
+
+    /**
+     * Constructor
+     *
+     * @param  {String} key
+     * @param  {Number} value
+     * @return {Void}
+     */
+    _init: function(key, value) {
+        if (typeof key !== 'string')
+            throw 'Enum.Member: key must be string';
+        if (!key.match(/^[A-Za-z]/))
+            throw 'Enum.Member: key must start with a letter';
+        if (typeof value !== 'number')
+            throw 'Enum.Member: value must be number';
+
+        this._key = key;
+        this._value = value;
+    },
+
+    /**
+     * Property key getter
+     *
+     * @return {String}
+     */
+    get key() {
+        return this._key;
+    },
+
+    /**
+     * Property value getter
+     *
+     * @return {Number}
+     */
+    get value() {
+        return this._value;
+    },
+
+    /* --- */
+
+});
+
+/**
  * Enum.Enum constructor
+ *
+ * Constructor argument params must be of type
+ * Object, Enum, Member, Array or String.
+ *
+ * For param type Object members are defined
+ * for each key by it's value
+ *     gjs> let a = new Enum({ 'ONE': 1, 'TWO': 2, 'THREE': 3, 'FOUR': 4 });
+ *     gjs> a.ONE;
+ *     1
+ *     gjs> a.TWO;
+ *     2
+ *     gjs> a.THREE;
+ *     3
+ *     gjs> a.FOUR;
+ *     4
+ *
+ * For param type Enum members are defined
+ * as members in param (cloned object)
+ *     gjs> let b = new Enum(a);
+ *     gjs> b.ONE;
+ *     1
+ *     gjs> b.TWO;
+ *     2
+ *     gjs> b.THREE;
+ *     3
+ *     gjs> b.FOUR;
+ *     4
+ *
+ * For param type Member only one member is defined
+ * as members in param
+ *     gjs> let c = new Enum(b._members[1]);
+ *     gjs> c.TWO;
+ *     2
+ *
+ * For param type Array type members are defined
+ * for each item with value of Math.pow(2, index)
+ *     gjs> let d = new Enum([ 'ONE', 'TWO', 'THREE', 'FOUR' ]);
+ *     gjs> d.ONE;
+ *     1
+ *     gjs> d.TWO;
+ *     2
+ *     gjs> d.THREE;
+ *     4
+ *     gjs> d.FOUR;
+ *     8
+ *
+ * For param type String only one member is defined
+ * with value 1
+ *     gjs> let e = new Enum('ONE');
+ *     gjs> e.ONE;
+ *     1
  *
  * @param  {Object}
  * @return {Object}
@@ -49,90 +151,186 @@ const Enum = new Lang.Class({
      * @return {Void}
      */
     _init: function(params) {
-        let args = arguments;
-        if (params instanceof Array)
-            args = params;
+        this._members = [];
 
-        this._enum = [];
+        let ptype = typeof params;
+        let props = {};
 
-        for (let i in args) {
-            let prop = args[i]
-                .toString()
-                .toUpperCase()
-                .replace(/[^A-Za-z0-9]+/g, '_')
-                .replace(/^_|_$/g, '');
+        if (ptype === 'string')
+            props[params] = 1;
+        else if (ptype === 'object' && params.constructor === Object)
+            props = params;
+        else if (ptype === 'object' && params.constructor === Enum)
+            props = params._to_object();
+        else if (ptype === 'object' && params.constructor === Member)
+            props[params.key] = params.value;
+        else if (ptype === 'object' && params.constructor === Array) {
+            for (let i in params) {
+                props[params[i]] = Math.pow(2, i);
+            }
+        }
+        else
+            throw 'Enum.Enum: constructor argument must be of type Object, Array or String';
 
-            this[prop] = Math.pow(2, i);
-            this._enum.push(prop);
+        for (let i in props) {
+            if (props.hasOwnProperty(i))
+                this._define(i, props[i]);
+        }
+    },
+
+    /**
+     * Remove key from members list
+     *
+     * @param  {String} key
+     * @return {Void}
+     */
+    _undefine: function(key) {
+        let index = this._index(key);
+        if (index === null)
+            return;
+
+        this._members.splice(index, 1);
+        delete this[key];
+    },
+
+    /**
+     * Define member
+     *
+     * @param  {String} key
+     * @param  {Number} value
+     * @return {Void}
+     */
+    _define: function(key, value) {
+        this._undefine(key);
+
+        let member = new Member(key, value);
+        this._members.push(member);
+
+        Object.defineProperty(this, member.key, {
+            configurable: true,
+            writable: false,
+            value: member.value,
+        });
+
+        this._members.sort(function(a, b) {
+            if (a.value < b.value)
+                return -1;
+            else if (a.value > b.value)
+                return 1;
+            else
+                return 0;
+        });
+    },
+
+    /**
+     * Get minimal value of enumeration
+     *
+     * @return {Mixed} enumeration value or null on fail
+     */
+    _min: function() {
+        return this._members.length ? this._members[0].value : null;
+    },
+
+    /**
+     * Get maximal value of enumeration
+     *
+     * @return {Mixed} enumeration value or null on fail
+     */
+    _max: function() {
+        return this._members.length ? this._members[this._members.length - 1].value : null;
+    },
+
+    /**
+     * Get sum of enumeration values
+     *
+     * @return {Mixed} enumeration values sum or null on fail
+     */
+    _sum: function() {
+        if (!this._members.length)
+            return null;
+
+        let result = 0;
+        for (let i in this._members) {
+            result += this._members[i].value;
         }
 
-        this.UNKNOWN = 0;
-        this._enum.unshift('UNKNOWN');
-
-        this.ALL = Math.pow(2, this._enum.length - 1) - 1;
-        this._enum.push('ALL');
+        return result;
     },
 
     /**
-     * Get minimal value from enumeration
-     * (skip unknown)
+     * Get member index
      *
-     * @return {Numeric}
+     * @param  {String} key
+     * @return {Mixed}      member index or null on fail
      */
-    min: function() {
-        return this[this._enum[1]];
-    },
-
-    /**
-     * Get maximal value from enumeration
-     *
-     * @return {Numeric}
-     */
-    max: function() {
-        return this[this._enum[this._enum.length - 1]];
-    },
-
-    /**
-     * Convert enumination to string
-     *
-     * @param  {Number} val
-     * @return {String}
-     */
-    to_string: function(val) {
-        for (let i in this._enum) {
-            let key = this._enum[i];
-
-            if (this[key] == val)
-                return key;
+    _index: function(key) {
+        for (let i in this._members) {
+            if (this._members[i].key === key)
+                return i;
         }
 
-        return null;
+        return null
     },
 
     /**
-     * Conver string value to numeric
-     * value from enumenation list
+     * Members iterator
      *
-     * @param  {String}  str
-     * @return {Numeric}
+     * @param  {Function} callback method with key/value arguments
+     * @return {Void}
      */
-    from_string: function(str) {
-        str = str
-            .toString()
-            .toUpperCase()
-            .replace(/[^A-Za-z0-9]+/g, '_')
-            .replace(/^_|_$/g, '');
+    _each: function(callback) {
+        if (!this._members.length)
+            return null;
 
-        let prop = Object.keys(this);
-        for (let i in prop) {
-            let key = prop[i];
-            let val = this[key];
+        return this._members.forEach(function(member, index) {
+            callback.call(this, member.key, member.value);
+        });
+    },
 
-            if (!key.startsWith('_') && typeof val === 'number' && str === key)
-                return val;
+    /**
+     * Convert members to object
+     *
+     * @return {Mixed} members object or null on fail
+     */
+    _to_object: function() {
+        if (!this._members.length)
+            return null;
+
+        let result = {};
+        for (let i in this._members) {
+            result[this._members[i].key] = this._members[i].value;
         }
 
-        return this.UNKNOWN;
+        return result;
+    },
+
+    /**
+     * Convert member value to key
+     *
+     * @param  {Number} value
+     * @return {Mixed}        get member key by value or null on fail
+     */
+    _to_string: function(value) {
+        for (let i in this._members) {
+            if (this._members[i].value === value)
+                return this._members[i].key;
+        }
+
+        return null
+    },
+
+    /**
+     * Convert member key to value
+     *
+     * @param  {String} key
+     * @return {Mixed}      get member value by key or null on fail
+     */
+    _from_string: function(key) {
+        let index = this._index(key);
+        if (index === null)
+            return null;
+
+        return this._members[index].value;
     },
 
     /* --- */

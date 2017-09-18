@@ -128,20 +128,20 @@ const Base = new Lang.Class({
      */
     _get_settings_machine_menu_display: function() {
         return 0
-            | (this.settings.get_boolean('system-terminal') ? Menu.Display.from_string('terminal') : 0)
-            | (this.settings.get_boolean('system-file-manager') ? Menu.Display.from_string('file-manager') : 0)
-            | (this.settings.get_boolean('system-vagrantfile') ? Menu.Display.from_string('vagrantfile') : 0)
-            | (this.settings.get_boolean('vagrant-up') ? Menu.Display.from_string('up') : 0)
-            | (this.settings.get_boolean('vagrant-up-provision') ? Menu.Display.from_string('up-provision') : 0)
-            | (this.settings.get_boolean('vagrant-up-ssh') ? Menu.Display.from_string('up-ssh') : 0)
-            | (this.settings.get_boolean('vagrant-up-rdp') ? Menu.Display.from_string('up-rdp') : 0)
-            | (this.settings.get_boolean('vagrant-provision') ? Menu.Display.from_string('provision') : 0)
-            | (this.settings.get_boolean('vagrant-ssh') ? Menu.Display.from_string('ssh') : 0)
-            | (this.settings.get_boolean('vagrant-rdp') ? Menu.Display.from_string('rdp') : 0)
-            | (this.settings.get_boolean('vagrant-resume') ? Menu.Display.from_string('resume') : 0)
-            | (this.settings.get_boolean('vagrant-suspend') ? Menu.Display.from_string('suspend') : 0)
-            | (this.settings.get_boolean('vagrant-halt') ? Menu.Display.from_string('halt') : 0)
-            | (this.settings.get_boolean('vagrant-destroy') ? Menu.Display.from_string('destroy') : 0);
+            | (this.settings.get_boolean('system-terminal') ? Menu.Display._from_string('TERMINAL') : 0)
+            | (this.settings.get_boolean('system-file-manager') ? Menu.Display._from_string('FILE_MANAGER') : 0)
+            | (this.settings.get_boolean('system-vagrantfile') ? Menu.Display._from_string('VAGRANTFILE') : 0)
+            | (this.settings.get_boolean('vagrant-up') ? Menu.Display._from_string('UP') : 0)
+            | (this.settings.get_boolean('vagrant-up-provision') ? Menu.Display._from_string('UP_PROVISION') : 0)
+            | (this.settings.get_boolean('vagrant-up-ssh') ? Menu.Display._from_string('UP_SSH') : 0)
+            | (this.settings.get_boolean('vagrant-up-rdp') ? Menu.Display._from_string('UP_RDP') : 0)
+            | (this.settings.get_boolean('vagrant-provision') ? Menu.Display._from_string('PROVISION') : 0)
+            | (this.settings.get_boolean('vagrant-ssh') ? Menu.Display._from_string('SSH') : 0)
+            | (this.settings.get_boolean('vagrant-rdp') ? Menu.Display._from_string('RDP') : 0)
+            | (this.settings.get_boolean('vagrant-resume') ? Menu.Display._from_string('RESUME') : 0)
+            | (this.settings.get_boolean('vagrant-suspend') ? Menu.Display._from_string('SUSPEND') : 0)
+            | (this.settings.get_boolean('vagrant-halt') ? Menu.Display._from_string('HALT') : 0)
+            | (this.settings.get_boolean('vagrant-destroy') ? Menu.Display._from_string('DESTROY') : 0);
         },
 
     /**
@@ -234,7 +234,7 @@ const Base = new Lang.Class({
      */
     _handle_machine_vagrant: function(widget, event) {
         let action = this.settings.get_string('post-terminal-action');
-        action = Vagrant.PostTerminalAction.from_string(action);
+        action = Vagrant.PostTerminalAction._from_string(action);
 
         this.vagrant.execute(event.id, event.command, action);
     },
