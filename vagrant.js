@@ -142,7 +142,7 @@ const Exception = new Lang.Class({
     toString: function() {
         return ''
             + (this.title || '')
-            + (this.title && this.message ? ' - ' : '')
+            + (this.title && this.message ? ': ' : '')
             + (this.message || '');
     },
 
@@ -412,15 +412,15 @@ const Emulator = new Lang.Class({
         let machine = this.index.machines[id];
 
         if (!this.command || !GLib.file_test(this.command, GLib.FileTest.EXISTS) || !GLib.file_test(this.command, GLib.FileTest.IS_EXECUTABLE))
-            throw 'Vagrant.Emulator: %s'.format(MESSAGE_VAGRANT_NOT_INSTALLED);
+            throw new Exception(MESSAGE_VAGRANT_NOT_INSTALLED, 'Vagrant.Emulator');
         else if (!machine)
-            throw 'Vagrant.Emulator: %s'.format(MESSAGE_INVALID_MACHINE);
+            throw new Exception(MESSAGE_INVALID_MACHINE, 'Vagrant.Emulator');
         else if (typeof machine !== 'object')
-            throw 'Vagrant.Emulator: %s'.format(MESSAGE_CORRUPTED_DATA);
+            throw new Exception(MESSAGE_CORRUPTED_DATA, 'Vagrant.Emulator');
         else if (!machine.vagrantfile_path || !GLib.file_test(machine.vagrantfile_path, GLib.FileTest.EXISTS) || !GLib.file_test(machine.vagrantfile_path, GLib.FileTest.IS_DIR))
-            throw 'Vagrant.Emulator: %s'.format(MESSAGE_INVALID_PATH);
+            throw new Exception(MESSAGE_INVALID_PATH, 'Vagrant.Emulator');
         else if (!GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.EXISTS) || !GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.IS_REGULAR))
-            throw 'Vagrant.Emulator: %s'.format(MESSAGE_MISSING_VAGRANTFILE);
+            throw new Exception(MESSAGE_MISSING_VAGRANTFILE, 'Vagrant.Emulator');
     },
 
     /**
