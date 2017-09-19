@@ -38,8 +38,6 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Enum = Me.imports.enum;
 const Terminal = Me.imports.terminal;
-const Translation = Me.imports.translation;
-const _ = Translation.translate;
 
 // global properties
 const VAGRANT_EXE = 'vagrant';
@@ -397,40 +395,24 @@ const Emulator = new Lang.Class({
     },
 
     /**
-     * Validate vagrant command and vagrant machine id:
-     * on check fail error signal will be emited with
-     * error as message and provided title as title
-     * (if no title is provided signal won't be
-     * emited)
+     * Validate vagrant command and vagrant machine id
      *
-     * @param  {String}  id    machine id
-     * @param  {String}  title (optional) error signal title
+     * @param  {String}  id machine id
      * @return {Boolean}
      */
-    _validate: function(id, title) {
-        let error, machine = this.index.machines[id];
+    _validate: function(id) {
+        let machine = this.index.machines[id];
 
-        // set error
         if (!this.command || !GLib.file_test(this.command, GLib.FileTest.EXISTS) || !GLib.file_test(this.command, GLib.FileTest.IS_EXECUTABLE))
-            error = _("Vagrant not installed on your system");
+            throw 'Vagrant.Emulator: Vagrant not installed on your system';
         else if (!machine)
-            error = _("Invalid machine id");
+            throw 'Vagrant.Emulator: Invalid machine id';
         else if (typeof machine !== 'object')
-            error = _("Corrupted data");
+            throw 'Vagrant.Emulator: Corrupted data';
         else if (!machine.vagrantfile_path || !GLib.file_test(machine.vagrantfile_path, GLib.FileTest.EXISTS) || !GLib.file_test(machine.vagrantfile_path, GLib.FileTest.IS_DIR))
-            error = _("Path does not exist");
+            throw 'Vagrant.Emulator: Path does not exist';
         else if (!GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.EXISTS) || !GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.IS_REGULAR))
-            error = _("Missing Vagrantfile");
-
-        // emit error
-        if (error && title) {
-            this.emit('error', {
-                title: title,
-                message: error,
-            });
-        }
-
-        return !error;
+            throw 'Vagrant.Emulator: Missing Vagrantfile';
     },
 
     /**
@@ -442,10 +424,9 @@ const Emulator = new Lang.Class({
      * @return {Void}
      */
     _exec: function(id, cmd, action) {
-        if (!this._validate(id, _("Vagrant Command")))
-            return;
+        this._validate(id);
 
-        let msg = _("Press any key to close terminal...");
+        let msg = 'Press any key to close terminal...';
         let cwd = this.index.machines[id].vagrantfile_path;
         let exe = '';
 
@@ -571,27 +552,18 @@ const Emulator = new Lang.Class({
      * @return {Void}
      */
     open: function(id, cmd) {
-        if (!this._validate(id, _("System Command")))
-            return;
+        this._validate(id);
 
-        try {
-            if ((cmd | CommandSystem.TERMINAL) === cmd) {
-                this.terminal.popup(this.index.machines[id].vagrantfile_path);
-            }
-            if ((cmd | CommandSystem.VAGRANTFILE) === cmd) {
-                let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path + '/Vagrantfile', null);
-                Gio.AppInfo.launch_default_for_uri(uri, null);
-            }
-            if ((cmd | CommandSystem.FILE_MANAGER) === cmd) {
-                let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path, null);
-                Gio.AppInfo.launch_default_for_uri(uri, null);
-            }
+        if ((cmd | CommandSystem.TERMINAL) === cmd) {
+            this.terminal.popup(this.index.machines[id].vagrantfile_path);
         }
-        catch(e) {
-            this.emit('error', {
-                title: _("System Command"),
-                message: e.toString(),
-            });
+        if ((cmd | CommandSystem.VAGRANTFILE) === cmd) {
+            let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path + '/Vagrantfile', null);
+            Gio.AppInfo.launch_default_for_uri(uri, null);
+        }
+        if ((cmd | CommandSystem.FILE_MANAGER) === cmd) {
+            let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path, null);
+            Gio.AppInfo.launch_default_for_uri(uri, null);
         }
     },
 
@@ -604,8 +576,7 @@ const Emulator = new Lang.Class({
      * @return {Void}
      */
     execute: function(id, cmd, action) {
-        if (!this._validate(id, _("System Command")))
-            return;
+        this._validate(id);
 
         if ((cmd | CommandVagrant.UP) === cmd)
             this._exec(id, 'up', action);

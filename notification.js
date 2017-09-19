@@ -94,7 +94,10 @@ const Base = new Lang.Class({
      */
     show: function(title, message) {
         this._prepare();
-        this._source.notify(this._notification(title, message));
+
+        let notify = this._notification(title, message);
+        this._source.notify(notify);
+
     },
 
     /* --- */

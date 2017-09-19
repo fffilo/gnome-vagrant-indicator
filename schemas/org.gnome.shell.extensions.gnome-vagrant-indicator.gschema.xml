@@ -22,75 +22,90 @@
             <summary>Post terminal action</summary>
             <description>Action after `vagrant` command execution</description>
         </key>
-        <key name="system-terminal" type="b">
+        <key name="display-system-none" type="b">
+            <default>false</default>
+            <summary>Disabled</summary>
+            <description>Disabled</description>
+        </key>
+        <key name="display-system-terminal" type="b">
             <default>true</default>
             <summary>Open in Terminal</summary>
             <description>Display Open in Terminal system menu</description>
         </key>
-        <key name="system-file-manager" type="b">
+        <key name="display-system-file-manager" type="b">
             <default>true</default>
             <summary>Open in File Manager</summary>
             <description>Display Open in File Manager system menu</description>
         </key>
-        <key name="system-vagrantfile" type="b">
+        <key name="display-system-vagrantfile" type="b">
             <default>true</default>
             <summary>Edit Vagrantfile</summary>
             <description>Display Edit Vagrantfile system menu</description>
         </key>
-        <key name="vagrant-up" type="b">
+        <key name="display-vagrant-none" type="b">
+            <default>false</default>
+            <summary>Disabled</summary>
+            <description>Disabled</description>
+        </key>
+        <key name="display-vagrant-up" type="b">
             <default>true</default>
             <summary>Up</summary>
             <description>Display menu for `vagrant up` command</description>
         </key>
-        <key name="vagrant-up-provision" type="b">
+        <key name="display-vagrant-up-provision" type="b">
             <default>false</default>
             <summary>Up and Provision</summary>
             <description>Display menu for `vagrant up --provision` command</description>
         </key>
-        <key name="vagrant-up-ssh" type="b">
+        <key name="display-vagrant-up-ssh" type="b">
             <default>false</default>
             <summary>Up asd SSH</summary>
             <description>Display menu for `vagrant up; vagrant ssh` command</description>
         </key>
-        <key name="vagrant-up-rdp" type="b">
+        <key name="display-vagrant-up-rdp" type="b">
             <default>false</default>
             <summary>Up and RDP</summary>
             <description>Display menu for `vagrant up; vagrant rdp` command</description>
         </key>
-        <key name="vagrant-provision" type="b">
+        <key name="display-vagrant-provision" type="b">
             <default>false</default>
             <summary>Provision</summary>
             <description>Display menu for `vagrant provision` command</description>
         </key>
-        <key name="vagrant-ssh" type="b">
+        <key name="display-vagrant-ssh" type="b">
             <default>true</default>
             <summary>SSH</summary>
             <description>Display menu for `vagrant ssh` command</description>
         </key>
-        <key name="vagrant-rdp" type="b">
+        <key name="display-vagrant-rdp" type="b">
             <default>false</default>
             <summary>RDP</summary>
             <description>Display menu for `vagrant rdp` command</description>
         </key>
-        <key name="vagrant-resume" type="b">
+        <key name="display-vagrant-resume" type="b">
             <default>false</default>
             <summary>Resume</summary>
             <description>Display menu for `vagrant resume` command</description>
         </key>
-        <key name="vagrant-suspend" type="b">
+        <key name="display-vagrant-suspend" type="b">
             <default>false</default>
             <summary>Suspend</summary>
             <description>Display menu for `vagrant suspend` command</description>
         </key>
-        <key name="vagrant-halt" type="b">
+        <key name="display-vagrant-halt" type="b">
             <default>true</default>
             <summary>Halt</summary>
             <description>Display menu for `vagrant halt` command</description>
         </key>
-        <key name="vagrant-destroy" type="b">
+        <key name="display-vagrant-destroy" type="b">
             <default>false</default>
             <summary>Destroy</summary>
             <description>Display menu for `vagrant destroy` command</description>
+        </key>
+        <key name="display-vagrant-destroy-force" type="b">
+            <default>false</default>
+            <summary>Disabled</summary>
+            <description>Disabled</description>
         </key>
     </schema>
 </schemalist>

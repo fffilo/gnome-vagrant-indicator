@@ -20,28 +20,9 @@ const Item = PopupMenu.PopupMenuItem;
 const SubMenu = PopupMenu.PopupSubMenuMenuItem;
 const Section = PopupMenu.PopupMenuSection;
 
-/**
- * Display enum
- *
- * @type {Object}
- */
-const Display = new Enum.Enum([
-    'NONE',
-    'TERMINAL',
-    'FILE_MANAGER',
-    'VAGRANTFILE',
-    'UP',
-    'UP_PROVISION',
-    'UP_SSH',
-    'UP_RDP',
-    'PROVISION',
-    'SSH',
-    'RDP',
-    'RESUME',
-    'SUSPEND',
-    'HALT',
-    'DESTROY',
-]);
+// Display enums
+const DisplayVagrant = Vagrant.CommandVagrant;
+const DisplaySystem = Vagrant.CommandSystem;
 
 /**
  * Menu.Machine constructor
@@ -65,7 +46,8 @@ const Machine = new Lang.Class({
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-machine');
 
         this._shorten = false;
-        this._display = Display._sum();
+        this._display_vagrant = DisplayVagrant._sum();
+        this._display_system = DisplaySystem._sum();
 
         this.clear();
     },
@@ -113,7 +95,8 @@ const Machine = new Lang.Class({
 
         let item = new Path(id, path, state);
         item.shorten = this.shorten;
-        item.display = this.display;
+        item.setDisplayVagrant(this.getDisplayVagrant());
+        item.setDisplaySystem(this.getDisplaySystem());
         item.connect('system', Lang.bind(this, this._handle_system));
         item.connect('vagrant', Lang.bind(this, this._handle_vagrant));
         this.addMenuItem(item, index);
@@ -149,6 +132,66 @@ const Machine = new Lang.Class({
     },
 
     /**
+     * Get DisplayVagrant:
+     * display vagrant menu subitems
+     * from DisplayVagrant enum
+     *
+     * @return {Number}
+     */
+    getDisplayVagrant: function() {
+        return this._display_vagrant;
+    },
+
+    /**
+     * Set DisplayVagrant
+     *
+     * @param  {Number} value
+     * @return {Void}
+     */
+    setDisplayVagrant: function(value) {
+        if (value < DisplayVagrant._min())
+            value = DisplayVagrant._min();
+        else if (value > DisplayVagrant._sum())
+            value = DisplayVagrant._sum();
+
+        this._display_vagrant = value;
+
+        this._get_item().forEach(function(actor) {
+            actor.setDisplayVagrant(value);
+        });
+    },
+
+    /**
+     * Get DisplaySystem:
+     * display system menu subitems
+     * from DisplaySystem enum
+     *
+     * @return {Number}
+     */
+    getDisplaySystem: function() {
+        return this._display_system;
+    },
+
+    /**
+     * Set DisplaySystem
+     *
+     * @param  {Number} value
+     * @return {Void}
+     */
+    setDisplaySystem: function(value) {
+        if (value < DisplaySystem._min())
+            value = DisplaySystem._min();
+        else if (value > DisplaySystem._sum())
+            value = DisplaySystem._sum();
+
+        this._display_system = value;
+
+        this._get_item().forEach(function(actor) {
+            actor.setDisplaySystem(value);
+        });
+    },
+
+    /**
      * Property shorten getter
      *
      * @return {Boolean}
@@ -168,34 +211,6 @@ const Machine = new Lang.Class({
 
         this._get_item().forEach(function(actor) {
             actor.shorten = value;
-        });
-    },
-
-    /**
-     * Property display getter
-     *
-     * @return {Number}
-     */
-    get display() {
-        return this._display;
-    },
-
-    /**
-     * Property display setter
-     *
-     * @param  {Number} value
-     * @return {Void}
-     */
-    set display(value) {
-        if (value < Display._min())
-            value = Display._min();
-        else if (value > Display._sum())
-            value = Display._sum();
-
-        this._display = value;
-
-        this._get_item().forEach(function(actor) {
-            actor.display = value;
         });
     },
 
@@ -275,14 +290,15 @@ const Path = new Lang.Class({
         this._path = path;
         this._state = 'unknown';
         this._shorten = true;
-        this._display = Display.NONE;
 
         this._ui();
         this._bind();
 
+        this.setDisplayVagrant(DisplayVagrant.NONE);
+        this.setDisplaySystem(DisplaySystem.NONE);
+
         this.state = state;
         this.shorten = false;
-        this.display = Display._sum();
     },
 
     /**
@@ -381,6 +397,76 @@ const Path = new Lang.Class({
     },
 
     /**
+     * Get DisplayVagrant:
+     * display vagrant menu subitems
+     * from DisplayVagrant enum
+     *
+     * @return {Number}
+     */
+    getDisplayVagrant: function() {
+        return this._display_vagrant;
+    },
+
+    /**
+     * Set DisplayVagrant
+     *
+     * @param  {Number} value
+     * @return {Void}
+     */
+    setDisplayVagrant: function(value) {
+        if (value < DisplayVagrant._min())
+            value = DisplayVagrant._min();
+        else if (value > DisplayVagrant._sum())
+            value = DisplayVagrant._sum();
+
+        this._display_vagrant = value;
+
+        this._refresh_menu();
+    },
+
+    /**
+     * Get DisplaySystem:
+     * display system menu subitems
+     * from DisplaySystem enum
+     *
+     * @return {Number}
+     */
+    getDisplaySystem: function() {
+        return this._display_system;
+    },
+
+    /**
+     * Set DisplaySystem
+     *
+     * @param  {Number} value
+     * @return {Void}
+     */
+    setDisplaySystem: function(value) {
+        if (value < DisplaySystem._min())
+            value = DisplaySystem._min();
+        else if (value > DisplaySystem._sum())
+            value = DisplaySystem._sum();
+
+        this._display_system = value;
+
+        this._refresh_menu();
+    },
+
+    /**
+     * Act like PopupMenu.PopupMenuItem
+     * when submenu is empty
+     *
+     * @param  {Booelan} open
+     * @return {Void}
+     */
+    setSubmenuShown: function(open) {
+        this.parent(open);
+
+        if (!this.system.header.actor.visible && !this.vagrant.header.actor.visible)
+            this.emit('activate');
+    },
+
+    /**
      * Property shorten getter
      *
      * @return {Boolean}
@@ -403,32 +489,6 @@ const Path = new Lang.Class({
             path = GLib.basename(path);
 
         this.label.text = path;
-    },
-
-    /**
-     * Property display getter
-     *
-     * @return {Number}
-     */
-    get display() {
-        return this._display;
-    },
-
-    /**
-     * Property display setter
-     *
-     * @param  {Number} value
-     * @return {Void}
-     */
-    set display(value) {
-        if (value < Display._min())
-            value = Display._min();
-        else if (value > Display._sum())
-            value = Display._sum();
-
-        this._display = value;
-
-        this._refresh_menu();
     },
 
     /**
@@ -474,20 +534,6 @@ const Path = new Lang.Class({
     },
 
     /**
-     * Act like PopupMenu.PopupMenuItem
-     * when submenu is empty
-     *
-     * @param  {Booelan} open
-     * @return {Void}
-     */
-    setSubmenuShown: function(open) {
-        this.parent(open);
-
-        if (!this.system.header.actor.visible && !this.vagrant.header.actor.visible)
-            this.emit('activate');
-    },
-
-    /**
      *
      * Show/hide system/vagrant menu
      * items
@@ -509,25 +555,25 @@ const Path = new Lang.Class({
      * @return {Void}
      */
     _refresh_menu_by_display: function() {
-        let value = this.display;
-
-        for (let method in this.vagrant) {
-            if (method === 'header')
+        let value = this.getDisplayVagrant();
+        for (let key in this.vagrant) {
+            if (key === 'header')
                 continue;
 
-            let menu = this.vagrant[method];
-            let display = Display._from_string(method.toUpperCase());
+            let menu = this.vagrant[key];
+            let display = DisplayVagrant._from_string(key.toUpperCase());
             let visible = (value | display) === value;
 
             menu.actor.visible = visible;
         }
 
-        for (let method in this.system) {
-            if (method === 'header')
+        let value = this.getDisplaySystem();
+        for (let key in this.system) {
+            if (key === 'header')
                 continue;
 
-            let menu = this.system[method];
-            let display = Display._from_string(method.toUpperCase());
+            let menu = this.system[key];
+            let display = DisplaySystem._from_string(key.toUpperCase());
             let visible = (value | display) === value;
 
             menu.actor.visible = visible;
@@ -666,10 +712,9 @@ const Path = new Lang.Class({
      * @return {Void}
      */
     _handle_activate: function(widget, event) {
-        this.emit('execute', {
+        this.emit('system', {
             id: this.id,
-            type: 'system',
-            method: Vagrant.SystemCommand.TERMINAL,
+            command: Vagrant.CommandSystem.TERMINAL,
         });
     },
 
@@ -722,7 +767,6 @@ const Command = new Lang.Class({
      * Constructor
      *
      * @param  {String} title
-     * @param  {String} method
      * @return {Void}
      */
     _init: function(title) {

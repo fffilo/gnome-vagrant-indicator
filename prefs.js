@@ -140,60 +140,70 @@ const Widget = new GObject.Class({
         this.ui.vagrant.page = this._page();
         this.ui.vagrant.page.get_style_context().add_class('gnome-vagrant-prefs-page-vagrant');
 
-        this.ui.vagrant.up = new InputSwitch('vagrant-up', this.settings.get_boolean('vagrant-up'), _("Up"), _("Display menu for `vagrant up` command"));
+        //this.ui.vagrant.none = new InputSwitch('display-vagrant-none', this.settings.get_boolean('display-vagrant-none'), _("Disabled"), _("Disabled"));
+        //this.ui.vagrant.none.name = 'gnome-vagrant-prefs-page-vagrant-none';
+        //this.ui.vagrant.none.connect('changed', Lang.bind(this, this._handle_widget));
+        //this.ui.vagrant.page.actor.add(this.ui.vagrant.none);
+
+        this.ui.vagrant.up = new InputSwitch('display-vagrant-up', this.settings.get_boolean('display-vagrant-up'), _("Up"), _("Display menu for `vagrant up` command"));
         this.ui.vagrant.up.name = 'gnome-vagrant-prefs-page-vagrant-up';
         this.ui.vagrant.up.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.up);
 
-        this.ui.vagrant.upprovision = new InputSwitch('vagrant-up-provision', this.settings.get_boolean('vagrant-up-provision'), _("Up and Provision"), _("Display menu for `vagrant up --provision` command"));
+        this.ui.vagrant.upprovision = new InputSwitch('display-vagrant-up-provision', this.settings.get_boolean('display-vagrant-up-provision'), _("Up and Provision"), _("Display menu for `vagrant up --provision` command"));
         this.ui.vagrant.upprovision.name = 'gnome-vagrant-prefs-page-vagrant-up-provision';
         this.ui.vagrant.upprovision.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.upprovision);
 
-        this.ui.vagrant.upssh = new InputSwitch('vagrant-up-ssh', this.settings.get_boolean('vagrant-up-ssh'), _("Up and SSH"), _("Display menu for `vagrant up; vagrant ssh` command"));
+        this.ui.vagrant.upssh = new InputSwitch('display-vagrant-up-ssh', this.settings.get_boolean('display-vagrant-up-ssh'), _("Up and SSH"), _("Display menu for `vagrant up; vagrant ssh` command"));
         this.ui.vagrant.upssh.name = 'gnome-vagrant-prefs-page-vagrant-up-ssh';
         this.ui.vagrant.upssh.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.upssh);
 
-        this.ui.vagrant.uprdp = new InputSwitch('vagrant-up-rdp', this.settings.get_boolean('vagrant-up-rdp'), _("Up and RPD"), _("Display menu for `vagrant up; vagrant rdp` command"));
+        this.ui.vagrant.uprdp = new InputSwitch('display-vagrant-up-rdp', this.settings.get_boolean('display-vagrant-up-rdp'), _("Up and RPD"), _("Display menu for `vagrant up; vagrant rdp` command"));
         this.ui.vagrant.uprdp.name = 'gnome-vagrant-prefs-page-vagrant-up-rdp';
         this.ui.vagrant.uprdp.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.uprdp);
 
-        this.ui.vagrant.provision = new InputSwitch('vagrant-provision', this.settings.get_boolean('vagrant-provision'), _("Provision"), _("Display menu for `vagrant provision` command"));
+        this.ui.vagrant.provision = new InputSwitch('display-vagrant-provision', this.settings.get_boolean('display-vagrant-provision'), _("Provision"), _("Display menu for `vagrant provision` command"));
         this.ui.vagrant.provision.name = 'gnome-vagrant-prefs-page-vagrant-provision';
         this.ui.vagrant.provision.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.provision);
 
-        this.ui.vagrant.ssh = new InputSwitch('vagrant-ssh', this.settings.get_boolean('vagrant-ssh'), _("SSH"), _("Display menu for `vagrant ssh` command"));
+        this.ui.vagrant.ssh = new InputSwitch('display-vagrant-ssh', this.settings.get_boolean('display-vagrant-ssh'), _("SSH"), _("Display menu for `vagrant ssh` command"));
         this.ui.vagrant.ssh.name = 'gnome-vagrant-prefs-page-vagrant-ssh';
         this.ui.vagrant.ssh.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.ssh);
 
-        this.ui.vagrant.rdp = new InputSwitch('vagrant-rdp', this.settings.get_boolean('vagrant-rdp'), _("RDP"), _("Display menu for `vagrant rdp` command"));
+        this.ui.vagrant.rdp = new InputSwitch('display-vagrant-rdp', this.settings.get_boolean('display-vagrant-rdp'), _("RDP"), _("Display menu for `vagrant rdp` command"));
         this.ui.vagrant.rdp.name = 'gnome-vagrant-prefs-page-vagrant-rdp';
         this.ui.vagrant.rdp.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.rdp);
 
-        this.ui.vagrant.resume = new InputSwitch('vagrant-resume', this.settings.get_boolean('vagrant-resume'), _("Resume"), _("Display menu for `vagrant resume` command"));
+        this.ui.vagrant.resume = new InputSwitch('display-vagrant-resume', this.settings.get_boolean('display-vagrant-resume'), _("Resume"), _("Display menu for `vagrant resume` command"));
         this.ui.vagrant.resume.name = 'gnome-vagrant-prefs-page-vagrant-resume';
         this.ui.vagrant.resume.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.resume);
 
-        this.ui.vagrant.suspend = new InputSwitch('vagrant-suspend', this.settings.get_boolean('vagrant-suspend'), _("Suspend"), _("Display menu for `vagrant suspend` command"));
+        this.ui.vagrant.suspend = new InputSwitch('display-vagrant-suspend', this.settings.get_boolean('display-vagrant-suspend'), _("Suspend"), _("Display menu for `vagrant suspend` command"));
         this.ui.vagrant.suspend.name = 'gnome-vagrant-prefs-page-vagrant-suspend';
         this.ui.vagrant.suspend.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.suspend);
 
-        this.ui.vagrant.halt = new InputSwitch('vagrant-halt', this.settings.get_boolean('vagrant-halt'), _("Halt"), _("Display menu for `vagrant halt` command"));
+        this.ui.vagrant.halt = new InputSwitch('display-vagrant-halt', this.settings.get_boolean('display-vagrant-halt'), _("Halt"), _("Display menu for `vagrant halt` command"));
         this.ui.vagrant.halt.name = 'gnome-vagrant-prefs-page-vagrant-halt';
         this.ui.vagrant.halt.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.halt);
 
-        this.ui.vagrant.destroy_ = new InputSwitch('vagrant-destroy', this.settings.get_boolean('vagrant-destroy'), _("Destroy"), _("Display menu for `vagrant destroy` command"));
-        this.ui.vagrant.destroy_.name = 'gnome-vagrant-prefs-page-vagrant-destroy';
-        this.ui.vagrant.destroy_.connect('changed', Lang.bind(this, this._handle_widget));
-        this.ui.vagrant.page.actor.add(this.ui.vagrant.destroy_);
+        this.ui.vagrant.destroy_force = new InputSwitch('display-vagrant-destroy', this.settings.get_boolean('display-vagrant-destroy'), _("Destroy"), _("Display menu for `vagrant destroy` command"));
+        this.ui.vagrant.destroy_force.name = 'gnome-vagrant-prefs-page-vagrant-destroy';
+        this.ui.vagrant.destroy_force.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.page.actor.add(this.ui.vagrant.destroy_force);
+
+        //this.ui.vagrant.destroy_force = new InputSwitch('display-vagrant-destroy-force', this.settings.get_boolean('display-vagrant-destroy-force'), _("Disabled"), _("Disabled"));
+        //this.ui.vagrant.destroy_force.name = 'gnome-vagrant-prefs-page-vagrant-destroy';
+        //this.ui.vagrant.destroy_force.connect('changed', Lang.bind(this, this._handle_widget));
+        //this.ui.vagrant.page.actor.add(this.ui.vagrant.destroy_force);
 
         return this.ui.vagrant.page;
     },
@@ -208,17 +218,22 @@ const Widget = new GObject.Class({
         this.ui.system.page = this._page();
         this.ui.system.page.get_style_context().add_class('gnome-vagrant-prefs-page-system');
 
-        this.ui.system.terminal = new InputSwitch('system-terminal', this.settings.get_boolean('system-terminal'), _("Open in Terminal"), _("Display Open in Terminal system menu"));
+        //this.ui.system.none = new InputSwitch('display-system-none', this.settings.get_boolean('display-system-none'), _("Disabled"), _("Disabled"));
+        //this.ui.system.none.name = 'gnome-system-prefs-page-system-none';
+        //this.ui.system.none.connect('changed', Lang.bind(this, this._handle_widget));
+        //this.ui.system.page.actor.add(this.ui.system.none);
+
+        this.ui.system.terminal = new InputSwitch('display-system-terminal', this.settings.get_boolean('display-system-terminal'), _("Open in Terminal"), _("Display Open in Terminal system menu"));
         this.ui.system.terminal.name = 'gnome-system-prefs-page-system-terminal';
         this.ui.system.terminal.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.system.page.actor.add(this.ui.system.terminal);
 
-        this.ui.system.file_manager = new InputSwitch('system-file-manager', this.settings.get_boolean('system-file-manager'), _("Open in File Manager"), _("Display Open in File Manager system menu"));
+        this.ui.system.file_manager = new InputSwitch('display-system-file-manager', this.settings.get_boolean('display-system-file-manager'), _("Open in File Manager"), _("Display Open in File Manager system menu"));
         this.ui.system.file_manager.name = 'gnome-system-prefs-page-system-file-manager';
         this.ui.system.file_manager.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.system.page.actor.add(this.ui.system.file_manager);
 
-        this.ui.system.vagrantfile = new InputSwitch('system-vagrantfile', this.settings.get_boolean('system-vagrantfile'), _("Edit Vagrantfile"), _("Display Edit Vagrantfile system menu"));
+        this.ui.system.vagrantfile = new InputSwitch('display-system-vagrantfile', this.settings.get_boolean('display-system-vagrantfile'), _("Edit Vagrantfile"), _("Display Edit Vagrantfile system menu"));
         this.ui.system.vagrantfile.name = 'gnome-system-prefs-page-system-vagrantfile';
         this.ui.system.vagrantfile.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.system.page.actor.add(this.ui.system.vagrantfile);

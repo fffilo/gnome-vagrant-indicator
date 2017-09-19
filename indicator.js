@@ -95,7 +95,8 @@ const Base = new Lang.Class({
 
         this.machine = new Menu.Machine(this);
         this.machine.shorten = !this.settings.get_boolean('machine-full-path');
-        this.machine.display = this._get_settings_machine_menu_display();
+        this.machine.setDisplayVagrant(this._get_settings_machine_menu_display_vagrant());
+        this.machine.setDisplaySystem(this._get_settings_machine_menu_display_system());
         this.machine.connect('system', Lang.bind(this, this._handle_machine_system));
         this.machine.connect('vagrant', Lang.bind(this, this._handle_machine_vagrant));
         this.menu.addMenuItem(this.machine);
@@ -121,29 +122,44 @@ const Base = new Lang.Class({
     },
 
     /**
-     * Convert settings boolean machine-menu-display
-     * values to Menu.Display value
+     * Convert settings boolean display-vagrant
+     * values to Menu.DisplayVagrant value
      *
      * @return {Number}
      */
-    _get_settings_machine_menu_display: function() {
-        return 0
-            | (this.settings.get_boolean('system-terminal') ? Menu.Display._from_string('TERMINAL') : 0)
-            | (this.settings.get_boolean('system-file-manager') ? Menu.Display._from_string('FILE_MANAGER') : 0)
-            | (this.settings.get_boolean('system-vagrantfile') ? Menu.Display._from_string('VAGRANTFILE') : 0)
-            | (this.settings.get_boolean('vagrant-up') ? Menu.Display._from_string('UP') : 0)
-            | (this.settings.get_boolean('vagrant-up-provision') ? Menu.Display._from_string('UP_PROVISION') : 0)
-            | (this.settings.get_boolean('vagrant-up-ssh') ? Menu.Display._from_string('UP_SSH') : 0)
-            | (this.settings.get_boolean('vagrant-up-rdp') ? Menu.Display._from_string('UP_RDP') : 0)
-            | (this.settings.get_boolean('vagrant-provision') ? Menu.Display._from_string('PROVISION') : 0)
-            | (this.settings.get_boolean('vagrant-ssh') ? Menu.Display._from_string('SSH') : 0)
-            | (this.settings.get_boolean('vagrant-rdp') ? Menu.Display._from_string('RDP') : 0)
-            | (this.settings.get_boolean('vagrant-resume') ? Menu.Display._from_string('RESUME') : 0)
-            | (this.settings.get_boolean('vagrant-suspend') ? Menu.Display._from_string('SUSPEND') : 0)
-            | (this.settings.get_boolean('vagrant-halt') ? Menu.Display._from_string('HALT') : 0)
-            | (this.settings.get_boolean('vagrant-destroy') ? Menu.Display._from_string('DESTROY') : 0);
-        },
+    _get_settings_machine_menu_display_vagrant: function() {
+        let display = Menu.DisplayVagrant._to_object();
+        let result = 0;
 
+        for (let key in display) {
+            let value = display[key];
+            let setting = 'display-vagrant-' + key.toLowerCase().replace(/_/g, '-');
+
+            result += this.settings.get_boolean(setting) ? display[key] : 0;
+        }
+
+        return result;
+    },
+
+    /**
+     * Convert settings boolean display-system
+     * values to Menu.DisplaySystem value
+     *
+     * @return {Number}
+     */
+    _get_settings_machine_menu_display_system: function() {
+        let display = Menu.DisplaySystem._to_object();
+        let result = 0;
+
+        for (let key in display) {
+            let value = display[key];
+            let setting = 'display-system-' + key.toLowerCase().replace(/_/g, '-');
+
+            result += this.settings.get_boolean(setting) ? display[key] : 0;
+        }
+
+        return result;
+    },
     /**
      * Settings changed event handler
      *
@@ -154,10 +170,10 @@ const Base = new Lang.Class({
     _handle_settings: function(widget, key) {
         if (key === 'machine-full-path')
             this.machine.shorten = !widget.get_boolean(key);
-        else if (key.startsWith('system-'))
-            this.machine.display = this._get_settings_machine_menu_display();
-        else if (key.startsWith('vagrant-'))
-            this.machine.display = this._get_settings_machine_menu_display();
+        else if (key.startsWith('display-system-'))
+            this.machine.setDisplaySystem(this._get_settings_machine_menu_display_system());
+        else if (key.startsWith('display-vagrant-'))
+            this.machine.setDisplayVagrant(this._get_settings_machine_menu_display_vagrant());
     },
 
     /**
@@ -208,8 +224,19 @@ const Base = new Lang.Class({
      * @return {Void}
      */
     _handle_vagrant_error: function(widget, event) {
-        if (this.settings.get_boolean('notifications'))
-            this.notification.show(event.title, event.message);
+        if (!this.settings.get_boolean('notifications'))
+            return;
+
+        let arr = event.toString().split(':');
+        let title = arr[0].trim();
+        let message = arr.slice(1).join(':').trim();
+
+        if (!message) {
+            message = title;
+            title = 'Vagrant.Unknown';
+        }
+
+        this.notification.show(title, message);
     },
 
     /**
@@ -221,7 +248,12 @@ const Base = new Lang.Class({
      * @return {Void}
      */
     _handle_machine_system: function(widget, event) {
-        this.vagrant.open(event.id, event.command);
+        try {
+            this.vagrant.open(event.id, event.command);
+        }
+        catch(e) {
+            this.vagrant.emit('error', e);
+        }
     },
 
     /**
@@ -233,10 +265,15 @@ const Base = new Lang.Class({
      * @return {Void}
      */
     _handle_machine_vagrant: function(widget, event) {
-        let action = this.settings.get_string('post-terminal-action');
-        action = Vagrant.PostTerminalAction._from_string(action);
+        try {
+            let action = this.settings.get_string('post-terminal-action');
+            action = Vagrant.PostTerminalAction._from_string(action);
 
-        this.vagrant.execute(event.id, event.command, action);
+            this.vagrant.execute(event.id, event.command, action);
+        }
+        catch(e) {
+            this.vagrant.emit('error', e);
+        }
     },
 
     /**
