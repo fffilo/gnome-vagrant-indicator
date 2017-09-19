@@ -1,7 +1,7 @@
 # Changelog
 
 ## [Unreleased]
-- 'Terminal emulator' option from preferences (always use default one)
+- 'Terminal emulator' option removed from preferences (always use default one)
 - Error handling improvements
 - Code refactoring
 
