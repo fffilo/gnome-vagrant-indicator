@@ -46,8 +46,8 @@ const Machine = new Lang.Class({
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-machine');
 
         this._shorten = false;
-        this._display_vagrant = DisplayVagrant._sum();
-        this._display_system = DisplaySystem._sum();
+        this._display_vagrant = Enum.sum(DisplayVagrant);
+        this._display_system = Enum.sum(DisplaySystem);
 
         this.clear();
     },
@@ -149,10 +149,10 @@ const Machine = new Lang.Class({
      * @return {Void}
      */
     setDisplayVagrant: function(value) {
-        if (value < DisplayVagrant._min())
-            value = DisplayVagrant._min();
-        else if (value > DisplayVagrant._sum())
-            value = DisplayVagrant._sum();
+        if (value < Enum.min(DisplayVagrant))
+            value = Enum.min(DisplayVagrant);
+        else if (value > Enum.sum(DisplayVagrant))
+            value = Enum.sum(DisplayVagrant);
 
         this._display_vagrant = value;
 
@@ -179,10 +179,10 @@ const Machine = new Lang.Class({
      * @return {Void}
      */
     setDisplaySystem: function(value) {
-        if (value < DisplaySystem._min())
-            value = DisplaySystem._min();
-        else if (value > DisplaySystem._sum())
-            value = DisplaySystem._sum();
+        if (value < Enum.min(DisplaySystem))
+            value = Enum.min(DisplaySystem);
+        else if (value > Enum.sum(DisplaySystem))
+            value = Enum.sum(DisplaySystem);
 
         this._display_system = value;
 
@@ -414,10 +414,10 @@ const Path = new Lang.Class({
      * @return {Void}
      */
     setDisplayVagrant: function(value) {
-        if (value < DisplayVagrant._min())
-            value = DisplayVagrant._min();
-        else if (value > DisplayVagrant._sum())
-            value = DisplayVagrant._sum();
+        if (value < Enum.min(DisplayVagrant))
+            value = Enum.min(DisplayVagrant);
+        else if (value > Enum.sum(DisplayVagrant))
+            value = Enum.sum(DisplayVagrant);
 
         this._display_vagrant = value;
 
@@ -442,10 +442,10 @@ const Path = new Lang.Class({
      * @return {Void}
      */
     setDisplaySystem: function(value) {
-        if (value < DisplaySystem._min())
-            value = DisplaySystem._min();
-        else if (value > DisplaySystem._sum())
-            value = DisplaySystem._sum();
+        if (value < Enum.min(DisplaySystem))
+            value = Enum.min(DisplaySystem);
+        else if (value > Enum.sum(DisplaySystem))
+            value = Enum.sum(DisplaySystem);
 
         this._display_system = value;
 
@@ -561,7 +561,7 @@ const Path = new Lang.Class({
                 continue;
 
             let menu = this.vagrant[key];
-            let display = DisplayVagrant._from_string(key.toUpperCase());
+            let display = Enum.getValue(DisplayVagrant, key.toUpperCase());
             let visible = (value | display) === value;
 
             menu.actor.visible = visible;
@@ -573,7 +573,7 @@ const Path = new Lang.Class({
                 continue;
 
             let menu = this.system[key];
-            let display = DisplaySystem._from_string(key.toUpperCase());
+            let display = Enum.getValue(DisplaySystem, key.toUpperCase());
             let visible = (value | display) === value;
 
             menu.actor.visible = visible;

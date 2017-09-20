@@ -13,6 +13,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Menu = Me.imports.menu;
 const Notification = Me.imports.notification;
+const Enum = Me.imports.enum;
 const Vagrant = Me.imports.vagrant;
 const Icons = Me.imports.icons;
 const Settings = Me.imports.settings;
@@ -128,7 +129,7 @@ const Base = new Lang.Class({
      * @return {Number}
      */
     _get_settings_machine_menu_display_vagrant: function() {
-        let display = Menu.DisplayVagrant._to_object();
+        let display = Enum.toObject(Menu.DisplayVagrant);
         let result = 0;
 
         for (let key in display) {
@@ -148,7 +149,7 @@ const Base = new Lang.Class({
      * @return {Number}
      */
     _get_settings_machine_menu_display_system: function() {
-        let display = Menu.DisplaySystem._to_object();
+        let display = Enum.toObject(Menu.DisplaySystem);
         let result = 0;
 
         for (let key in display) {
@@ -267,7 +268,7 @@ const Base = new Lang.Class({
     _handle_machine_vagrant: function(widget, event) {
         try {
             let action = this.settings.get_string('post-terminal-action');
-            action = Vagrant.PostTerminalAction._from_string(action);
+            action = Enum.getValue(Vagrant.PostTerminalAction, action);
 
             this.vagrant.execute(event.id, event.command, action);
         }
