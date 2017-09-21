@@ -1,7 +1,6 @@
-GnomeVagrantIndicatorPrefsBox { border: none; }
-GnomeVagrantIndicatorPrefsInput { padding: 0.5em; }
-
-.gnome-vagrant-prefs-page { padding: 2em; }
-.gnome-vagrant-prefs-page-about-title { padding-bottom: 2em; font-weight: bold; }
-.gnome-vagrant-prefs-page-about-description { padding: 2em; }
-.gnome-vagrant-prefs-page-about-license { font-size: 0.8em; }
+.gnome-vagrant-indicator-prefs-box { border: none; }
+.gnome-vagrant-indicator-prefs-input { padding: 0.5em; }
+.gnome-vagrant-indicator-prefs-page { padding: 2em; }
+.gnome-vagrant-indicator-prefs-page-about-title { padding-bottom: 2em; font-weight: bold; }
+.gnome-vagrant-indicator-prefs-page-about-description { padding: 2em; }
+.gnome-vagrant-indicator-prefs-page-about-license { font-size: 0.8em; }
