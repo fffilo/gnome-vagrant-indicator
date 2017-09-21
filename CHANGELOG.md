@@ -1,13 +1,18 @@
 # Changelog
 
 ## [Unreleased]
-- 'Terminal emulator' option removed from preferences (always use default one)
+
+## Version 4 - 2017-09-21
+### Changed
+- _Terminal emulator_ option removed from preferences (always using default one)
 - Error handling improvements
+- Preferences styling
 - Code refactoring
 
 ## Version 3 - 2017-09-04
+### Added
+- Preferences _Terminal emulator_ option
 ### Changed
-- Preferences 'Terminal emulator' option
 - Metadata shell-version
 
 ## Version 2 - 2017-08-10
