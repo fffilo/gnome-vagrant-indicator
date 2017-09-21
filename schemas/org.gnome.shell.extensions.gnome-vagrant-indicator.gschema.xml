@@ -1,11 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="gnome-vagrant-indicator">
-    <enum id="org.gnome.shell.extensions.gnome-vagrant-indicator.post-terminal-action">
-        <value value="1" nick="NONE" />
-        <value value="2" nick="PAUSE" />
-        <value value="4" nick="EXIT" />
-        <value value="7" nick="ALL" />
-    </enum>
     <schema path="/org/gnome/shell/extensions/gnome-vagrant-indicator/" id="org.gnome.shell.extensions.gnome-vagrant-indicator">
         <key name="notifications" type="b">
             <default>true</default>
@@ -17,7 +11,7 @@
             <summary>Show machine full path</summary>
             <description>Show machine full path as instance name</description>
         </key>
-        <key name="post-terminal-action" enum="org.gnome.shell.extensions.gnome-vagrant-indicator.post-terminal-action">
+        <key name="post-terminal-action" type="s">
             <default>'NONE'</default>
             <summary>Post terminal action</summary>
             <description>Action after `vagrant` command execution</description>

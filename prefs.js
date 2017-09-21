@@ -122,7 +122,7 @@ const Widget = new GObject.Class({
         this.ui.settings.machinefullpath.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.settings.page.actor.add(this.ui.settings.machinefullpath);
 
-        this.ui.settings.postterminalaction = new InputComboBox('post-terminal-action', this.settings.get_string('post-terminal-action'), _("Post terminal action"), _("Vagrant terminal action after `vagrant` command execution"), { 'NONE': _("Leave opened"), /*'PAUSE': _("Wait for keypress"),*/ 'EXIT': _("Close"), 'ALL': _("Wait for keypress and close") });
+        this.ui.settings.postterminalaction = new InputComboBox('post-terminal-action', this.settings.get_string('post-terminal-action'), _("Post terminal action"), _("Vagrant terminal action after `vagrant` command execution"), { 'NONE': _("Leave opened"), /*'PAUSE': _("Wait for keypress"),*/ 'EXIT': _("Close"), 'BOTH': _("Wait for keypress and close") });
         this.ui.settings.postterminalaction.name = 'gnome-vagrant-prefs-page-settings-post-terminal-action';
         this.ui.settings.postterminalaction.connect('changed', Lang.bind(this, this._handle_widget));
         this.ui.settings.page.actor.add(this.ui.settings.postterminalaction);

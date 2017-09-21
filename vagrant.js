@@ -94,7 +94,9 @@ const PostTerminalAction = new Enum.Enum([
     'NONE',
     'PAUSE',
     'EXIT',
+    //'BOTH',
 ]);
+Enum.addMember(PostTerminalAction, 'BOTH', Enum.sum(PostTerminalAction));
 
 /**
  * Vagrant.Exception constructor
@@ -449,7 +451,7 @@ const Emulator = new Lang.Class({
 
         if (action) {
             if ((action | PostTerminalAction.PAUSE) === action)
-                exe += 'echo \\"%s\\";read -n 1 -s;'.format(MESSAGE_KEYPRESS);
+                exe += 'echo "%s";read -n 1 -s;'.format(MESSAGE_KEYPRESS.replace(/\"/g, '\\\\"'));
             if ((action | PostTerminalAction.EXIT) === action)
                 exe += 'exit;';
         }
