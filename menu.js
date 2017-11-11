@@ -567,7 +567,7 @@ const Path = new Lang.Class({
             menu.actor.visible = visible;
         }
 
-        let value = this.getDisplaySystem();
+        value = this.getDisplaySystem();
         for (let key in this.system) {
             if (key === 'header')
                 continue;
