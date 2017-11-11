@@ -1,6 +1,7 @@
 # Changelog
 
 ## [Unreleased]
+- Minor bug fixes
 
 ## Version 4 - 2017-09-21
 ### Changed
