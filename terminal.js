@@ -106,7 +106,8 @@ const Emulator = new Lang.Class({
      * @return {Object} list (array)
      */
     get list() {
-        return this._shell_output('update-alternatives --list %s'.format(ALTERNATIVE_NAME)) || null;
+        let result = this._shell_output('update-alternatives --list %s'.format(ALTERNATIVE_NAME));
+        return result === null ? null : result.split('\n');
     },
 
     /**
