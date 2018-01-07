@@ -74,17 +74,14 @@ const Emulator = new Lang.Class({
      *
      * @param  {String} cwd      (optional) working directory
      * @param  {String} command  (optional) command to execute
-     * @param  {String} terminal (optional) terminal emulator (must exist in this.list)
+     * @param  {String} terminal (optional) terminal emulator
      * @return {Void}
      */
     popup: function(cwd, command, terminal) {
         cwd = cwd || '~';
         command = command || ':';
         command = command.replace(/;+$/, '');
-        terminal = terminal || this.current;
-
-        if (this.list.indexOf(terminal) === -1)
-            throw 'Terminal.Emulator: Invalid terminal emulator "%s"'.format(terminal);
+        terminal = terminal || this.current || 'gnome-terminal';
 
         let exe = '';
         exe += 'cd %s; '.format(cwd);
@@ -103,21 +100,26 @@ const Emulator = new Lang.Class({
      * Property list getter:
      * list of all terminal emulators installed
      *
-     * @return {Object} list (array) or null on fail
+     * Warning: this method is not accurate
+     * for non-debian like systems
+     *
+     * @return {Object} list (array)
      */
     get list() {
-        let result = this._shell_output('update-alternatives --list %s'.format(ALTERNATIVE_NAME));
-        return result === null ? null : result.split('\n');
+        return this._shell_output('update-alternatives --list %s'.format(ALTERNATIVE_NAME)) || null;
     },
 
     /**
      * Property current getter:
      * default terminal emulator
      *
+     * Warning: this method is not accurate
+     * for non-debian like systems
+     *
      * @return {Mixed} path (string) or null on fail
      */
     get current() {
-        return this._shell_output('readlink %s'.format(ALTERNATIVE_PATH));
+        return this._shell_output('readlink %s'.format(ALTERNATIVE_PATH)) || null;
     },
 
     /* --- */
