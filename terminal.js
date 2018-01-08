@@ -34,11 +34,6 @@ const Lang = imports.lang;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
-// global properties
-const BASH_PATH = '/bin/bash';
-const ALTERNATIVE_NAME = 'x-terminal-emulator';
-const ALTERNATIVE_PATH = '/etc/alternatives/%s'.format(ALTERNATIVE_NAME);
-
 /**
  * Terminal.Emulator constructor
  *
@@ -81,46 +76,29 @@ const Emulator = new Lang.Class({
         cwd = cwd || '~';
         command = command || ':';
         command = command.replace(/;+$/, '');
-        terminal = terminal || this.current || 'gnome-terminal';
-
-        let exe = '';
-        exe += 'cd %s; '.format(cwd);
-        exe += '%s; '.format(command);
-        exe += 'exec %s'.format(BASH_PATH);
-        exe = exe.replace(/\"/g, '\\\"');
+        terminal = terminal || this.current;
+        if (!terminal)
+            throw 'Terminal.Emulator: Unable to get default terminal applications.';
 
         let subprocess = new Gio.Subprocess({
-            argv: [ terminal, '-e', '%s -c "%s"'.format(BASH_PATH, exe) ],
+            argv: [ terminal, '-e', 'bash', '-c', 'cd %s; %s; exec %s;'.format(cwd, command, 'bash') ],
             flags: Gio.SubprocessFlags.STDOUT_PIPE,
         });
         subprocess.init(null);
     },
 
     /**
-     * Property list getter:
-     * list of all terminal emulators installed
-     *
-     * Warning: this method is not accurate
-     * for non-debian like systems
-     *
-     * @return {Object} list (array)
-     */
-    get list() {
-        let result = this._shell_output('update-alternatives --list %s'.format(ALTERNATIVE_NAME));
-        return result === null ? null : result.split('\n');
-    },
-
-    /**
      * Property current getter:
      * default terminal emulator
-     *
-     * Warning: this method is not accurate
-     * for non-debian like systems
      *
      * @return {Mixed} path (string) or null on fail
      */
     get current() {
-        return this._shell_output('readlink %s'.format(ALTERNATIVE_PATH)) || null;
+        let result = this._shell_output('gsettings get org.gnome.desktop.default-applications.terminal exec') || "'gnome-terminal'";
+        result = result.replace(/^'|'$/g, '');
+        result = this._shell_output('which %s'.format(result));
+
+        return result || null;
     },
 
     /* --- */
