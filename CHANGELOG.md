@@ -1,6 +1,11 @@
 # Changelog
 
 ## [Unreleased]
+- (none)
+
+## Version 5 - 2018-01-08
+### Changed
+- Terminal improvements
 - Minor bug fixes
 
 ## Version 4 - 2017-09-21
