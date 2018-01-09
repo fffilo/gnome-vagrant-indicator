@@ -46,14 +46,15 @@ const Emulator = new Lang.Class({
 
     /**
      * Get output of shell command (sync)
+     * without throwing exception (instead
+     * exception result is null)
      *
      * @param  {String} command command to execute
      * @return {Mixed}          output (string) or null on fail
      */
     _shell_output: function(command) {
         try {
-            let argv = command.split(' ');
-            let [ ok, output, error, status ] = GLib.spawn_sync(null, argv, null, GLib.SpawnFlags.SEARCH_PATH, null);
+            let [ ok, output, error, status ] = GLib.spawn_command_line_sync(command);
             if (!status)
                 return output.toString().trim();
         }
@@ -70,23 +71,40 @@ const Emulator = new Lang.Class({
      * @param  {String} cwd      (optional) working directory
      * @param  {String} command  (optional) command to execute
      * @param  {String} terminal (optional) terminal emulator
+     * @param  {String} shell    (optional) command language interpreter
      * @return {Void}
      */
-    popup: function(cwd, command, terminal) {
+    popup: function(cwd, command, terminal, shell) {
         cwd = cwd || '~';
         command = command || ':';
         command = command.replace(/;+$/, '');
-        terminal = terminal || this.current;
+        terminal = this._shell_output('which %s'.format(terminal)) || this.current;
+        shell = shell || GLib.getenv('SHELL') || 'bash';
+        shell = this._shell_output('which %s'.format(shell)) || 'bash';
         if (!terminal)
             throw 'Terminal.Emulator: Unable to get default terminal application.';
 
-        // arguments
+        // specific terminal guake
+        if (terminal.endsWith('guake')) {
+            if (!this._shell_output('pgrep -f guake.main'))
+                throw 'Terminal.Emulator: Guake terminal not started.'
+
+            GLib.spawn_sync(null, [ terminal, '--new-tab', cwd ], null, GLib.SpawnFlags.SEARCH_PATH, null);
+            GLib.spawn_sync(null, [ terminal, '--rename-current-tab', 'vagrant' ], null, GLib.SpawnFlags.SEARCH_PATH, null);
+            //GLib.spawn_sync(null, [ terminal, '--execute-command', shell ], null, GLib.SpawnFlags.SEARCH_PATH, null);
+            GLib.spawn_sync(null, [ terminal, '--execute-command', command ], null, GLib.SpawnFlags.SEARCH_PATH, null);
+            GLib.spawn_sync(null, [ terminal, '--show', ], null, GLib.SpawnFlags.SEARCH_PATH, null);
+
+            return;
+        }
+
+        // terminal arguments
         let argv = [
             terminal,
             '-e',
-            'bash',
+            shell,
             '-c',
-            'cd %s; %s; %s'.format(cwd, command, 'bash'),
+            'cd %s; %s; %s'.format(cwd, command, shell),
         ];
 
         // argument -e (command) not working with some
