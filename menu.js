@@ -589,7 +589,7 @@ const Path = new Lang.Class({
     _refresh_menu_by_state: function() {
         this.setSensitive(true);
 
-        if (this.state === 'poweroff') {
+        if (this.state === 'poweroff' || this.state === 'shutoff') {
             this.vagrant.provision.actor.visible = false;
             this.vagrant.ssh.actor.visible = false;
             this.vagrant.rdp.actor.visible = false;
