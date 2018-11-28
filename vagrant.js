@@ -613,6 +613,9 @@ const Emulator = new Lang.Class({
             this._exec(id, 'destroy --force', action);
     },
 
+    // @todo:
+    // vagrant global-status --prune
+
     /* --- */
 
 });

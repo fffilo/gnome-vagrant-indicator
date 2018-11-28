@@ -35,6 +35,85 @@ const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
 /**
+ * List of yet not tested terminal
+ * emulators (work in progress)
+ *
+ * @type {Array}
+ */
+const NOTESTED = [
+    'wterm',
+    'TermKit',
+    'Final Term',
+    'Tilix',
+    'Termite',
+    'kitty',
+    'Pantheon Terminal',
+    'cool-retro-team',
+    'Alacritty',
+    'hyper',
+    'xiki',
+    'conhost',
+    'tym',
+    'BlackScreen',
+    'altyo',
+]
+
+/**
+ * List of supported terminal
+ * emulators
+ *
+ * @type {Array}
+ */
+const SUPPORTED = [
+    'gnome-terminal',
+    'mate-terminal',
+    'xfce4-terminal',
+    'terminator',
+    'guake',
+    'stterm',
+    'terminology',
+    'konsole',
+    'termit',
+    'xvt',
+    'lxterminal',
+    'mlterm',
+    'roxterm',
+    'rxvt',
+    'lilyterm',
+    'evilvte',
+    'pterm',
+    'aterm',
+    'caterm',
+    'gaterm',
+    'katerm',
+    'taterm',
+    'mrxvt',
+    'mrxvt-cjk',
+    'mrxvt-mini',
+    'mrxvt-full',
+    'eterm',
+    'kterm',
+    'lxterm',
+    'uxterm',
+    'xterm',
+    'vala-terminal',
+];
+
+/**
+ * List of unsupported terminal
+ * emulators
+ *
+ * @type {Array}
+ */
+const UNSUPPORTED = [
+    'qterminal',
+    'sakura',
+    'Terminal',
+    'tilda',
+    'xiterm+thai',
+];
+
+/**
  * Terminal.Emulator constructor
  *
  * @param  {Object}
@@ -71,20 +150,21 @@ const Emulator = new Lang.Class({
      * @param  {String} cwd      (optional) working directory
      * @param  {String} command  (optional) command to execute
      * @param  {String} terminal (optional) terminal emulator
-     * @param  {String} shell    (optional) command language interpreter
      * @return {Void}
      */
-    popup: function(cwd, command, terminal, shell) {
+    popup: function(cwd, command, terminal) {
         cwd = cwd || '~';
         command = command || ':';
         command = command.replace(/;+$/, '');
-        terminal = this._shell_output('which %s'.format(terminal)) || this.current;
-        shell = shell || GLib.getenv('SHELL') || 'bash';
-        shell = this._shell_output('which %s'.format(shell)) || 'bash';
+        terminal = this._shell_output('which %s'.format(terminal)) || this.path;
         if (!terminal)
-            throw 'Terminal.Emulator: Unable to get default terminal application.';
+            throw 'Terminal.Emulator: Not supported.';
 
-        // specific terminal guake
+        // command language interpreter
+        let shell = GLib.getenv('SHELL') || 'bash';
+        shell = this._shell_output('which %s'.format(shell)) || 'bash';
+
+        // specific terminal emulators guake
         if (terminal.endsWith('guake')) {
             if (!this._shell_output('pgrep -f guake.main'))
                 throw 'Terminal.Emulator: Guake terminal not started.'
@@ -94,9 +174,13 @@ const Emulator = new Lang.Class({
             //GLib.spawn_sync(null, [ terminal, '--execute-command', shell ], null, GLib.SpawnFlags.SEARCH_PATH, null);
             GLib.spawn_sync(null, [ terminal, '--execute-command', command ], null, GLib.SpawnFlags.SEARCH_PATH, null);
             GLib.spawn_sync(null, [ terminal, '--show', ], null, GLib.SpawnFlags.SEARCH_PATH, null);
+            // @todo - test if this works with empty command
 
             return;
         }
+
+        // quote current working directory
+        let qcwd = '"%s"'.format(cwd.replace(/\"/g, '\\\"'));
 
         // terminal arguments
         let argv = [
@@ -104,15 +188,27 @@ const Emulator = new Lang.Class({
             '-e',
             shell,
             '-c',
-            'cd %s; %s; %s'.format(cwd, command, shell),
+            'cd %s; %s; %s'.format(qcwd, command, shell),
         ];
 
         // argument -e (command) not working with some
         // terminals, replacing it with -x (execute)
-        [ 'gnome-terminal', 'terminator' ].forEach(function(item) {
+        [ 'gnome-terminal', 'mate-terminal', 'xfce4-terminal', 'terminator' ].forEach(function(item) {
             if (argv[0].endsWith(item))
                 argv[1] = '-x';
         });
+
+        // more argument fixes
+        if (argv[0].endsWith('terminology')) {
+            argv = [ terminal, '-d', cwd ];
+
+            if (command !== ':') {
+                argv.push('-e');
+                argv.push(command);
+            }
+        };
+        if (argv[0].endsWith('vala-terminal'))
+            argv = [ terminal, '-e', 'cd %s; %s'.format(qcwd, command) ];
 
         // popup window
         let subprocess = new Gio.Subprocess({
@@ -123,23 +219,39 @@ const Emulator = new Lang.Class({
     },
 
     /**
-     * Property current getter:
-     * default terminal emulator
+     * Property path getter:
+     * terminal emulator path
      *
      * Find default terminal application from
-     * gsettings configuration tool. Return
-     * gnome-terminal path on fail.
+     * gsettings configuration tool. Try to find
+     * any known installed emulators on fail.
      *
      * @return {Mixed} path (string) or null on fail
      */
-    get current() {
-        let result = null
-            || this._shell_output('gsettings get org.gnome.desktop.default-applications.terminal exec')
-            || "'gnome-terminal'";
+    get path() {
+        let result = this._shell_output('gsettings get org.gnome.desktop.default-applications.terminal exec') || '';
         result = result.replace(/^'|'$/g, '');
         result = this._shell_output('which %s'.format(result));
 
-        return result || null;
+        // alternatives x-terminal-emulator
+        if (result && result.endsWith('x-terminal-emulator'))
+            result = this._shell_output('readlink /etc/alternatives/x-terminal-emulator');
+
+        // skip unsupported terminal emulators
+        if (result)
+            UNSUPPORTED.forEach(function(item) {
+                if (result && result.endsWith(item))
+                    result = null;
+            });
+
+        // fallback - check if any common emulator installed
+        if (!result)
+            SUPPORTED.forEach(function(item) {
+                if (!result)
+                    result = this._shell_output('which %s'.format(item));
+            }.bind(this));
+
+        return result;
     },
 
     /* --- */
