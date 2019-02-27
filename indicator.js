@@ -69,13 +69,13 @@ const Base = new Lang.Class({
         this.notification = new Notification.Base();
 
         this.settings = Settings.settings();
-        this.settings.connect('changed', Lang.bind(this, this._handle_settings));
+        this.settings.connect('changed', Lang.bind(this, this._handleSettings));
 
         this.vagrant = new Vagrant.Emulator();
-        this.vagrant.connect('error', Lang.bind(this, this._handle_vagrant_error));
-        this.vagrant.monitor.connect('add', Lang.bind(this, this._handle_vagrant_add));
-        this.vagrant.monitor.connect('remove', Lang.bind(this, this._handle_vagrant_remove));
-        this.vagrant.monitor.connect('state', Lang.bind(this, this._handle_vagrant_state));
+        this.vagrant.connect('error', Lang.bind(this, this._handleVagrantError));
+        this.vagrant.monitor.connect('add', Lang.bind(this, this._handleVagrantAdd));
+        this.vagrant.monitor.connect('remove', Lang.bind(this, this._handleVagrantRemove));
+        this.vagrant.monitor.connect('state', Lang.bind(this, this._handleVagrantState));
         this.vagrant.monitor.start();
     },
 
@@ -96,15 +96,15 @@ const Base = new Lang.Class({
 
         this.machine = new Menu.Machine(this);
         this.machine.shorten = !this.settings.get_boolean('machine-full-path');
-        this.machine.setDisplayVagrant(this._get_settings_machine_menu_display_vagrant());
-        this.machine.setDisplaySystem(this._get_settings_machine_menu_display_system());
-        this.machine.connect('system', Lang.bind(this, this._handle_machine_system));
-        this.machine.connect('vagrant', Lang.bind(this, this._handle_machine_vagrant));
+        this.machine.setDisplayVagrant(this._getSettingsMachineMenuDisplayVagrant());
+        this.machine.setDisplaySystem(this._getSettingsMachineMenuDisplaySystem());
+        this.machine.connect('system', Lang.bind(this, this._handleMachineSystem));
+        this.machine.connect('vagrant', Lang.bind(this, this._handleMachineVagrant));
         this.menu.addMenuItem(this.machine);
         this.menu.addMenuItem(new Menu.Separator());
 
         this.preferences = new Menu.Item(_("Preferences"));
-        this.preferences.connect('activate', Lang.bind(this, this._handle_preferences));
+        this.preferences.connect('activate', Lang.bind(this, this._handlePreferences));
         this.menu.addMenuItem(this.preferences);
     },
 
@@ -128,7 +128,7 @@ const Base = new Lang.Class({
      *
      * @return {Number}
      */
-    _get_settings_machine_menu_display_vagrant: function() {
+    _getSettingsMachineMenuDisplayVagrant: function() {
         let display = Enum.toObject(Menu.DisplayVagrant);
         let result = 0;
 
@@ -148,7 +148,7 @@ const Base = new Lang.Class({
      *
      * @return {Number}
      */
-    _get_settings_machine_menu_display_system: function() {
+    _getSettingsMachineMenuDisplaySystem: function() {
         let display = Enum.toObject(Menu.DisplaySystem);
         let result = 0;
 
@@ -161,6 +161,7 @@ const Base = new Lang.Class({
 
         return result;
     },
+
     /**
      * Settings changed event handler
      *
@@ -168,13 +169,13 @@ const Base = new Lang.Class({
      * @param  {String} key
      * @return {Void}
      */
-    _handle_settings: function(widget, key) {
+    _handleSettings: function(widget, key) {
         if (key === 'machine-full-path')
             this.machine.shorten = !widget.get_boolean(key);
         else if (key.startsWith('display-system-'))
-            this.machine.setDisplaySystem(this._get_settings_machine_menu_display_system());
+            this.machine.setDisplaySystem(this._getSettingsMachineMenuDisplaySystem());
         else if (key.startsWith('display-vagrant-'))
-            this.machine.setDisplayVagrant(this._get_settings_machine_menu_display_vagrant());
+            this.machine.setDisplayVagrant(this._getSettingsMachineMenuDisplayVagrant());
     },
 
     /**
@@ -184,7 +185,7 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant_add: function(widget, event) {
+    _handleVagrantAdd: function(widget, event) {
         let machine = this.vagrant.index.machines[event.id];
         let index = Object.keys(this.vagrant.index.machines).indexOf(event.id);
 
@@ -198,7 +199,7 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant_remove: function(widget, event) {
+    _handleVagrantRemove: function(widget, event) {
         this.machine.remove(event.id);
     },
 
@@ -209,7 +210,7 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant_state: function(widget, event) {
+    _handleVagrantState: function(widget, event) {
         let machine = this.vagrant.index.machines[event.id];
         this.machine.state(event.id, machine.state);
 
@@ -224,7 +225,7 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant_error: function(widget, event) {
+    _handleVagrantError: function(widget, event) {
         if (!this.settings.get_boolean('notifications'))
             return;
 
@@ -248,7 +249,7 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_machine_system: function(widget, event) {
+    _handleMachineSystem: function(widget, event) {
         try {
             this.vagrant.open(event.id, event.command);
         }
@@ -265,7 +266,7 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_machine_vagrant: function(widget, event) {
+    _handleMachineVagrant: function(widget, event) {
         try {
             let action = this.settings.get_string('post-terminal-action');
             action = Enum.getValue(Vagrant.PostTerminalAction, action);
@@ -284,7 +285,7 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_preferences: function(widget, event) {
+    _handlePreferences: function(widget, event) {
         Util.spawn(['gnome-shell-extension-prefs', Me.metadata.uuid]);
     },
 

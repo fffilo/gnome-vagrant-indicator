@@ -65,7 +65,7 @@ const Widget = new GObject.Class({
      */
     _def: function() {
         this.settings = Settings.settings();
-        //this.settings.connect('changed', Lang.bind(this, this._handle_settings));
+        //this.settings.connect('changed', Lang.bind(this, this._handleSettings));
     },
 
     /**
@@ -80,10 +80,10 @@ const Widget = new GObject.Class({
 
         let notebook = new Gtk.Notebook();
         this.ui = {};
-        notebook.append_page(this._page_settings(), new Gtk.Label({ label: _("Settings"), }));
-        notebook.append_page(this._page_vagrant(), new Gtk.Label({ label: _("Vagrant"), }));
-        notebook.append_page(this._page_system(), new Gtk.Label({ label: _("System"), }));
-        notebook.append_page(this._page_about(), new Gtk.Label({ label: _("About"), }));
+        notebook.append_page(this._pageSettings(), new Gtk.Label({ label: _("Settings"), }));
+        notebook.append_page(this._pageVagrant(), new Gtk.Label({ label: _("Vagrant"), }));
+        notebook.append_page(this._pageSystem(), new Gtk.Label({ label: _("System"), }));
+        notebook.append_page(this._pageAbout(), new Gtk.Label({ label: _("About"), }));
         this.add(notebook);
 
         this.show_all();
@@ -107,21 +107,21 @@ const Widget = new GObject.Class({
      *
      * @return {Object}
      */
-    _page_settings: function() {
+    _pageSettings: function() {
         this.ui.settings = {};
         this.ui.settings.page = this._page();
         this.ui.settings.page.get_style_context().add_class('gnome-vagrant-indicator-prefs-page-settings');
 
         this.ui.settings.notifications = new InputSwitch('notifications', this.settings.get_boolean('notifications'), _("Show notifications"), _("Display notification on vagrant machine state change"));
-        this.ui.settings.notifications.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.settings.notifications.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.settings.page.actor.add(this.ui.settings.notifications);
 
         this.ui.settings.machinefullpath = new InputSwitch('machine-full-path', this.settings.get_boolean('machine-full-path'), _("Show machine full path"), _("Show machine full path as instance name"));
-        this.ui.settings.machinefullpath.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.settings.machinefullpath.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.settings.page.actor.add(this.ui.settings.machinefullpath);
 
         this.ui.settings.postterminalaction = new InputComboBox('post-terminal-action', this.settings.get_string('post-terminal-action'), _("Post terminal action"), _("Terminal action after vagrant command execution"), { 'NONE': _("Leave opened"), /*'PAUSE': _("Wait for keypress"),*/ 'EXIT': _("Close"), 'BOTH': _("Wait for keypress and close") });
-        this.ui.settings.postterminalaction.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.settings.postterminalaction.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.settings.page.actor.add(this.ui.settings.postterminalaction);
 
         return this.ui.settings.page;
@@ -132,61 +132,61 @@ const Widget = new GObject.Class({
      *
      * @return {Object}
      */
-    _page_vagrant: function() {
+    _pageVagrant: function() {
         this.ui.vagrant = {};
         this.ui.vagrant.page = this._page();
         this.ui.vagrant.page.get_style_context().add_class('gnome-vagrant-indicator-prefs-page-vagrant');
 
         //this.ui.vagrant.none = new InputSwitch('display-vagrant-none', this.settings.get_boolean('display-vagrant-none'), _("Disabled"), _("Disabled"));
-        //this.ui.vagrant.none.connect('changed', Lang.bind(this, this._handle_widget));
+        //this.ui.vagrant.none.connect('changed', Lang.bind(this, this._handleWidget));
         //this.ui.vagrant.page.actor.add(this.ui.vagrant.none);
 
         this.ui.vagrant.up = new InputSwitch('display-vagrant-up', this.settings.get_boolean('display-vagrant-up'), _("Up"), _("Display menu for `vagrant up` command"));
-        this.ui.vagrant.up.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.up.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.up);
 
         this.ui.vagrant.upprovision = new InputSwitch('display-vagrant-up-provision', this.settings.get_boolean('display-vagrant-up-provision'), _("Up and Provision"), _("Display menu for `vagrant up --provision` command"));
-        this.ui.vagrant.upprovision.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.upprovision.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.upprovision);
 
         this.ui.vagrant.upssh = new InputSwitch('display-vagrant-up-ssh', this.settings.get_boolean('display-vagrant-up-ssh'), _("Up and SSH"), _("Display menu for `vagrant up; vagrant ssh` command"));
-        this.ui.vagrant.upssh.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.upssh.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.upssh);
 
         this.ui.vagrant.uprdp = new InputSwitch('display-vagrant-up-rdp', this.settings.get_boolean('display-vagrant-up-rdp'), _("Up and RPD"), _("Display menu for `vagrant up; vagrant rdp` command"));
-        this.ui.vagrant.uprdp.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.uprdp.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.uprdp);
 
         this.ui.vagrant.provision = new InputSwitch('display-vagrant-provision', this.settings.get_boolean('display-vagrant-provision'), _("Provision"), _("Display menu for `vagrant provision` command"));
-        this.ui.vagrant.provision.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.provision.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.provision);
 
         this.ui.vagrant.ssh = new InputSwitch('display-vagrant-ssh', this.settings.get_boolean('display-vagrant-ssh'), _("SSH"), _("Display menu for `vagrant ssh` command"));
-        this.ui.vagrant.ssh.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.ssh.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.ssh);
 
         this.ui.vagrant.rdp = new InputSwitch('display-vagrant-rdp', this.settings.get_boolean('display-vagrant-rdp'), _("RDP"), _("Display menu for `vagrant rdp` command"));
-        this.ui.vagrant.rdp.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.rdp.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.rdp);
 
         this.ui.vagrant.resume = new InputSwitch('display-vagrant-resume', this.settings.get_boolean('display-vagrant-resume'), _("Resume"), _("Display menu for `vagrant resume` command"));
-        this.ui.vagrant.resume.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.resume.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.resume);
 
         this.ui.vagrant.suspend = new InputSwitch('display-vagrant-suspend', this.settings.get_boolean('display-vagrant-suspend'), _("Suspend"), _("Display menu for `vagrant suspend` command"));
-        this.ui.vagrant.suspend.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.suspend.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.suspend);
 
         this.ui.vagrant.halt = new InputSwitch('display-vagrant-halt', this.settings.get_boolean('display-vagrant-halt'), _("Halt"), _("Display menu for `vagrant halt` command"));
-        this.ui.vagrant.halt.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.halt.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.halt);
 
         this.ui.vagrant.destroy_force = new InputSwitch('display-vagrant-destroy', this.settings.get_boolean('display-vagrant-destroy'), _("Destroy"), _("Display menu for `vagrant destroy` command"));
-        this.ui.vagrant.destroy_force.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.vagrant.destroy_force.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.vagrant.page.actor.add(this.ui.vagrant.destroy_force);
 
         //this.ui.vagrant.destroy_force = new InputSwitch('display-vagrant-destroy-force', this.settings.get_boolean('display-vagrant-destroy-force'), _("Disabled"), _("Disabled"));
-        //this.ui.vagrant.destroy_force.connect('changed', Lang.bind(this, this._handle_widget));
+        //this.ui.vagrant.destroy_force.connect('changed', Lang.bind(this, this._handleWidget));
         //this.ui.vagrant.page.actor.add(this.ui.vagrant.destroy_force);
 
         return this.ui.vagrant.page;
@@ -197,25 +197,25 @@ const Widget = new GObject.Class({
      *
      * @return {Object}
      */
-    _page_system: function() {
+    _pageSystem: function() {
         this.ui.system = {};
         this.ui.system.page = this._page();
         this.ui.system.page.get_style_context().add_class('gnome-vagrant-indicator-prefs-page-system');
 
         //this.ui.system.none = new InputSwitch('display-system-none', this.settings.get_boolean('display-system-none'), _("Disabled"), _("Disabled"));
-        //this.ui.system.none.connect('changed', Lang.bind(this, this._handle_widget));
+        //this.ui.system.none.connect('changed', Lang.bind(this, this._handleWidget));
         //this.ui.system.page.actor.add(this.ui.system.none);
 
         this.ui.system.terminal = new InputSwitch('display-system-terminal', this.settings.get_boolean('display-system-terminal'), _("Open in Terminal"), _("Display Open in Terminal system menu"));
-        this.ui.system.terminal.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.system.terminal.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.system.page.actor.add(this.ui.system.terminal);
 
         this.ui.system.file_manager = new InputSwitch('display-system-file-manager', this.settings.get_boolean('display-system-file-manager'), _("Open in File Manager"), _("Display Open in File Manager system menu"));
-        this.ui.system.file_manager.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.system.file_manager.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.system.page.actor.add(this.ui.system.file_manager);
 
         this.ui.system.vagrantfile = new InputSwitch('display-system-vagrantfile', this.settings.get_boolean('display-system-vagrantfile'), _("Edit Vagrantfile"), _("Display Edit Vagrantfile system menu"));
-        this.ui.system.vagrantfile.connect('changed', Lang.bind(this, this._handle_widget));
+        this.ui.system.vagrantfile.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.system.page.actor.add(this.ui.system.vagrantfile);
 
         return this.ui.system.page;
@@ -226,7 +226,7 @@ const Widget = new GObject.Class({
      *
      * @return {Object}
      */
-    _page_about: function() {
+    _pageAbout: function() {
         this.ui.about = {};
         this.ui.about.page = this._page();
         this.ui.about.page.get_style_context().add_class('gnome-vagrant-indicator-prefs-page-about');
@@ -269,7 +269,7 @@ const Widget = new GObject.Class({
      * @return {Void}
      */
     _bind: function() {
-        this.connect('destroy', Lang.bind(this, this._handle_destroy));
+        this.connect('destroy', Lang.bind(this, this._handleDestroy));
     },
 
     /**
@@ -279,7 +279,7 @@ const Widget = new GObject.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_destroy: function(widget, event) {
+    _handleDestroy: function(widget, event) {
         if (this.settings)
             this.settings.run_dispose();
     },
@@ -291,7 +291,7 @@ const Widget = new GObject.Class({
      * @param  {String} event
      * @return {Void}
      */
-    _handle_widget: function(widget, event) {
+    _handleWidget: function(widget, event) {
         let old_value = this.settings['get_' + event.type](event.key);
 
         if (old_value != event.value)
@@ -305,7 +305,7 @@ const Widget = new GObject.Class({
      * @param  {String} key
      * @return {Void}
      */
-    _handle_settings: function(widget, key) {
+    _handleSettings: function(widget, key) {
         // pass
     },
 
@@ -421,6 +421,20 @@ const Input = new GObject.Class({
     },
 
     /**
+     * Input change event handler
+     *
+     * @param  {Object} widget
+     * @return {Void}
+     */
+    _handleChange: function(widget) {
+        this.emit('changed', {
+            key: this._key,
+            value: widget.value,
+            type: typeof widget.value,
+        });
+    },
+
+    /**
      * Value getter
      *
      * @return {Boolean}
@@ -437,20 +451,6 @@ const Input = new GObject.Class({
      */
     set value(value) {
         this._widget.value = value;
-    },
-
-    /**
-     * Input change event handler
-     *
-     * @param  {Object} widget
-     * @return {Void}
-     */
-    _handle_change: function(widget) {
-        this.emit('changed', {
-            key: this._key,
-            value: widget.value,
-            type: typeof widget.value,
-        });
     },
 
     /* --- */
@@ -481,7 +481,7 @@ const InputEntry = new GObject.Class({
         this.parent(key, text, tooltip);
 
         this._widget = new Gtk.Entry({ text: value });
-        this._widget.connect('notify::text', Lang.bind(this, this._handle_change));
+        this._widget.connect('notify::text', Lang.bind(this, this._handleChange));
         this.actor.add(this._widget);
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-input-entry');
@@ -494,7 +494,7 @@ const InputEntry = new GObject.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_change: function(actor, event) {
+    _handleChange: function(actor, event) {
         this.emit('changed', {
             key: this._key,
             value: this.value,
@@ -547,7 +547,7 @@ const InputSwitch = new GObject.Class({
         this.parent(key, text, tooltip);
 
         this._widget = new Gtk.Switch({ active: value });
-        this._widget.connect('notify::active', Lang.bind(this, this._handle_change));
+        this._widget.connect('notify::active', Lang.bind(this, this._handleChange));
         this.actor.add(this._widget);
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-input-switch');
@@ -559,7 +559,7 @@ const InputSwitch = new GObject.Class({
      * @param  {Object} widget
      * @return {Void}
      */
-    _handle_change: function(widget) {
+    _handleChange: function(widget) {
         this.emit('changed', {
             key: this._key,
             value: widget.active,
@@ -617,7 +617,7 @@ const InputComboBox = new GObject.Class({
         this.parent(key, text, tooltip);
 
         this._widget = new Gtk.ComboBoxText();
-        this._widget.connect('notify::active', Lang.bind(this, this._handle_change));
+        this._widget.connect('notify::active', Lang.bind(this, this._handleChange));
         this.actor.add(this._widget);
 
         for (let id in options) {
@@ -635,7 +635,7 @@ const InputComboBox = new GObject.Class({
      * @param  {Object} widget
      * @return {Void}
      */
-    _handle_change: function(widget) {
+    _handleChange: function(widget) {
         this.emit('changed', {
             key: this._key,
             value: this.value,

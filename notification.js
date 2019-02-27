@@ -45,7 +45,7 @@ const Base = new Lang.Class({
             return;
 
         this._source = new MessageTray.Source(this._title, this._icon);
-        this._source.connect('destroy', Lang.bind(this, this._handle_destroy));
+        this._source.connect('destroy', Lang.bind(this, this._handleDestroy));
 
         Main.messageTray.add(this._source);
     },
@@ -81,7 +81,7 @@ const Base = new Lang.Class({
      *
      * @return {Void}
      */
-    _handle_destroy: function() {
+    _handleDestroy: function() {
         this._source = null;
     },
 

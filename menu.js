@@ -46,8 +46,8 @@ const Machine = new Lang.Class({
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-machine');
 
         this._shorten = false;
-        this._display_vagrant = Enum.sum(DisplayVagrant);
-        this._display_system = Enum.sum(DisplaySystem);
+        this._displayVagrant = Enum.sum(DisplayVagrant);
+        this._displaySystem = Enum.sum(DisplaySystem);
 
         this.clear();
     },
@@ -97,8 +97,8 @@ const Machine = new Lang.Class({
         item.shorten = this.shorten;
         item.setDisplayVagrant(this.getDisplayVagrant());
         item.setDisplaySystem(this.getDisplaySystem());
-        item.connect('system', Lang.bind(this, this._handle_system));
-        item.connect('vagrant', Lang.bind(this, this._handle_vagrant));
+        item.connect('system', Lang.bind(this, this._handleSystem));
+        item.connect('vagrant', Lang.bind(this, this._handleVagrant));
         this.addMenuItem(item, index);
     },
 
@@ -108,11 +108,11 @@ const Machine = new Lang.Class({
      * @return {Void}
      */
     remove: function(id) {
-        this._get_item(id).forEach(function(actor) {
+        this._getItem(id).forEach(function(actor) {
             actor.destroy();
         });
 
-        if (!this._get_item().length)
+        if (!this._getItem().length)
             this.clear();
     },
 
@@ -124,7 +124,7 @@ const Machine = new Lang.Class({
      * @return {Void}
      */
     state: function(id, value) {
-        this._get_item(id).forEach(function(actor) {
+        this._getItem(id).forEach(function(actor) {
             actor.actor.remove_style_class_name(actor.state);
             actor.actor.add_style_class_name(value);
             actor.state = value;
@@ -139,7 +139,7 @@ const Machine = new Lang.Class({
      * @return {Number}
      */
     getDisplayVagrant: function() {
-        return this._display_vagrant;
+        return this._displayVagrant;
     },
 
     /**
@@ -154,9 +154,9 @@ const Machine = new Lang.Class({
         else if (value > Enum.sum(DisplayVagrant))
             value = Enum.sum(DisplayVagrant);
 
-        this._display_vagrant = value;
+        this._displayVagrant = value;
 
-        this._get_item().forEach(function(actor) {
+        this._getItem().forEach(function(actor) {
             actor.setDisplayVagrant(value);
         });
     },
@@ -169,7 +169,7 @@ const Machine = new Lang.Class({
      * @return {Number}
      */
     getDisplaySystem: function() {
-        return this._display_system;
+        return this._displaySystem;
     },
 
     /**
@@ -184,9 +184,9 @@ const Machine = new Lang.Class({
         else if (value > Enum.sum(DisplaySystem))
             value = Enum.sum(DisplaySystem);
 
-        this._display_system = value;
+        this._displaySystem = value;
 
-        this._get_item().forEach(function(actor) {
+        this._getItem().forEach(function(actor) {
             actor.setDisplaySystem(value);
         });
     },
@@ -209,7 +209,7 @@ const Machine = new Lang.Class({
     set shorten(value) {
         this._shorten = !!value;
 
-        this._get_item().forEach(function(actor) {
+        this._getItem().forEach(function(actor) {
             actor.shorten = value;
         });
     },
@@ -220,7 +220,7 @@ const Machine = new Lang.Class({
      * @param  {String} id (optional)
      * @return {Object}
      */
-    _get_item: function(id) {
+    _getItem: function(id) {
         return this.box.get_children()
             .map(function(actor) {
                 return actor._delegate;
@@ -238,7 +238,7 @@ const Machine = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_system: function(widget, event) {
+    _handleSystem: function(widget, event) {
         this.emit('system', {
             id: event.id,
             command: event.command,
@@ -253,7 +253,7 @@ const Machine = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant: function(widget, event) {
+    _handleVagrant: function(widget, event) {
         this.emit('vagrant', {
             id: event.id,
             command: event.command,
@@ -311,8 +311,8 @@ const Path = new Lang.Class({
         this.menu.actor.add_style_class_name('gnome-vagrant-indicator-menu-submenu');
         this.setOrnament(PopupMenu.Ornament.DOT);
 
-        this._ui_vagrant();
-        this._ui_system();
+        this._uiVagrant();
+        this._uiSystem();
     },
 
     /**
@@ -321,7 +321,7 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _ui_vagrant: function() {
+    _uiVagrant: function() {
         this.vagrant = {};
 
         let item = new Header(_("VAGRANT COMMANDS"));
@@ -349,7 +349,7 @@ const Path = new Lang.Class({
 
             let item = new Command(label);
             item.command = cmd;
-            item.connect('execute', Lang.bind(this, this._handle_vagrant));
+            item.connect('execute', Lang.bind(this, this._handleVagrant));
             this.menu.addMenuItem(item);
             this.vagrant[id] = item;
         }
@@ -361,7 +361,7 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _ui_system: function() {
+    _uiSystem: function() {
         this.system = {};
 
         let item = new Header(_("SYSTEM COMMANDS"));
@@ -381,7 +381,7 @@ const Path = new Lang.Class({
 
             let item = new Command(label);
             item.command = cmd;
-            item.connect('execute', Lang.bind(this, this._handle_system));
+            item.connect('execute', Lang.bind(this, this._handleSystem));
             this.menu.addMenuItem(item);
             this.system[id] = item;
         }
@@ -393,7 +393,7 @@ const Path = new Lang.Class({
      * @return {Void}
      */
     _bind: function() {
-        this.connect('activate', Lang.bind(this, this._handle_activate));
+        this.connect('activate', Lang.bind(this, this._handleActivate));
     },
 
     /**
@@ -404,7 +404,7 @@ const Path = new Lang.Class({
      * @return {Number}
      */
     getDisplayVagrant: function() {
-        return this._display_vagrant;
+        return this._displayVagrant;
     },
 
     /**
@@ -419,9 +419,9 @@ const Path = new Lang.Class({
         else if (value > Enum.sum(DisplayVagrant))
             value = Enum.sum(DisplayVagrant);
 
-        this._display_vagrant = value;
+        this._displayVagrant = value;
 
-        this._refresh_menu();
+        this._refreshMenu();
     },
 
     /**
@@ -432,7 +432,7 @@ const Path = new Lang.Class({
      * @return {Number}
      */
     getDisplaySystem: function() {
-        return this._display_system;
+        return this._displaySystem;
     },
 
     /**
@@ -447,9 +447,9 @@ const Path = new Lang.Class({
         else if (value > Enum.sum(DisplaySystem))
             value = Enum.sum(DisplaySystem);
 
-        this._display_system = value;
+        this._displaySystem = value;
 
-        this._refresh_menu();
+        this._refreshMenu();
     },
 
     /**
@@ -530,7 +530,7 @@ const Path = new Lang.Class({
 
         this._state = value;
 
-        this._refresh_menu();
+        this._refreshMenu();
     },
 
     /**
@@ -540,11 +540,11 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refresh_menu: function() {
-        this._refresh_menu_by_display();
-        this._refresh_menu_by_state();
-        this._refresh_menu_dropdown();
-        this._refresh_menu_headers();
+    _refreshMenu: function() {
+        this._refreshMenuByDisplay();
+        this._refreshMenuByState();
+        this._refreshMenuDropdown();
+        this._refreshMenuHeaders();
     },
 
     /**
@@ -554,7 +554,7 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refresh_menu_by_display: function() {
+    _refreshMenuByDisplay: function() {
         let value = this.getDisplayVagrant();
         for (let key in this.vagrant) {
             if (key === 'header')
@@ -586,7 +586,7 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refresh_menu_by_state: function() {
+    _refreshMenuByState: function() {
         this.setSensitive(true);
 
         if (this.state === 'poweroff' || this.state === 'shutoff') {
@@ -643,7 +643,7 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refresh_menu_dropdown: function() {
+    _refreshMenuDropdown: function() {
         this._triangleBin.visible = false
             || this.system.terminal.actor.visible
             || this.system.file_manager.actor.visible
@@ -667,7 +667,7 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refresh_menu_headers: function() {
+    _refreshMenuHeaders: function() {
         this.vagrant.header.actor.visible = false
             || this.vagrant.up.actor.visible
             || this.vagrant.up_provision.actor.visible
@@ -693,7 +693,7 @@ const Path = new Lang.Class({
      * @param  {String} method (optional)
      * @return {Object}
      */
-    _get_item: function(method) {
+    _getItem: function(method) {
         return this.get_children()
             .map(function(actor) {
                 return actor._delegate;
@@ -711,7 +711,7 @@ const Path = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_activate: function(widget, event) {
+    _handleActivate: function(widget, event) {
         this.emit('system', {
             id: this.id,
             command: Vagrant.CommandSystem.TERMINAL,
@@ -726,7 +726,7 @@ const Path = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_system: function(widget, event) {
+    _handleSystem: function(widget, event) {
         this.emit('system', {
             id: this.id,
             command: widget.command,
@@ -741,7 +741,7 @@ const Path = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant: function(widget, event) {
+    _handleVagrant: function(widget, event) {
         this.emit('vagrant', {
             id: this.id,
             command: widget.command,
@@ -802,7 +802,7 @@ const Command = new Lang.Class({
      * @return {Void}
      */
     _bind: function() {
-        this.connect('activate', Lang.bind(this, this._handle_activate));
+        this.connect('activate', Lang.bind(this, this._handleActivate));
     },
 
     /**
@@ -812,7 +812,7 @@ const Command = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_activate: function(widget, event) {
+    _handleActivate: function(widget, event) {
         this.emit('execute', {});
     },
 

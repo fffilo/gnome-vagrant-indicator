@@ -131,7 +131,7 @@ const Emulator = new Lang.Class({
      * @param  {String} command command to execute
      * @return {Mixed}          output (string) or null on fail
      */
-    _shell_output: function(command) {
+    _shellOutput: function(command) {
         try {
             let [ ok, output, error, status ] = GLib.spawn_command_line_sync(command);
             if (!status)
@@ -156,17 +156,17 @@ const Emulator = new Lang.Class({
         cwd = cwd || '~';
         command = command || ':';
         command = command.replace(/;+$/, '');
-        terminal = this._shell_output('which %s'.format(terminal)) || this.path;
+        terminal = this._shellOutput('which %s'.format(terminal)) || this.path;
         if (!terminal)
             throw 'Terminal.Emulator: Not supported.';
 
         // command language interpreter
         let shell = GLib.getenv('SHELL') || 'bash';
-        shell = this._shell_output('which %s'.format(shell)) || 'bash';
+        shell = this._shellOutput('which %s'.format(shell)) || 'bash';
 
         // specific terminal emulators guake
         if (terminal.endsWith('guake')) {
-            if (!this._shell_output('pgrep -f guake.main'))
+            if (!this._shellOutput('pgrep -f guake.main'))
                 throw 'Terminal.Emulator: Guake terminal not started.'
 
             GLib.spawn_sync(null, [ terminal, '--new-tab', cwd ], null, GLib.SpawnFlags.SEARCH_PATH, null);
@@ -229,13 +229,13 @@ const Emulator = new Lang.Class({
      * @return {Mixed} path (string) or null on fail
      */
     get path() {
-        let result = this._shell_output('gsettings get org.gnome.desktop.default-applications.terminal exec') || '';
+        let result = this._shellOutput('gsettings get org.gnome.desktop.default-applications.terminal exec') || '';
         result = result.replace(/^'|'$/g, '');
-        result = this._shell_output('which %s'.format(result));
+        result = this._shellOutput('which %s'.format(result));
 
         // alternatives x-terminal-emulator
         if (result && result.endsWith('x-terminal-emulator'))
-            result = this._shell_output('readlink /etc/alternatives/x-terminal-emulator');
+            result = this._shellOutput('readlink /etc/alternatives/x-terminal-emulator');
 
         // skip unsupported terminal emulators
         if (result)
@@ -248,7 +248,7 @@ const Emulator = new Lang.Class({
         if (!result)
             SUPPORTED.forEach(function(item) {
                 if (!result)
-                    result = this._shell_output('which %s'.format(item));
+                    result = this._shellOutput('which %s'.format(item));
             }.bind(this));
 
         return result;

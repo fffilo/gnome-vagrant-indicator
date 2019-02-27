@@ -271,7 +271,7 @@ const Monitor = new Lang.Class({
             return;
 
         this._monitor = this._file.monitor(Gio.FileMonitorFlags.NONE, null);
-        this._monitor.connect('changed', Lang.bind(this, this._handle_monitor_changed));
+        this._monitor.connect('changed', Lang.bind(this, this._handleMonitorChanged));
     },
 
     /**
@@ -307,7 +307,7 @@ const Monitor = new Lang.Class({
      * @param  {Object} file
      * @return {Void}
      */
-    _handle_monitor_changed: function(monitor, file) {
+    _handleMonitorChanged: function(monitor, file) {
         let index = new Index();
         let emit = [];
         let _new = index.parse();
@@ -390,7 +390,7 @@ const Emulator = new Lang.Class({
         index.destroy();
 
         this._monitor = new Monitor();
-        this._monitor.connect('change', Lang.bind(this, this._handle_monitor_change));
+        this._monitor.connect('change', Lang.bind(this, this._handleMonitorChange));
 
         this._terminal = new Terminal.Emulator();
     },
@@ -466,7 +466,7 @@ const Emulator = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_monitor_change: function(monitor, event) {
+    _handleMonitorChange: function(monitor, event) {
         this._index = event.index;
     },
 
