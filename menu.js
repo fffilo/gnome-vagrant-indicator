@@ -290,6 +290,7 @@ const Path = new Lang.Class({
         this._path = path;
         this._state = 'unknown';
         this._shorten = true;
+        this._config = null;
 
         this._ui();
         this._bind();
@@ -484,11 +485,19 @@ const Path = new Lang.Class({
     set shorten(value) {
         this._shorten = !!value;
 
-        let path = this.path;
+        let text = this.path;
         if (this.shorten)
-            path = GLib.basename(path);
+            text = GLib.basename(text);
 
-        this.label.text = path;
+        try {
+            if (this.config.label)
+                text = this.config.label;
+        }
+        catch(e) {
+            // pass
+        }
+
+        this.label.text = text;
     },
 
     /**
@@ -531,6 +540,41 @@ const Path = new Lang.Class({
         this._state = value;
 
         this._refreshMenu();
+    },
+
+    /**
+     * Property config getter
+     *
+     * @return {Object}
+     */
+    get config() {
+        if (!this._config) {
+            try {
+                let path = this.path + '/.' + Me.metadata.uuid;
+                if (!GLib.file_test(path, GLib.FileTest.EXISTS)) {
+                    let data = {
+                        label: null,
+                        settings: null,
+                    }
+
+                    GLib.file_set_contents(path, JSON.stringify(data, null, 4) + '\n');
+                }
+
+                let [ ok, contents ] = GLib.file_get_contents(path);
+                if (ok)
+                    this._config = JSON.parse(contents);
+                else
+                    throw '';
+
+                if (typeof this._config !== "object")
+                    throw '';
+            }
+            catch(e) {
+                this._config = {};
+            }
+        }
+
+        return this._config;
     },
 
     /**
