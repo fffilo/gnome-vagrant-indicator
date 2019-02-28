@@ -641,8 +641,13 @@ const Path = new Lang.Class({
     _refreshMenuByLabel: function() {
         let text = this.getConfig('label');
         if (!text) {
+            let full = this.getConfig('settings.machineFullPath');
+            let shorten = !full;
+            if (full === null || typeof full === 'undefined')
+                shorten = this.shorten;
+
             text = this.path;
-            if (this.shorten)
+            if (shorten)
                 text = GLib.basename(text);
         }
 

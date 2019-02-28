@@ -215,7 +215,7 @@ const Base = new Lang.Class({
         this.machine.state(event.id, machine.state);
 
         let notify = this.machine.getConfig(event.id, 'settings.notifications');
-        if (typeof notify === 'undefined')
+        if (notify === null || typeof notify === 'undefined')
             notify = this.settings.get_boolean('notifications');
         if (notify)
             this.notification.show('Machine went %s'.format(machine.state), machine.vagrantfile_path);
