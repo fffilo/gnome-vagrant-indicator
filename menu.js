@@ -316,9 +316,12 @@ const Path = new Lang.Class({
      * @return {Void}
      */
     destroy: function() {
+        Mainloop.source_remove(this._configInterval);
+
         this._configMonitor.cancel();
         this._configMonitor = null;
         this._configFile = null;
+        this._configInterval = null;
 
         this.parent();
     },
@@ -856,6 +859,7 @@ const Path = new Lang.Class({
         this._configInterval = null;
         this._loadConfig();
 
+        // stop repeating
         return false;
     },
 

@@ -31,6 +31,7 @@
 
 // import modules
 const Lang = imports.lang;
+const Mainloop = imports.mainloop;
 const Signals = imports.signals;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
@@ -243,6 +244,7 @@ const Monitor = new Lang.Class({
         this._index = null;
         this._file = null;
         this._monitor = null;
+        this._interval = null;
 
         let index = new Index();
         this._index = index.parse();
@@ -284,6 +286,8 @@ const Monitor = new Lang.Class({
         if (!this._monitor)
             return;
 
+        Mainloop.source_remove(this._interval);
+
         this._monitor.cancel();
         this._monitor = null;
     },
@@ -308,6 +312,22 @@ const Monitor = new Lang.Class({
      * @return {Void}
      */
     _handleMonitorChanged: function(monitor, file) {
+        Mainloop.source_remove(this._interval);
+        this._interval = Mainloop.timeout_add(1000, Lang.bind(this, this._handleMonitorChangedDelayed), null);
+    },
+
+    /**
+     * Adding delay after vagrant machine
+     * index file content change event
+     * handler which will prevent
+     * unnecessary multiple code
+     * execution
+     *
+     * @return {Boolean}
+     */
+    _handleMonitorChangedDelayed: function() {
+        this._interval = null;
+
         let index = new Index();
         let emit = [];
         let _new = index.parse();
@@ -316,7 +336,7 @@ const Monitor = new Lang.Class({
 
         // check actual changes
         if (JSON.stringify(_old) === JSON.stringify(_new))
-            return;
+            return false;
 
         // check if machine is missing
         for (let id in _old.machines) {
@@ -338,7 +358,7 @@ const Monitor = new Lang.Class({
 
         // no changes
         if (!emit.length)
-            return;
+            return false;
 
         // save new index
         this._index = _new;
@@ -354,6 +374,9 @@ const Monitor = new Lang.Class({
                 id: emit[i + 1],
             });
         }
+
+        // stop repeating
+        return false;
     },
 
     /* --- */
