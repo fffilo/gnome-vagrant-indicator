@@ -271,7 +271,9 @@ const Base = new Lang.Class({
      */
     _handleMachineVagrant: function(widget, event) {
         try {
-            let action = this.settings.get_string('post-terminal-action');
+            let action = this.machine.getConfig(event.id, 'settings.postTerminalAction');
+            if (typeof action !== 'string')
+                action = this.settings.get_string('post-terminal-action');
             action = Enum.getValue(Vagrant.PostTerminalAction, action);
 
             this.vagrant.execute(event.id, event.command, action);
