@@ -194,6 +194,22 @@ const Machine = new Lang.Class({
     },
 
     /**
+     * Get machine specific config
+     *
+     * @param  {String} id
+     * @param  {String} key (optional)
+     * @return {Mixed}
+     */
+    getConfig: function(id, key) {
+        let result;
+        this._getItem(id).forEach(function(actor) {
+            result = actor.getConfig(key);
+        });
+
+        return result;
+    },
+
+    /**
      * Property shorten getter
      *
      * @return {Boolean}

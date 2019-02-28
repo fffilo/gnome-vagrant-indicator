@@ -214,7 +214,10 @@ const Base = new Lang.Class({
         let machine = this.vagrant.index.machines[event.id];
         this.machine.state(event.id, machine.state);
 
-        if (this.settings.get_boolean('notifications'))
+        let notify = this.machine.getConfig(event.id, 'settings.notifications');
+        if (typeof notify === 'undefined')
+            notify = this.settings.get_boolean('notifications');
+        if (notify)
             this.notification.show('Machine went %s'.format(machine.state), machine.vagrantfile_path);
     },
 
