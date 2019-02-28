@@ -5,6 +5,8 @@
 
 // import modules
 const Lang = imports.lang;
+const Mainloop = imports.mainloop;
+const Gio = imports.gi.Gio;
 const GLib = imports.gi.GLib;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -290,16 +292,35 @@ const Path = new Lang.Class({
         this._path = path;
         this._state = 'unknown';
         this._shorten = true;
-        this._config = null;
+
+        this._configFile = Gio.File.new_for_path(this.path + '/.' + Me.metadata.uuid);
+        this._configMonitor = null;
+        this._configInterval = null;
+        this._configData = {};
 
         this._ui();
         this._bind();
+        this._loadConfig(true);
 
         this.setDisplayVagrant(DisplayVagrant.NONE);
         this.setDisplaySystem(DisplaySystem.NONE);
 
+        // with setter we're making sure className
+        // (machine state) is set
         this.state = state;
-        this.shorten = false;
+    },
+
+    /**
+     * Destructor
+     *
+     * @return {Void}
+     */
+    destroy: function() {
+        this._configMonitor.cancel();
+        this._configMonitor = null;
+        this._configFile = null;
+
+        this.parent();
     },
 
     /**
@@ -395,6 +416,9 @@ const Path = new Lang.Class({
      */
     _bind: function() {
         this.connect('activate', Lang.bind(this, this._handleActivate));
+
+        this._configMonitor = this._configFile.monitor(Gio.FileMonitorFlags.NONE, null);
+        this._configMonitor.connect('changed', Lang.bind(this, this._handleMonitorChanged));
     },
 
     /**
@@ -468,6 +492,28 @@ const Path = new Lang.Class({
     },
 
     /**
+     * Get configuration from config file
+     *
+     * @param  {String} key (optional)
+     * @return {Mixed}
+     */
+    getConfig: function(key) {
+        let result = this._configData;
+        if (!key)
+            return result;
+
+        let arr = key.split('.');
+        for (let i = 0; i < arr.length; i++) {
+            if (!(arr[i] in result))
+                return undefined;
+
+            result = result[arr[i]];
+        }
+
+        return result;
+    },
+
+    /**
      * Property shorten getter
      *
      * @return {Boolean}
@@ -485,19 +531,7 @@ const Path = new Lang.Class({
     set shorten(value) {
         this._shorten = !!value;
 
-        let text = this.path;
-        if (this.shorten)
-            text = GLib.basename(text);
-
-        try {
-            if (this.config.label)
-                text = this.config.label;
-        }
-        catch(e) {
-            // pass
-        }
-
-        this.label.text = text;
+        this._refreshMenuByLabel();
     },
 
     /**
@@ -543,52 +577,57 @@ const Path = new Lang.Class({
     },
 
     /**
-     * Property config getter
+     * Load config and store it to
+     * this._configData
      *
-     * @return {Object}
+     * @param  {Boolean} skipRefresh (optional)
+     * @return {Void}
      */
-    get config() {
-        if (!this._config) {
-            try {
-                let path = this.path + '/.' + Me.metadata.uuid;
-                if (!GLib.file_test(path, GLib.FileTest.EXISTS)) {
-                    let data = {
-                        label: null,
-                        settings: null,
-                    }
-
-                    GLib.file_set_contents(path, JSON.stringify(data, null, 4) + '\n');
-                }
-
-                let [ ok, contents ] = GLib.file_get_contents(path);
-                if (ok)
-                    this._config = JSON.parse(contents);
-                else
-                    throw '';
-
-                if (typeof this._config !== "object")
-                    throw '';
-            }
-            catch(e) {
-                this._config = {};
-            }
+    _loadConfig: function(skipRefresh) {
+        try {
+            let [ ok, contents ] = GLib.file_get_contents(this._configFile.get_path());
+            if (ok)
+                this._configData = JSON.parse(contents);
+            else
+                throw '';
+        }
+        catch(e) {
+            this._configData = {};
         }
 
-        return this._config;
+        if (!skipRefresh)
+            this._refreshMenu();
     },
 
     /**
-     *
      * Show/hide system/vagrant menu
      * items
      *
      * @return {Void}
      */
     _refreshMenu: function() {
+        this._refreshMenuByLabel();
         this._refreshMenuByDisplay();
         this._refreshMenuByState();
         this._refreshMenuDropdown();
         this._refreshMenuHeaders();
+    },
+
+    /**
+     * Set menu label based on  shorten
+     * property
+     *
+     * @return {Void}
+     */
+    _refreshMenuByLabel: function() {
+        let text = this.getConfig('label');
+        if (!text) {
+            text = this.path;
+            if (this.shorten)
+                text = GLib.basename(text);
+        }
+
+        this.label.text = text;
     },
 
     /**
@@ -790,6 +829,34 @@ const Path = new Lang.Class({
             id: this.id,
             command: widget.command,
         });
+    },
+
+    /**
+     * Machine config file content
+     * change event handler
+     *
+     * @param  {Object} monitor
+     * @param  {Object} file
+     * @return {Void}
+     */
+    _handleMonitorChanged: function(monitor, file) {
+        Mainloop.source_remove(this._configInterval);
+        this._configInterval = Mainloop.timeout_add(500, Lang.bind(this, this._handleMonitorChangedDelayed), null);
+    },
+
+    /**
+     * Adding delay after machine config
+     * file content change event handler
+     * which will prevent unnecessary
+     * multiple code execution
+     *
+     * @return {Boolean}
+     */
+    _handleMonitorChangedDelayed: function() {
+        this._configInterval = null;
+        this._loadConfig();
+
+        return false;
     },
 
     /* --- */
