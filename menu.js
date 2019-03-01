@@ -923,7 +923,11 @@ const Path = new Lang.Class({
             GLib.file_set_contents(path, data);
         }
         catch(e) {
-            this.emit('error', e);
+            this.emit('error', {
+                id: this.id,
+                error: e,
+            });
+
             return true;
         }
 

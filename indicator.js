@@ -223,17 +223,20 @@ const Base = new Lang.Class({
     },
 
     /**
-     * Monitor error event handler
+     * Default error event handler
      *
      * @param  {Object} widget
      * @param  {Object} event
      * @return {Void}
      */
-    _handleVagrantError: function(widget, event) {
-        if (!this.settings.get_boolean('notifications'))
+    _handleError: function(widget, event) {
+        let notify = this.machine.getConfig(event.id, 'settings.notifications');
+        if (notify === null || typeof notify === 'undefined')
+            notify = this.settings.get_boolean('notifications');
+        if (!notify)
             return;
 
-        let arr = event.toString().split(':');
+        let arr = event.error.toString().split(':');
         let title = arr[0].trim();
         let message = arr.slice(1).join(':').trim();
 
@@ -245,20 +248,26 @@ const Base = new Lang.Class({
         this.notification.show(title, message);
     },
 
+    /**
+     * Monitor error event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handleVagrantError: function(widget, event) {
+        this._handleError(widget, event);
+    },
+
+    /**
+     * Machine error event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
     _handleMachineError: function(widget, event) {
-        if (!this.settings.get_boolean('notifications'))
-            return;
-
-        let arr = event.toString().split(':');
-        let title = arr[0].trim();
-        let message = arr.slice(1).join(':').trim();
-
-        if (!message) {
-            message = title;
-            title = 'Vagrant.Unknown';
-        }
-
-        this.notification.show(title, message);
+        this._handleError(widget, event);
     },
 
     /**
@@ -274,7 +283,10 @@ const Base = new Lang.Class({
             this.vagrant.open(event.id, event.command);
         }
         catch(e) {
-            this.vagrant.emit('error', e);
+            this.vagrant.emit('error', {
+                id: event.id,
+                error: e,
+            });
         }
     },
 
@@ -296,7 +308,10 @@ const Base = new Lang.Class({
             this.vagrant.execute(event.id, event.command, action);
         }
         catch(e) {
-            this.vagrant.emit('error', e);
+            this.vagrant.emit('error', {
+                id: event.id,
+                error: e,
+            });
         }
     },
 
