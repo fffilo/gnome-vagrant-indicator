@@ -84,6 +84,7 @@ const CommandSystem = new Enum.Enum([
     'TERMINAL',
     'FILE_MANAGER',
     'VAGRANTFILE',
+    'MACHINE_CONFIG',
 ]);
 
 /**
@@ -595,6 +596,10 @@ const Emulator = new Lang.Class({
         }
         if ((cmd | CommandSystem.FILE_MANAGER) === cmd) {
             let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path, null);
+            Gio.AppInfo.launch_default_for_uri(uri, null);
+        }
+        if ((cmd | CommandSystem.MACHINE_CONFIG) === cmd) {
+            let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path + '/.' + Me.metadata.uuid, null);
             Gio.AppInfo.launch_default_for_uri(uri, null);
         }
     },

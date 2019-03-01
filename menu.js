@@ -99,6 +99,7 @@ const Machine = new Lang.Class({
         item.shorten = this.shorten;
         item.setDisplayVagrant(this.getDisplayVagrant());
         item.setDisplaySystem(this.getDisplaySystem());
+        item.connect('error', Lang.bind(this, this._handleError));
         item.connect('system', Lang.bind(this, this._handleSystem));
         item.connect('vagrant', Lang.bind(this, this._handleVagrant));
         this.addMenuItem(item, index);
@@ -151,6 +152,8 @@ const Machine = new Lang.Class({
      * @return {Void}
      */
     setDisplayVagrant: function(value) {
+        // @todo: this.machine.getConfig
+
         if (value < Enum.min(DisplayVagrant))
             value = Enum.min(DisplayVagrant);
         else if (value > Enum.sum(DisplayVagrant))
@@ -181,6 +184,8 @@ const Machine = new Lang.Class({
      * @return {Void}
      */
     setDisplaySystem: function(value) {
+        // @todo: this.machine.getConfig
+
         if (value < Enum.min(DisplaySystem))
             value = Enum.min(DisplaySystem);
         else if (value > Enum.sum(DisplaySystem))
@@ -246,6 +251,17 @@ const Machine = new Lang.Class({
             .filter(function(actor) {
                 return actor instanceof Path && (id ? actor.id === id : true);
             });
+    },
+
+    /**
+     * Error handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Void}
+     */
+    _handleError: function(widget, event) {
+        this.emit('error', event);
     },
 
     /**
@@ -370,17 +386,17 @@ const Path = new Lang.Class({
         this.vagrant.header = item;
 
         let menu = [
-            'up', Vagrant.CommandVagrant.UP, _("Up"),
-            'up_provision', Vagrant.CommandVagrant.UP_PROVISION, _("Up and Provision"),
-            'up_ssh', Vagrant.CommandVagrant.UP_SSH, _("Up and SSH"),
-            'up_rdp', Vagrant.CommandVagrant.UP_RDP, _("Up and RDP"),
-            'provision', Vagrant.CommandVagrant.PROVISION, _("Provision"),
-            'ssh', Vagrant.CommandVagrant.SSH, _("SSH"),
-            'rdp', Vagrant.CommandVagrant.RDP, _("RDP"),
-            'resume', Vagrant.CommandVagrant.RESUME, _("Resume"),
-            'suspend', Vagrant.CommandVagrant.SUSPEND, _("Suspend"),
-            'halt', Vagrant.CommandVagrant.HALT, _("Halt"),
-            'destroy', Vagrant.CommandVagrant.DESTROY, _("Destroy"),
+            'up', DisplayVagrant.UP, _("Up"),
+            'up_provision', DisplayVagrant.UP_PROVISION, _("Up and Provision"),
+            'up_ssh', DisplayVagrant.UP_SSH, _("Up and SSH"),
+            'up_rdp', DisplayVagrant.UP_RDP, _("Up and RDP"),
+            'provision', DisplayVagrant.PROVISION, _("Provision"),
+            'ssh', DisplayVagrant.SSH, _("SSH"),
+            'rdp', DisplayVagrant.RDP, _("RDP"),
+            'resume', DisplayVagrant.RESUME, _("Resume"),
+            'suspend', DisplayVagrant.SUSPEND, _("Suspend"),
+            'halt', DisplayVagrant.HALT, _("Halt"),
+            'destroy', DisplayVagrant.DESTROY, _("Destroy"),
         ];
 
         for (let i = 0; i < menu.length; i += 3) {
@@ -410,9 +426,10 @@ const Path = new Lang.Class({
         this.system.header = item;
 
         let menu = [
-            'terminal', Vagrant.CommandSystem.TERMINAL, _("Open in Terminal"),
-            'file_manager', Vagrant.CommandSystem.FILE_MANAGER, _("Open in File Manager"),
-            'vagrantfile', Vagrant.CommandSystem.VAGRANTFILE, _("Edit Vagrantfile"),
+            'terminal', DisplaySystem.TERMINAL, _("Open in Terminal"),
+            'file_manager', DisplaySystem.FILE_MANAGER, _("Open in File Manager"),
+            'vagrantfile', DisplaySystem.VAGRANTFILE, _("Edit Vagrantfile"),
+            'machine_config', DisplaySystem.MACHINE_CONFIG, _("Machine Configuration"),
         ];
 
         for (let i = 0; i < menu.length; i += 3) {
@@ -593,6 +610,40 @@ const Path = new Lang.Class({
         this._state = value;
 
         this._refreshMenu();
+    },
+
+    /**
+     * Default machine configuration
+     *
+     * @return {Object}
+     */
+    _defaultConfig: function() {
+        return {
+            'label': null,
+            'settings': {
+                'notifications': null,
+                'machineFullPath': null,
+                'postTerminalAction': null,
+                'displaySystemNone': null,
+                'displaySystemTerminal': null,
+                'displaySystemFileManager': null,
+                'displaySystemVagrantfile': null,
+                'displaySystemMachineConfig': null,
+                'displayVagrantNone': null,
+                'displayVagrantUp': null,
+                'displayVagrantUpProvision': null,
+                'displayVagrantUpSsh': null,
+                'displayVagrantUpRdp': null,
+                'displayVagrantProvision': null,
+                'displayVagrantSsh': null,
+                'displayVagrantRdp': null,
+                'displayVagrantResume': null,
+                'displayVagrantSuspend': null,
+                'displayVagrantHalt': null,
+                'displayVagrantDestroy': null,
+                'displayVagrantDestroyForce': null,
+            }
+        };
     },
 
     /**
@@ -821,7 +872,7 @@ const Path = new Lang.Class({
     _handleActivate: function(widget, event) {
         this.emit('system', {
             id: this.id,
-            command: Vagrant.CommandSystem.TERMINAL,
+            command: DisplaySystem.TERMINAL,
         });
     },
 
@@ -834,10 +885,49 @@ const Path = new Lang.Class({
      * @return {Void}
      */
     _handleSystem: function(widget, event) {
+        let key = Enum.getKey(DisplaySystem, widget.command);
+        key = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+        key = key.replace(/_[a-z]/g, function(match) {
+            return match.charAt(1).toUpperCase();
+        });
+        if (typeof this['_handleSystem' + key] === 'function')
+            if (this['_handleSystem' + key].call(this, widget, event))
+                return;
+
         this.emit('system', {
             id: this.id,
             command: widget.command,
         });
+    },
+
+    /**
+     * Before menu subitem (system command
+     * machine_config) event handler:
+     * create default config file (if not
+     * exists)
+     *
+     * @param  {Object}  widget
+     * @param  {Object}  event
+     * @return {Boolean}
+     */
+    _handleSystemMachineConfig: function(widget, event) {
+        let path = this._configFile.get_path();
+        if (GLib.file_test(path, GLib.FileTest.EXISTS))
+            return false;
+
+        try {
+            let data = this._defaultConfig();
+            data = JSON.stringify(data, null, 4);
+            data += '\n';
+
+            GLib.file_set_contents(path, data);
+        }
+        catch(e) {
+            this.emit('error', e);
+            return true;
+        }
+
+        return false;
     },
 
     /**
@@ -849,6 +939,15 @@ const Path = new Lang.Class({
      * @return {Void}
      */
     _handleVagrant: function(widget, event) {
+        let key = Enum.getKey(DisplayVagrant, widget.command);
+        key = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
+        key = key.replace(/_[a-z]/g, function(match) {
+            return match.charAt(1).toUpperCase();
+        });
+        if (typeof this['_handleVagrant' + key] === 'function')
+            if (this['_handleVagrant' + key].call(this, widget, event))
+                return;
+
         this.emit('vagrant', {
             id: this.id,
             command: widget.command,

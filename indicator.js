@@ -98,6 +98,7 @@ const Base = new Lang.Class({
         this.machine.shorten = !this.settings.get_boolean('machine-full-path');
         this.machine.setDisplayVagrant(this._getSettingsMachineMenuDisplayVagrant());
         this.machine.setDisplaySystem(this._getSettingsMachineMenuDisplaySystem());
+        this.machine.connect('error', Lang.bind(this, this._handleMachineError));
         this.machine.connect('system', Lang.bind(this, this._handleMachineSystem));
         this.machine.connect('vagrant', Lang.bind(this, this._handleMachineVagrant));
         this.menu.addMenuItem(this.machine);
@@ -229,6 +230,22 @@ const Base = new Lang.Class({
      * @return {Void}
      */
     _handleVagrantError: function(widget, event) {
+        if (!this.settings.get_boolean('notifications'))
+            return;
+
+        let arr = event.toString().split(':');
+        let title = arr[0].trim();
+        let message = arr.slice(1).join(':').trim();
+
+        if (!message) {
+            message = title;
+            title = 'Vagrant.Unknown';
+        }
+
+        this.notification.show(title, message);
+    },
+
+    _handleMachineError: function(widget, event) {
         if (!this.settings.get_boolean('notifications'))
             return;
 
