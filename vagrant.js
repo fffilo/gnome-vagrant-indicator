@@ -30,7 +30,6 @@
 'use strict';
 
 // import modules
-const Lang = imports.lang;
 const Signals = imports.signals;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
@@ -198,7 +197,7 @@ var Index = class Index {
             let [ok, content] = GLib.file_get_contents(this.path);
             let data = null;
             if (content instanceof Uint8Array) {
-                data = JSON.parse(imports.byteArray.toString(content));
+                data = JSON.parse(String.fromCharCode.apply(null, content));
             } else {
                 data = JSON.parse(content);
             }
@@ -270,7 +269,7 @@ var Monitor = class Monitor {
             return;
 
         this._monitor = this._file.monitor(Gio.FileMonitorFlags.NONE, null);
-        this._monitor.connect('changed', Lang.bind(this, this._handle_monitor_changed));
+        this._monitor.connect('changed', this._handle_monitor_changed.bind(this));
     }
 
     /**
@@ -387,7 +386,7 @@ var Emulator = class Emulator {
         index.destroy();
 
         this._monitor = new Monitor();
-        this._monitor.connect('change', Lang.bind(this, this._handle_monitor_change));
+        this._monitor.connect('change', this._handle_monitor_change.bind(this));
 
         this._terminal = new Terminal.Emulator();
     }
@@ -508,7 +507,7 @@ var Emulator = class Emulator {
                 let [ok, output, error, status] = GLib.spawn_sync(null, ['which', VAGRANT_EXE], null, GLib.SpawnFlags.SEARCH_PATH, null);
                 if (!status && output) {
                     if (output instanceof Uint8Array) {
-                        this._command = imports.byteArray.toString(output);
+                        this._command = String.fromCharCode.apply(null, output).trim();
                     } else {
                         this._command = output.toString().trim();
                     }
@@ -534,7 +533,7 @@ var Emulator = class Emulator {
                 let [ok, output, error, status] = GLib.spawn_sync(null, [this.command, '--version'], null, GLib.SpawnFlags.SEARCH_PATH, null);
                 if (!status && output) {
                     if (output instanceof Uint8Array) {
-                        this._command = imports.byteArray.toString(output);
+                        this._command = String.fromCharCode.apply(null, output).trim();
                     } else {
                         this._command = output.toString().trim();
                     }

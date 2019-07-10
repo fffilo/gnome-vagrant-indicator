@@ -4,7 +4,6 @@
 'use strict';
 
 // import modules
-const Lang = imports.lang;
 const Main = imports.ui.main;
 const MessageTray = imports.ui.messageTray;
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -43,7 +42,7 @@ var Base = class Base {
             return;
 
         this._source = new MessageTray.Source(this._title, this._icon);
-        this._source.connect('destroy', Lang.bind(this, this._handle_destroy));
+        this._source.connect('destroy', this._handle_destroy.bind(this));
 
         Main.messageTray.add(this._source);
     }

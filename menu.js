@@ -4,7 +4,6 @@
 'use strict';
 
 // import modules
-const Lang = imports.lang;
 const GLib = imports.gi.GLib;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -93,8 +92,8 @@ var Machine = class Machine extends Section {
         item.shorten = this.shorten;
         item.setDisplayVagrant(this.getDisplayVagrant());
         item.setDisplaySystem(this.getDisplaySystem());
-        item.connect('system', Lang.bind(this, this._handle_system));
-        item.connect('vagrant', Lang.bind(this, this._handle_vagrant));
+        item.connect('system', this._handle_system.bind(this));
+        item.connect('vagrant', this._handle_vagrant.bind(this));
         this.addMenuItem(item, index);
     }
 
@@ -342,7 +341,7 @@ var Path = class Path extends SubMenu {
 
             let item = new Command(label);
             item.command = cmd;
-            item.connect('execute', Lang.bind(this, this._handle_vagrant));
+            item.connect('execute', this._handle_vagrant.bind(this));
             this.menu.addMenuItem(item);
             this.vagrant[id] = item;
         }
@@ -374,7 +373,7 @@ var Path = class Path extends SubMenu {
 
             let item = new Command(label);
             item.command = cmd;
-            item.connect('execute', Lang.bind(this, this._handle_system));
+            item.connect('execute', this._handle_system.bind(this));
             this.menu.addMenuItem(item);
             this.system[id] = item;
         }
@@ -386,7 +385,7 @@ var Path = class Path extends SubMenu {
      * @return {Void}
      */
     _bind() {
-        this.connect('activate', Lang.bind(this, this._handle_activate));
+        this.connect('activate', this._handle_activate.bind(this));
     }
 
     /**
@@ -453,7 +452,7 @@ var Path = class Path extends SubMenu {
      * @return {Void}
      */
     setSubmenuShown(open) {
-        this.parent(open);
+        super.setSubmenuShown(open);
 
         if (!this.system.header.actor.visible && !this.vagrant.header.actor.visible)
             this.emit('activate');
@@ -791,7 +790,7 @@ var Command = class Command extends Item {
      * @return {Void}
      */
     _bind() {
-        this.connect('activate', Lang.bind(this, this._handle_activate));
+        this.connect('activate', this._handle_activate.bind(this));
     }
 
     /**
