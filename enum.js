@@ -38,19 +38,17 @@ const Lang = imports.lang;
  * @param  {Object}
  * @return {Object}
  */
-const Exception = new Lang.Class({
-
-    Name: 'Enum.Exception',
+var Exception = class Exception {
 
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function(message, title) {
+    constructor(message, title) {
         this._message = message;
         this._title = title;
-    },
+    }
 
     /**
      * Property message getter
@@ -59,7 +57,7 @@ const Exception = new Lang.Class({
      */
     get message() {
         return this._message;
-    },
+    }
 
     /**
      * Property title getter
@@ -68,23 +66,23 @@ const Exception = new Lang.Class({
      */
     get title() {
         return this._title;
-    },
+    }
 
     /**
      * Exception as string
      *
      * @return {String}
      */
-    toString: function() {
+    toString() {
         return ''
             + (this.title || '')
             + (this.title && this.message ? ': ' : '')
             + (this.message || '');
-    },
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Enum.Member constructor
@@ -92,9 +90,7 @@ const Exception = new Lang.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Member = new Lang.Class({
-
-    Name: 'Enum.Member',
+var Member = class Member {
 
     /**
      * Constructor
@@ -103,7 +99,7 @@ const Member = new Lang.Class({
      * @param  {Number} value
      * @return {Void}
      */
-    _init: function(key, value) {
+    constructor(key, value) {
         if (typeof key !== 'string')
             throw new Exception('Argument key must be of type String', 'Enum.Member');
         if (typeof value !== 'number')
@@ -111,7 +107,7 @@ const Member = new Lang.Class({
 
         this._key = key;
         this._value = value;
-    },
+    }
 
     /**
      * Property key getter
@@ -120,7 +116,7 @@ const Member = new Lang.Class({
      */
     get key() {
         return this._key;
-    },
+    }
 
     /**
      * Property value getter
@@ -129,11 +125,11 @@ const Member = new Lang.Class({
      */
     get value() {
         return this._value;
-    },
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Enum.Enum constructor
@@ -192,9 +188,7 @@ const Member = new Lang.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Enum = new Lang.Class({
-
-    Name: 'Enum.Enum',
+var Enum = class Enum {
 
     /**
      * Constructor
@@ -202,7 +196,7 @@ const Enum = new Lang.Class({
      * @param  {Mixed} params
      * @return {Void}
      */
-    _init: function(params) {
+    constructor(params) {
         this._members = [];
 
         let ptype = typeof params;
@@ -228,11 +222,11 @@ const Enum = new Lang.Class({
             if (props.hasOwnProperty(i))
                 addMember(this, i, props[i]);
         }
-    },
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Check if item is instance of Enum
@@ -240,9 +234,9 @@ const Enum = new Lang.Class({
  * @param  {Mixed}   item
  * @return {Boolean}
  */
-const isEnum = function(item) {
+var isEnum = function(item) {
     return item instanceof Enum;
-}
+};
 
 /**
  * Check if item is instance of Member
@@ -250,9 +244,9 @@ const isEnum = function(item) {
  * @param  {Mixed}   item
  * @return {Boolean}
  */
-const isMember = function(item) {
+var isMember = function(item) {
     return item instanceof Member;
-}
+};
 
 /**
  * Add member to enumeration.
@@ -266,7 +260,7 @@ const isMember = function(item) {
  * @param  {Number}  value  (optional) member value (ignored if key is member)
  * @return {Boolean}        success (always true)
  */
-const addMember = function(self, key, value) {
+var addMember = function(self, key, value) {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.addMember');
 
@@ -301,7 +295,7 @@ const addMember = function(self, key, value) {
     });
 
     return true;
-}
+};
 
 /**
  * Remove member from enumeration
@@ -310,7 +304,7 @@ const addMember = function(self, key, value) {
  * @param  {Mixed}   member Member, member key (string) or member value (number)
  * @return {Boolean}        success
  */
-const removeMember = function(self, member) {
+var removeMember = function(self, member) {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.removeMember');
 
@@ -322,7 +316,7 @@ const removeMember = function(self, member) {
     self._members.splice(index, 1);
 
     return true;
-}
+};
 
 /**
  * Get enumeration member(s) key(s)
@@ -331,7 +325,7 @@ const removeMember = function(self, member) {
  * @param  {Mixed}  member (optional) Member or member value (number)
  * @return {Mixed}         member key string, null on fail or array of keys if member is not defined
  */
-const getKey = function(self, member) {
+var getKey = function(self, member) {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.getKey');
 
@@ -359,7 +353,7 @@ const getKey = function(self, member) {
     }
 
     throw new Exception('Argument member must be of type Enum.Member or Number', 'Enum.getKey');
-}
+};
 
 /**
  * Get enumeration member(s) value(s)
@@ -368,7 +362,7 @@ const getKey = function(self, member) {
  * @param  {Mixed}  member (optional) Member or member key (string)
  * @return {Mixed}         member value number, null on fail or array of values if member is not defined
  */
-const getValue = function(self, member) {
+var getValue = function(self, member) {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.getValue');
 
@@ -396,7 +390,7 @@ const getValue = function(self, member) {
     }
 
     throw new Exception('Argument member must be of type Enum.Member or String', 'Enum.getValue');
-}
+};
 
 /**
  * Get enumeration member(s) index
@@ -405,7 +399,7 @@ const getValue = function(self, member) {
  * @param  {Mixed}  member Member, member key (string) or member value (number)
  * @return {Number}        member index
  */
-const getIndex = function(self, member) {
+var getIndex = function(self, member) {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.getIndex');
 
@@ -436,7 +430,7 @@ const getIndex = function(self, member) {
         throw new Exception('Argument member is not member of Enum.Enum', 'Enum.getIndex');
 
     return result * 1;
-}
+};
 
 /**
  * Convert enumeration members to object
@@ -444,7 +438,7 @@ const getIndex = function(self, member) {
  * @param  {Object} self Enum
  * @return {Object}      members value/key object
  */
-const toObject = function(self) {
+var toObject = function(self) {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.toObject');
 
@@ -454,7 +448,7 @@ const toObject = function(self) {
     });
 
     return result;
-}
+};
 
 /**
  * Get enumeration minimal value
@@ -462,12 +456,12 @@ const toObject = function(self) {
  * @param  {Object} self Enum
  * @return {Mixed}       member min value (number) or null on no members
  */
-const min = function(self) {
+var min = function(self) {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.min');
 
     return self._members.length ? self._members[0].value : null;
-}
+};
 
 /**
  * Get enumeration maximal value
@@ -475,12 +469,12 @@ const min = function(self) {
  * @param  {Object} self Enum
  * @return {Mixed}       member max value (number) or null on no members
  */
-const max = function(self) {
+var max = function(self) {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.max');
 
     return self._members.length ? self._members[self._members.length - 1].value : null;
-}
+};
 
 /**
  * Get enumeration sum of values
@@ -488,7 +482,7 @@ const max = function(self) {
  * @param  {Object} self Enum
  * @return {Mixed}       sum of member values (number) or null on no members
  */
-const sum = function(self) {
+var sum = function(self) {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.sum');
 
@@ -501,7 +495,7 @@ const sum = function(self) {
     });
 
     return result;
-}
+};
 
 /**
  * Enumeration members iterator.
@@ -514,7 +508,7 @@ const sum = function(self) {
  * @param  {Function} callback method
  * @return {Void}
  */
-const forEach = function(self, callback) {
+var forEach = function(self, callback) {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.forEach');
     if (typeof callback !== 'function')
@@ -524,4 +518,4 @@ const forEach = function(self, callback) {
         if (callback.call(this, self._members[i].key, self._members[i].value))
             break;
     }
-}
+};

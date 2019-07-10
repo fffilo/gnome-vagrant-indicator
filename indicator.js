@@ -5,7 +5,7 @@
 
 // import modules
 const Lang = imports.lang;
-const St = imports.gi.St;
+const { St, Gio, GObject } = imports.gi;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const Util = imports.misc.util;
@@ -26,46 +26,42 @@ const _ = Translation.translate;
  * @param  {Object}
  * @return {Object}
  */
-const Base = new Lang.Class({
-
-    Name: 'Indicator.Base',
-    Extends: PanelMenu.Button,
+var Base = GObject.registerClass(class Base extends PanelMenu.Button {
 
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function() {
-        this.parent(null, Me.metadata.name);
-
+    _init() {
+        super._init(null, Me.metadata.name);
         this._def();
         this._ui();
         this.refresh();
 
         Main.panel.addToStatusArea(Me.metadata.uuid, this);
-    },
+    }
 
     /**
      * Destructor
      *
      * @return {Void}
      */
-    destroy: function() {
+    destroy() {
         if (this.vagrant)
             this.vagrant.destroy();
         if (this.settings)
             this.settings.run_dispose();
 
-        this.parent();
-    },
+        super.destroy();
+    }
 
     /**
      * Initialize object properties
      *
      * @return {Void}
      */
-    _def: function() {
+    _def() {
         this.notification = new Notification.Base();
 
         this.settings = Settings.settings();
@@ -77,14 +73,14 @@ const Base = new Lang.Class({
         this.vagrant.monitor.connect('remove', Lang.bind(this, this._handle_vagrant_remove));
         this.vagrant.monitor.connect('state', Lang.bind(this, this._handle_vagrant_state));
         this.vagrant.monitor.start();
-    },
+    }
 
     /**
      * Create user interface
      *
      * @return {Void}
      */
-    _ui: function() {
+    _ui() {
         this.actor.add_style_class_name('panel-status-button');
         this.actor.add_style_class_name('gnome-vagrant-indicator');
 
@@ -92,6 +88,7 @@ const Base = new Lang.Class({
             icon_name: Icons.DEFAULT,
             style_class: 'system-status-icon',
         });
+        this.icon.set_gicon(Gio.icon_new_for_string(Me.path + '/assets/' + Icons.DEFAULT + ".svg"));
         this.actor.add_actor(this.icon);
 
         this.machine = new Menu.Machine(this);
@@ -106,21 +103,21 @@ const Base = new Lang.Class({
         this.preferences = new Menu.Item(_("Preferences"));
         this.preferences.connect('activate', Lang.bind(this, this._handle_preferences));
         this.menu.addMenuItem(this.preferences);
-    },
+    }
 
     /**
      * Refresh machine menu
      *
      * @return {Void}
      */
-    refresh: function() {
+    refresh() {
         this.machine.clear();
 
         for (let id in this.vagrant.index.machines) {
             let machine = this.vagrant.index.machines[id];
             this.machine.add(id, machine.vagrantfile_path, machine.state);
         }
-    },
+    }
 
     /**
      * Convert settings boolean display-vagrant
@@ -128,7 +125,7 @@ const Base = new Lang.Class({
      *
      * @return {Number}
      */
-    _get_settings_machine_menu_display_vagrant: function() {
+    _get_settings_machine_menu_display_vagrant() {
         let display = Enum.toObject(Menu.DisplayVagrant);
         let result = 0;
 
@@ -140,7 +137,7 @@ const Base = new Lang.Class({
         }
 
         return result;
-    },
+    }
 
     /**
      * Convert settings boolean display-system
@@ -148,7 +145,7 @@ const Base = new Lang.Class({
      *
      * @return {Number}
      */
-    _get_settings_machine_menu_display_system: function() {
+    _get_settings_machine_menu_display_system() {
         let display = Enum.toObject(Menu.DisplaySystem);
         let result = 0;
 
@@ -160,7 +157,8 @@ const Base = new Lang.Class({
         }
 
         return result;
-    },
+    }
+
     /**
      * Settings changed event handler
      *
@@ -168,14 +166,14 @@ const Base = new Lang.Class({
      * @param  {String} key
      * @return {Void}
      */
-    _handle_settings: function(widget, key) {
+    _handle_settings(widget, key) {
         if (key === 'machine-full-path')
             this.machine.shorten = !widget.get_boolean(key);
         else if (key.startsWith('display-system-'))
             this.machine.setDisplaySystem(this._get_settings_machine_menu_display_system());
         else if (key.startsWith('display-vagrant-'))
             this.machine.setDisplayVagrant(this._get_settings_machine_menu_display_vagrant());
-    },
+    }
 
     /**
      * Monitor machine add event handler
@@ -184,12 +182,12 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant_add: function(widget, event) {
+    _handle_vagrant_add(widget, event) {
         let machine = this.vagrant.index.machines[event.id];
         let index = Object.keys(this.vagrant.index.machines).indexOf(event.id);
 
         this.machine.add(event.id, machine.vagrantfile_path, machine.state, index);
-    },
+    }
 
     /**
      * Monitor machine remove event handler
@@ -198,9 +196,9 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant_remove: function(widget, event) {
+    _handle_vagrant_remove(widget, event) {
         this.machine.remove(event.id);
-    },
+    }
 
     /**
      * Monitor machine state change event handler
@@ -209,13 +207,13 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant_state: function(widget, event) {
+    _handle_vagrant_state(widget, event) {
         let machine = this.vagrant.index.machines[event.id];
         this.machine.state(event.id, machine.state);
 
         if (this.settings.get_boolean('notifications'))
             this.notification.show('Machine went %s'.format(machine.state), machine.vagrantfile_path);
-    },
+    }
 
     /**
      * Monitor error event handler
@@ -224,7 +222,7 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant_error: function(widget, event) {
+    _handle_vagrant_error(widget, event) {
         if (!this.settings.get_boolean('notifications'))
             return;
 
@@ -238,7 +236,7 @@ const Base = new Lang.Class({
         }
 
         this.notification.show(title, message);
-    },
+    }
 
     /**
      * Machines item (system command)
@@ -248,14 +246,13 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_machine_system: function(widget, event) {
+    _handle_machine_system(widget, event) {
         try {
             this.vagrant.open(event.id, event.command);
-        }
-        catch(e) {
+        } catch (e) {
             this.vagrant.emit('error', e);
         }
-    },
+    }
 
     /**
      * Machines item (vagrant command)
@@ -265,17 +262,16 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_machine_vagrant: function(widget, event) {
+    _handle_machine_vagrant(widget, event) {
         try {
             let action = this.settings.get_string('post-terminal-action');
             action = Enum.getValue(Vagrant.PostTerminalAction, action);
 
             this.vagrant.execute(event.id, event.command, action);
-        }
-        catch(e) {
+        } catch (e) {
             this.vagrant.emit('error', e);
         }
-    },
+    }
 
     /**
      * Preferences activate event handler
@@ -284,9 +280,9 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_preferences: function(widget, event) {
+    _handle_preferences(widget, event) {
         Util.spawn(['gnome-shell-extension-prefs', Me.metadata.uuid]);
-    },
+    }
 
     /* --- */
 

@@ -8,8 +8,8 @@
     "original-author": "Franjo Filo <fffilo666@gmail.com>",
     "original-author-html": "Franjo Filo <a href=\"mailto:fffilo666@gmail.com\">&lt;fffilo666@gmail.com&gt;</a>",
     "settings-schema": "org.gnome.shell.extensions.gnome-vagrant-indicator",
-    "shell-version": ["3.18", "3.20", "3.22", "3.24"],
+    "shell-version": ["3.32"],
     "url": "https://github.com/fffilo/gnome-vagrant-indicator",
     "uuid": "gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com",
-    "version": "5"
+    "version": "6"
 }

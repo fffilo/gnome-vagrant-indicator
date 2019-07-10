@@ -39,41 +39,36 @@ function buildPrefsWidget() {
  * @param  {Object}
  * @return {Object}
  */
-const Widget = new GObject.Class({
-
-    Name: 'Prefs.Widget',
-    GTypeName: 'GnomeVagrantIndicatorPrefsWidget',
-    Extends: Gtk.Box,
-
+var Widget = GObject.registerClass(class Widget extends Gtk.Box {
     /**
      * Widget initialization
      *
      * @return {Void}
      */
-    _init: function() {
-        this.parent({ orientation: Gtk.Orientation.VERTICAL, });
+    _init() {
+        super._init({ orientation: Gtk.Orientation.VERTICAL, });
 
         this._def();
         this._ui();
         this._bind();
-    },
+    }
 
     /**
      * Initialize object properties
      *
      * @return {Void}
      */
-    _def: function() {
+    _def() {
         this.settings = Settings.settings();
         //this.settings.connect('changed', Lang.bind(this, this._handle_settings));
-    },
+    }
 
     /**
      * Create user interface
      *
      * @return {Void}
      */
-    _ui: function() {
+    _ui() {
         let css = new Gtk.CssProvider();
         css.load_from_path(Me.path + '/prefs.css');
         Gtk.StyleContext.add_provider_for_screen(Gdk.Screen.get_default(), css, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
@@ -87,27 +82,27 @@ const Widget = new GObject.Class({
         this.add(notebook);
 
         this.show_all();
-    },
+    }
 
     /**
      * Create new page
      *
      * @return {Object}
      */
-    _page: function() {
+    _page() {
         let page = new Box();
         page.expand = true;
         page.get_style_context().add_class('gnome-vagrant-indicator-prefs-page');
 
         return page;
-    },
+    }
 
     /**
      * Create new settings page
      *
      * @return {Object}
      */
-    _page_settings: function() {
+    _page_settings() {
         this.ui.settings = {};
         this.ui.settings.page = this._page();
         this.ui.settings.page.get_style_context().add_class('gnome-vagrant-indicator-prefs-page-settings');
@@ -125,14 +120,14 @@ const Widget = new GObject.Class({
         this.ui.settings.page.actor.add(this.ui.settings.postterminalaction);
 
         return this.ui.settings.page;
-    },
+    }
 
     /**
      * Create new vagrant page
      *
      * @return {Object}
      */
-    _page_vagrant: function() {
+    _page_vagrant() {
         this.ui.vagrant = {};
         this.ui.vagrant.page = this._page();
         this.ui.vagrant.page.get_style_context().add_class('gnome-vagrant-indicator-prefs-page-vagrant');
@@ -190,14 +185,14 @@ const Widget = new GObject.Class({
         //this.ui.vagrant.page.actor.add(this.ui.vagrant.destroy_force);
 
         return this.ui.vagrant.page;
-    },
+    }
 
     /**
      * Create new system page
      *
      * @return {Object}
      */
-    _page_system: function() {
+    _page_system() {
         this.ui.system = {};
         this.ui.system.page = this._page();
         this.ui.system.page.get_style_context().add_class('gnome-vagrant-indicator-prefs-page-system');
@@ -219,14 +214,14 @@ const Widget = new GObject.Class({
         this.ui.system.page.actor.add(this.ui.system.vagrantfile);
 
         return this.ui.system.page;
-    },
+    }
 
     /**
      * Create new about page
      *
      * @return {Object}
      */
-    _page_about: function() {
+    _page_about() {
         this.ui.about = {};
         this.ui.about.page = this._page();
         this.ui.about.page.get_style_context().add_class('gnome-vagrant-indicator-prefs-page-about');
@@ -261,16 +256,16 @@ const Widget = new GObject.Class({
         this.ui.about.page.actor.pack_end(this.ui.about.license, false, false, 0);
 
         return this.ui.about.page;
-    },
+    }
 
     /**
      * Bind events
      *
      * @return {Void}
      */
-    _bind: function() {
+    _bind() {
         this.connect('destroy', Lang.bind(this, this._handle_destroy));
-    },
+    }
 
     /**
      * Widget destroy event handler
@@ -279,10 +274,10 @@ const Widget = new GObject.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_destroy: function(widget, event) {
+    _handle_destroy(widget, event) {
         if (this.settings)
             this.settings.run_dispose();
-    },
+    }
 
     /**
      * Settings widget change event handler
@@ -291,12 +286,12 @@ const Widget = new GObject.Class({
      * @param  {String} event
      * @return {Void}
      */
-    _handle_widget: function(widget, event) {
+    _handle_widget(widget, event) {
         let old_value = this.settings['get_' + event.type](event.key);
 
         if (old_value != event.value)
             this.settings['set_' + event.type](event.key, event.value);
-    },
+    }
 
     /**
      * Settings changed event handler
@@ -305,9 +300,9 @@ const Widget = new GObject.Class({
      * @param  {String} key
      * @return {Void}
      */
-    _handle_settings: function(widget, key) {
+    _handle_settings(widget, key) {
         // pass
-    },
+    }
 
     /* --- */
 
@@ -326,20 +321,15 @@ const Widget = new GObject.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Box = new GObject.Class({
-
-    Name: 'Prefs.Box',
-    GTypeName: 'GnomeVagrantIndicatorPrefsBox',
-    Extends: Gtk.Frame,
-
-    _init: function() {
-        this.parent();
+var Box = GObject.registerClass(class Box extends Gtk.Frame {
+    _init() {
+        super._init();
 
         this.actor = new Gtk.Box({ orientation: Gtk.Orientation.VERTICAL, });
         this.add(this.actor);
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-box');
-    },
+    }
 
     /* --- */
 
@@ -355,29 +345,24 @@ const Box = new GObject.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Label = new GObject.Class({
-
-    Name: 'Prefs.Label',
-    GTypeName: 'GnomeVagrantIndicatorPrefsLabel',
-    Extends: Gtk.Label,
-
+var Label = GObject.registerClass(class Label extends Gtk.Label {
     /**
      * Constructor
      *
      * @param  {Object} options (optional)
      * @return {Void}
      */
-    _init: function(options) {
+    _init(options) {
         let o = options || {};
         if (!('label' in options)) o.label = 'undefined';
 
-        this.parent(o);
+        super._init(o);
         this.set_markup(this.get_text());
         this.set_line_wrap(true);
         this.set_justify(Gtk.Justification.CENTER);
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-label');
-    },
+    }
 
     /* --- */
 
@@ -393,12 +378,7 @@ const Label = new GObject.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Input = new GObject.Class({
-
-    Name: 'Prefs.Input',
-    GTypeName: 'GnomeVagrantIndicatorPrefsInput',
-    Extends: Box,
-
+var Input = GObject.registerClass(class Input extends Box {
     /**
      * Constructor
      *
@@ -407,8 +387,8 @@ const Input = new GObject.Class({
      * @param  {String} tooltip
      * @return {Void}
      */
-    _init: function(key, text, tooltip) {
-        this.parent();
+    _init(key, text, tooltip) {
+        super._init();
         this.actor.set_orientation(Gtk.Orientation.HORIZONTAL);
 
         this._key = key;
@@ -418,7 +398,7 @@ const Input = new GObject.Class({
         this.actor.pack_start(this._label, true, true, 0);
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-input');
-    },
+    }
 
     /**
      * Value getter
@@ -427,7 +407,7 @@ const Input = new GObject.Class({
      */
     get value() {
         return this._widget.value;
-    },
+    }
 
     /**
      * Value setter
@@ -437,7 +417,7 @@ const Input = new GObject.Class({
      */
     set value(value) {
         this._widget.value = value;
-    },
+    }
 
     /**
      * Input change event handler
@@ -445,13 +425,13 @@ const Input = new GObject.Class({
      * @param  {Object} widget
      * @return {Void}
      */
-    _handle_change: function(widget) {
+    _handle_change(widget) {
         this.emit('changed', {
             key: this._key,
             value: widget.value,
             type: typeof widget.value,
         });
-    },
+    }
 
     /* --- */
 
@@ -466,26 +446,21 @@ Signals.addSignalMethods(Input.prototype);
  * @param  {Object}
  * @return {Object}
  */
-const InputEntry = new GObject.Class({
-
-    Name: 'Prefs.InputEntry',
-    GTypeName: 'GnomeVagrantIndicatorPrefsInputEntry',
-    Extends: Input,
-
+var InputEntry = GObject.registerClass(class InputEntry extends Input {
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function(key, value, text, tooltip) {
-        this.parent(key, text, tooltip);
+    _init(key, value, text, tooltip) {
+        super._init(key, text, tooltip);
 
         this._widget = new Gtk.Entry({ text: value });
         this._widget.connect('notify::text', Lang.bind(this, this._handle_change));
         this.actor.add(this._widget);
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-input-entry');
-    },
+    }
 
     /**
      * Input change event handler
@@ -494,13 +469,13 @@ const InputEntry = new GObject.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_change: function(actor, event) {
+    _handle_change(actor, event) {
         this.emit('changed', {
             key: this._key,
             value: this.value,
             type: 'string',
         });
-    },
+    }
 
     /**
      * Value getter
@@ -509,7 +484,7 @@ const InputEntry = new GObject.Class({
      */
     get value() {
         return this._widget.text;
-    },
+    }
 
     /**
      * Value setter
@@ -519,7 +494,7 @@ const InputEntry = new GObject.Class({
      */
     set value(value) {
         this._widget.text = value;
-    },
+    }
 
     /* --- */
 
@@ -532,26 +507,21 @@ const InputEntry = new GObject.Class({
  * @param  {Object}
  * @return {Object}
  */
-const InputSwitch = new GObject.Class({
-
-    Name: 'Prefs.InputSwitch',
-    GTypeName: 'GnomeVagrantIndicatorPrefsInputSwitch',
-    Extends: Input,
-
+var InputSwitch = GObject.registerClass(class InputSwitch extends Input {
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function(key, value, text, tooltip) {
-        this.parent(key, text, tooltip);
+    _init(key, value, text, tooltip) {
+        super._init(key, text, tooltip);
 
         this._widget = new Gtk.Switch({ active: value });
         this._widget.connect('notify::active', Lang.bind(this, this._handle_change));
         this.actor.add(this._widget);
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-input-switch');
-    },
+    }
 
     /**
      * Input change event handler
@@ -559,13 +529,13 @@ const InputSwitch = new GObject.Class({
      * @param  {Object} widget
      * @return {Void}
      */
-    _handle_change: function(widget) {
+    _handle_change(widget) {
         this.emit('changed', {
             key: this._key,
             value: widget.active,
             type: 'boolean',
         });
-    },
+    }
 
     /**
      * Value getter
@@ -574,7 +544,7 @@ const InputSwitch = new GObject.Class({
      */
     get value() {
         return this._widget.active;
-    },
+    }
 
     /**
      * Value setter
@@ -584,7 +554,7 @@ const InputSwitch = new GObject.Class({
      */
     set value(value) {
         this._widget.active = value;
-    },
+    }
 
     /* --- */
 
@@ -597,12 +567,7 @@ const InputSwitch = new GObject.Class({
  * @param  {Object}
  * @return {Object}
  */
-const InputComboBox = new GObject.Class({
-
-    Name: 'Prefs.InputComboBox',
-    GTypeName: 'GnomeVagrantIndicatorPrefsInputComboBox',
-    Extends: Input,
-
+var InputComboBox = GObject.registerClass(class InputComboBox extends Input {
     /**
      * ComboBox initialization
      *
@@ -613,8 +578,8 @@ const InputComboBox = new GObject.Class({
      * @param  {Object} options
      * @return {Void}
      */
-    _init: function(key, value, text, tooltip, options) {
-        this.parent(key, text, tooltip);
+    _init(key, value, text, tooltip, options) {
+        super._init(key, text, tooltip);
 
         this._widget = new Gtk.ComboBoxText();
         this._widget.connect('notify::active', Lang.bind(this, this._handle_change));
@@ -627,7 +592,7 @@ const InputComboBox = new GObject.Class({
         this.value = value;
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-input-combobox');
-    },
+    }
 
     /**
      * Widget change event handler
@@ -635,13 +600,13 @@ const InputComboBox = new GObject.Class({
      * @param  {Object} widget
      * @return {Void}
      */
-    _handle_change: function(widget) {
+    _handle_change(widget) {
         this.emit('changed', {
             key: this._key,
             value: this.value,
             type: 'string'
         });
-    },
+    }
 
     /**
      * Value getter
@@ -650,7 +615,7 @@ const InputComboBox = new GObject.Class({
      */
     get value() {
         return this._widget.get_active_id();
-    },
+    }
 
     /**
      * Value setter
@@ -660,7 +625,7 @@ const InputComboBox = new GObject.Class({
      */
     set value(value) {
         this._widget.set_active_id(value);
-    },
+    }
 
     /* --- */
 

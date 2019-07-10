@@ -9,13 +9,13 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 
 // Icons
-const DEFAULT = 'gnome-vagrant-indicator-symbolic';
+var DEFAULT = 'gnome-vagrant-indicator-symbolic';
 
 /**
  * Append assets path to theme
  *
  * @return {Void}
  */
-const init = function() {
+var init = function() {
     IconTheme.get_default().append_search_path(Me.path + '/assets');
-}
+};

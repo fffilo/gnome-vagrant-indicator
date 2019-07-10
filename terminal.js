@@ -40,9 +40,7 @@ const Gio = imports.gi.Gio;
  * @param  {Object}
  * @return {Object}
  */
-const Emulator = new Lang.Class({
-
-    Name: 'Terminal.Emulator',
+var Emulator = class Emulator {
 
     /**
      * Get output of shell command (sync)
@@ -50,7 +48,7 @@ const Emulator = new Lang.Class({
      * @param  {String} command command to execute
      * @return {Mixed}          output (string) or null on fail
      */
-    _shell_output: function(command) {
+    _shell_output(command) {
         try {
             let argv = command.split(' ');
             let [ ok, output, error, status ] = GLib.spawn_sync(null, argv, null, GLib.SpawnFlags.SEARCH_PATH, null);
@@ -62,7 +60,7 @@ const Emulator = new Lang.Class({
         }
 
         return null;
-    },
+    }
 
     /**
      * Open new terminal window
@@ -72,7 +70,7 @@ const Emulator = new Lang.Class({
      * @param  {String} terminal (optional) terminal emulator
      * @return {Void}
      */
-    popup: function(cwd, command, terminal) {
+    popup(cwd, command, terminal) {
         cwd = cwd || '~';
         command = command || ':';
         command = command.replace(/;+$/, '');
@@ -102,7 +100,7 @@ const Emulator = new Lang.Class({
             flags: Gio.SubprocessFlags.STDOUT_PIPE,
         });
         subprocess.init(null);
-    },
+    }
 
     /**
      * Property current getter:
@@ -122,8 +120,8 @@ const Emulator = new Lang.Class({
         result = this._shell_output('which %s'.format(result));
 
         return result || null;
-    },
+    }
 
     /* --- */
 
-});
+};

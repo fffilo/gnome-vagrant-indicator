@@ -15,14 +15,14 @@ const Translation = Me.imports.translation;
 const _ = Translation.translate;
 
 // PopupMenu proxies
-const Separator = PopupMenu.PopupSeparatorMenuItem;
-const Item = PopupMenu.PopupMenuItem;
-const SubMenu = PopupMenu.PopupSubMenuMenuItem;
-const Section = PopupMenu.PopupMenuSection;
+var Separator = PopupMenu.PopupSeparatorMenuItem;
+var Item = PopupMenu.PopupMenuItem;
+var SubMenu = PopupMenu.PopupSubMenuMenuItem;
+var Section = PopupMenu.PopupMenuSection;
 
 // Display enums
-const DisplayVagrant = Vagrant.CommandVagrant;
-const DisplaySystem = Vagrant.CommandSystem;
+var DisplayVagrant = Vagrant.CommandVagrant;
+var DisplaySystem = Vagrant.CommandSystem;
 
 /**
  * Menu.Machine constructor
@@ -30,18 +30,14 @@ const DisplaySystem = Vagrant.CommandSystem;
  * @param  {Object}
  * @return {Object}
  */
-const Machine = new Lang.Class({
-
-    Name: 'Menu.Machine',
-    Extends: Section,
-
+var Machine = class Machine extends Section {
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function() {
-        this.parent();
+    constructor() {
+        super();
 
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-machine');
 
@@ -50,20 +46,20 @@ const Machine = new Lang.Class({
         this._display_system = Enum.sum(DisplaySystem);
 
         this.clear();
-    },
+    }
 
     /**
      * Empty list
      *
      * @return {Void}
      */
-    clear: function() {
+    clear() {
         this.removeAll();
 
         this.empty = new Item(_("No Vagrant machines found"));
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
-    },
+    }
 
     /**
      * Display error
@@ -71,13 +67,13 @@ const Machine = new Lang.Class({
      * @param  {String} msg
      * @return {Void}
      */
-    error: function(msg) {
+    error(msg) {
         this.removeAll();
 
         this.empty = new Item(msg || 'ERROR');
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
-    },
+    }
 
     /**
      * Add item to list
@@ -88,7 +84,7 @@ const Machine = new Lang.Class({
      * @param  {Number} index (optional)
      * @return {Void}
      */
-    add: function(id, path, state, index) {
+    add(id, path, state, index) {
         if (this.empty)
             this.empty.destroy();
         this.empty = null;
@@ -100,21 +96,21 @@ const Machine = new Lang.Class({
         item.connect('system', Lang.bind(this, this._handle_system));
         item.connect('vagrant', Lang.bind(this, this._handle_vagrant));
         this.addMenuItem(item, index);
-    },
+    }
 
     /**
      * Remove item from list
      *
      * @return {Void}
      */
-    remove: function(id) {
+    remove(id) {
         this._get_item(id).forEach(function(actor) {
             actor.destroy();
         });
 
         if (!this._get_item().length)
             this.clear();
-    },
+    }
 
     /**
      * Set item state
@@ -123,13 +119,13 @@ const Machine = new Lang.Class({
      * @param  {String} value
      * @return {Void}
      */
-    state: function(id, value) {
+    state(id, value) {
         this._get_item(id).forEach(function(actor) {
             actor.actor.remove_style_class_name(actor.state);
             actor.actor.add_style_class_name(value);
             actor.state = value;
         });
-    },
+    }
 
     /**
      * Get DisplayVagrant:
@@ -138,9 +134,9 @@ const Machine = new Lang.Class({
      *
      * @return {Number}
      */
-    getDisplayVagrant: function() {
+    getDisplayVagrant() {
         return this._display_vagrant;
-    },
+    }
 
     /**
      * Set DisplayVagrant
@@ -148,7 +144,7 @@ const Machine = new Lang.Class({
      * @param  {Number} value
      * @return {Void}
      */
-    setDisplayVagrant: function(value) {
+    setDisplayVagrant(value) {
         if (value < Enum.min(DisplayVagrant))
             value = Enum.min(DisplayVagrant);
         else if (value > Enum.sum(DisplayVagrant))
@@ -159,7 +155,7 @@ const Machine = new Lang.Class({
         this._get_item().forEach(function(actor) {
             actor.setDisplayVagrant(value);
         });
-    },
+    }
 
     /**
      * Get DisplaySystem:
@@ -168,9 +164,9 @@ const Machine = new Lang.Class({
      *
      * @return {Number}
      */
-    getDisplaySystem: function() {
+    getDisplaySystem() {
         return this._display_system;
-    },
+    }
 
     /**
      * Set DisplaySystem
@@ -178,7 +174,7 @@ const Machine = new Lang.Class({
      * @param  {Number} value
      * @return {Void}
      */
-    setDisplaySystem: function(value) {
+    setDisplaySystem(value) {
         if (value < Enum.min(DisplaySystem))
             value = Enum.min(DisplaySystem);
         else if (value > Enum.sum(DisplaySystem))
@@ -189,7 +185,7 @@ const Machine = new Lang.Class({
         this._get_item().forEach(function(actor) {
             actor.setDisplaySystem(value);
         });
-    },
+    }
 
     /**
      * Property shorten getter
@@ -198,7 +194,7 @@ const Machine = new Lang.Class({
      */
     get shorten() {
         return this._shorten;
-    },
+    }
 
     /**
      * Property shorten setter
@@ -212,7 +208,7 @@ const Machine = new Lang.Class({
         this._get_item().forEach(function(actor) {
             actor.shorten = value;
         });
-    },
+    }
 
     /**
      * Get submenu item from menu list
@@ -220,7 +216,7 @@ const Machine = new Lang.Class({
      * @param  {String} id (optional)
      * @return {Object}
      */
-    _get_item: function(id) {
+    _get_item(id) {
         return this.box.get_children()
             .map(function(actor) {
                 return actor._delegate;
@@ -228,7 +224,7 @@ const Machine = new Lang.Class({
             .filter(function(actor) {
                 return actor instanceof Path && (id ? actor.id === id : true);
             });
-    },
+    }
 
     /**
      * Menu subitem (system command)
@@ -238,12 +234,12 @@ const Machine = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_system: function(widget, event) {
+    _handle_system(widget, event) {
         this.emit('system', {
             id: event.id,
             command: event.command,
         });
-    },
+    }
 
     /**
      * Menu subitem (vagrant command)
@@ -253,16 +249,16 @@ const Machine = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant: function(widget, event) {
+    _handle_vagrant(widget, event) {
         this.emit('vagrant', {
             id: event.id,
             command: event.command,
         });
-    },
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Menu.Path constructor
@@ -270,11 +266,7 @@ const Machine = new Lang.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Path = new Lang.Class({
-
-    Name: 'Menu.Path',
-    Extends: SubMenu,
-
+var Path = class Path extends SubMenu {
     /**
      * Constructor
      *
@@ -283,13 +275,14 @@ const Path = new Lang.Class({
      * @param  {String} state
      * @return {Void}
      */
-    _init: function(id, path, state) {
-        this.parent('unknown');
+    constructor(id, path, state) {
+        super('unknown');
 
         this._id = id;
         this._path = path;
         this._state = 'unknown';
         this._shorten = true;
+        this._display_system = null;
 
         this._ui();
         this._bind();
@@ -299,21 +292,21 @@ const Path = new Lang.Class({
 
         this.state = state;
         this.shorten = false;
-    },
+    }
 
     /**
      * Create user interface
      *
      * @return {Void}
      */
-    _ui: function() {
+    _ui() {
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-path');
         this.menu.actor.add_style_class_name('gnome-vagrant-indicator-menu-submenu');
         this.setOrnament(PopupMenu.Ornament.DOT);
 
         this._ui_vagrant();
         this._ui_system();
-    },
+    }
 
     /**
      * Create user interface for
@@ -321,7 +314,7 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _ui_vagrant: function() {
+    _ui_vagrant() {
         this.vagrant = {};
 
         let item = new Header(_("VAGRANT COMMANDS"));
@@ -353,7 +346,7 @@ const Path = new Lang.Class({
             this.menu.addMenuItem(item);
             this.vagrant[id] = item;
         }
-    },
+    }
 
     /**
      * Create user interface for
@@ -361,7 +354,7 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _ui_system: function() {
+    _ui_system() {
         this.system = {};
 
         let item = new Header(_("SYSTEM COMMANDS"));
@@ -385,16 +378,16 @@ const Path = new Lang.Class({
             this.menu.addMenuItem(item);
             this.system[id] = item;
         }
-    },
+    }
 
     /**
      * Bind events
      *
      * @return {Void}
      */
-    _bind: function() {
+    _bind() {
         this.connect('activate', Lang.bind(this, this._handle_activate));
-    },
+    }
 
     /**
      * Get DisplayVagrant:
@@ -403,9 +396,9 @@ const Path = new Lang.Class({
      *
      * @return {Number}
      */
-    getDisplayVagrant: function() {
+    getDisplayVagrant() {
         return this._display_vagrant;
-    },
+    }
 
     /**
      * Set DisplayVagrant
@@ -413,7 +406,7 @@ const Path = new Lang.Class({
      * @param  {Number} value
      * @return {Void}
      */
-    setDisplayVagrant: function(value) {
+    setDisplayVagrant(value) {
         if (value < Enum.min(DisplayVagrant))
             value = Enum.min(DisplayVagrant);
         else if (value > Enum.sum(DisplayVagrant))
@@ -422,7 +415,7 @@ const Path = new Lang.Class({
         this._display_vagrant = value;
 
         this._refresh_menu();
-    },
+    }
 
     /**
      * Get DisplaySystem:
@@ -431,9 +424,9 @@ const Path = new Lang.Class({
      *
      * @return {Number}
      */
-    getDisplaySystem: function() {
+    getDisplaySystem() {
         return this._display_system;
-    },
+    }
 
     /**
      * Set DisplaySystem
@@ -441,7 +434,7 @@ const Path = new Lang.Class({
      * @param  {Number} value
      * @return {Void}
      */
-    setDisplaySystem: function(value) {
+    setDisplaySystem(value) {
         if (value < Enum.min(DisplaySystem))
             value = Enum.min(DisplaySystem);
         else if (value > Enum.sum(DisplaySystem))
@@ -450,7 +443,7 @@ const Path = new Lang.Class({
         this._display_system = value;
 
         this._refresh_menu();
-    },
+    }
 
     /**
      * Act like PopupMenu.PopupMenuItem
@@ -459,12 +452,12 @@ const Path = new Lang.Class({
      * @param  {Booelan} open
      * @return {Void}
      */
-    setSubmenuShown: function(open) {
+    setSubmenuShown(open) {
         this.parent(open);
 
         if (!this.system.header.actor.visible && !this.vagrant.header.actor.visible)
             this.emit('activate');
-    },
+    }
 
     /**
      * Property shorten getter
@@ -473,7 +466,7 @@ const Path = new Lang.Class({
      */
     get shorten() {
         return this._shorten;
-    },
+    }
 
     /**
      * Property shorten setter
@@ -489,7 +482,7 @@ const Path = new Lang.Class({
             path = GLib.basename(path);
 
         this.label.text = path;
-    },
+    }
 
     /**
      * Property id getter
@@ -498,7 +491,7 @@ const Path = new Lang.Class({
      */
     get id() {
         return this._id;
-    },
+    }
 
     /**
      * Property path getter
@@ -507,7 +500,7 @@ const Path = new Lang.Class({
      */
     get path() {
         return this._path;
-    },
+    }
 
     /**
      * Property state getter
@@ -516,7 +509,7 @@ const Path = new Lang.Class({
      */
     get state() {
         return this._state;
-    },
+    }
 
     /**
      * Property state setter
@@ -531,7 +524,7 @@ const Path = new Lang.Class({
         this._state = value;
 
         this._refresh_menu();
-    },
+    }
 
     /**
      *
@@ -540,12 +533,12 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refresh_menu: function() {
+    _refresh_menu() {
         this._refresh_menu_by_display();
         this._refresh_menu_by_state();
         this._refresh_menu_dropdown();
         this._refresh_menu_headers();
-    },
+    }
 
     /**
      * Show/hide system/vagrant menu
@@ -554,7 +547,7 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refresh_menu_by_display: function() {
+    _refresh_menu_by_display() {
         let value = this.getDisplayVagrant();
         for (let key in this.vagrant) {
             if (key === 'header')
@@ -578,7 +571,7 @@ const Path = new Lang.Class({
 
             menu.actor.visible = visible;
         }
-    },
+    }
 
     /**
      * Hide vagrant menu items based
@@ -586,7 +579,7 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refresh_menu_by_state: function() {
+    _refresh_menu_by_state() {
         this.setSensitive(true);
 
         if (this.state === 'poweroff') {
@@ -636,14 +629,14 @@ const Path = new Lang.Class({
             // disable menu on aborted or unknown state
             this.setSensitive(false);
         }
-    },
+    }
 
     /**
      * Show/hide dropdown arrow
      *
      * @return {Void}
      */
-    _refresh_menu_dropdown: function() {
+    _refresh_menu_dropdown() {
         this._triangleBin.visible = false
             || this.system.terminal.actor.visible
             || this.system.file_manager.actor.visible
@@ -659,7 +652,7 @@ const Path = new Lang.Class({
             || this.vagrant.suspend.actor.visible
             || this.vagrant.halt.actor.visible
             || this.vagrant.destroy.actor.visible;
-    },
+    }
 
     /**
      * Show/hide system/vagrant menu
@@ -667,7 +660,7 @@ const Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refresh_menu_headers: function() {
+    _refresh_menu_headers() {
         this.vagrant.header.actor.visible = false
             || this.vagrant.up.actor.visible
             || this.vagrant.up_provision.actor.visible
@@ -685,7 +678,7 @@ const Path = new Lang.Class({
             || this.system.terminal.actor.visible
             || this.system.file_manager.actor.visible
             || this.system.vagrantfile.actor.visible;
-    },
+    }
 
     /**
      * Get submenu item from menu list
@@ -693,7 +686,7 @@ const Path = new Lang.Class({
      * @param  {String} method (optional)
      * @return {Object}
      */
-    _get_item: function(method) {
+    _get_item(method) {
         return this.get_children()
             .map(function(actor) {
                 return actor._delegate;
@@ -701,7 +694,7 @@ const Path = new Lang.Class({
             .filter(function(actor) {
                 return actor instanceof Path && (method ? actor.method === method : true);
             });
-    },
+    }
 
     /**
      * Menu item activate event handler
@@ -711,12 +704,12 @@ const Path = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_activate: function(widget, event) {
+    _handle_activate(widget, event) {
         this.emit('system', {
             id: this.id,
             command: Vagrant.CommandSystem.TERMINAL,
         });
-    },
+    }
 
     /**
      * Menu subitem (system command)
@@ -726,12 +719,12 @@ const Path = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_system: function(widget, event) {
+    _handle_system(widget, event) {
         this.emit('system', {
             id: this.id,
             command: widget.command,
         });
-    },
+    }
 
     /**
      * Menu subitem (vagrant command)
@@ -741,16 +734,16 @@ const Path = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_vagrant: function(widget, event) {
+    _handle_vagrant(widget, event) {
         this.emit('vagrant', {
             id: this.id,
             command: widget.command,
         });
-    },
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Menu.Command constructor
@@ -758,52 +751,48 @@ const Path = new Lang.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Command = new Lang.Class({
-
-    Name: 'Menu.Command',
-    Extends: Item,
-
+var Command = class Command extends Item {
     /**
      * Constructor
      *
      * @param  {String} title
      * @return {Void}
      */
-    _init: function(title) {
-        this.parent(title);
+    constructor(title) {
+        super(title);
 
         this._def();
         this._ui();
         this._bind();
-    },
+    }
 
     /**
      * Initialize object properties
      *
      * @return {Void}
      */
-    _def: function() {
+    _def() {
         this._method = 'unknown';
-    },
+    }
 
     /**
      * Create user interface
      *
      * @return {Void}
      */
-    _ui: function() {
+    _ui() {
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-command');
         this.actor.add_style_class_name(this.method);
-    },
+    }
 
     /**
      * Bind events
      *
      * @return {Void}
      */
-    _bind: function() {
+    _bind() {
         this.connect('activate', Lang.bind(this, this._handle_activate));
-    },
+    }
 
     /**
      * Activate event handler
@@ -812,9 +801,9 @@ const Command = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handle_activate: function(widget, event) {
+    _handle_activate(widget, event) {
         this.emit('execute', {});
-    },
+    }
 
     /**
      * Property method getter
@@ -823,7 +812,7 @@ const Command = new Lang.Class({
      */
     get method() {
         return this._method;
-    },
+    }
 
     /**
      * Property method getter
@@ -833,11 +822,11 @@ const Command = new Lang.Class({
      */
     set method(value) {
         this._method = value;
-    },
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Menu.Header constructor
@@ -845,24 +834,20 @@ const Command = new Lang.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Header = new Lang.Class({
-
-    Name: 'Menu.Header',
-    Extends: Item,
-
+var Header = class Header extends Item {
     /**
      * Constructor
      *
      * @param  {String} title
      * @return {Void}
      */
-    _init: function(title) {
-        this.parent(title);
+    constructor(title) {
+        super(title);
 
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-header');
         this.setSensitive(false);
-    },
+    }
 
     /* --- */
 
-});
+};

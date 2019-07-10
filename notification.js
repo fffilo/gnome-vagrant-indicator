@@ -17,9 +17,7 @@ const Icons = Me.imports.icons;
  * @param  {Object}
  * @return {Object}
  */
-const Base = new Lang.Class({
-
-    Name: 'Notification.Base',
+var Base = class Base {
 
     /**
      * Constructor
@@ -28,19 +26,19 @@ const Base = new Lang.Class({
      * @param  {String} icon
      * @return {Void}
      */
-    _init: function(title, icon) {
+    constructor(title, icon) {
         this._title = title || Me.metadata.name;
         this._icon = icon || Icons.DEFAULT;
 
         this._source = null;
-    },
+    }
 
     /**
      * Prepare source
      *
      * @return {Void}
      */
-    _prepare: function() {
+    _prepare() {
         if (this._source !== null)
             return;
 
@@ -48,7 +46,7 @@ const Base = new Lang.Class({
         this._source.connect('destroy', Lang.bind(this, this._handle_destroy));
 
         Main.messageTray.add(this._source);
-    },
+    }
 
     /**
      * Get existing notification from
@@ -58,7 +56,7 @@ const Base = new Lang.Class({
      * @param  {String} message
      * @return {Object}
      */
-    _notification: function(title, message) {
+    _notification(title, message) {
         let result = null;
         if (this._source.notifications.length) {
             result = this._source.notifications[0];
@@ -73,7 +71,7 @@ const Base = new Lang.Class({
         }
 
         return result;
-    },
+    }
 
     /**
      * Source destroy event handler:
@@ -81,9 +79,9 @@ const Base = new Lang.Class({
      *
      * @return {Void}
      */
-    _handle_destroy: function() {
+    _handle_destroy() {
         this._source = null;
-    },
+    }
 
     /**
      * Show notification
@@ -92,14 +90,14 @@ const Base = new Lang.Class({
      * @param  {String} message
      * @return {Void}
      */
-    show: function(title, message) {
+    show(title, message) {
         this._prepare();
 
         let notify = this._notification(title, message);
         this._source.notify(notify);
 
-    },
+    }
 
     /* --- */
 
-});
+};
