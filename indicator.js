@@ -243,13 +243,12 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      * activate event handler
      *
      * @param  {Object} widget
-     * @param  {String} id
-     * @param  {Number} command
+     * @param  {Object} event
      * @return {void}
      */
-    _handle_machine_system(widget, id, command) {
+    _handle_machine_system(widget, event) {
         try {
-            this.vagrant.open(id, command);
+            this.vagrant.open(event.id, event.command);
         } catch (e) {
             this.vagrant.emit('error', e);
         }
@@ -260,16 +259,15 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      * activate event handler
      *
      * @param  {Object} widget
-     * @param  {String} id
-     * @param  {Number} command
+     * @param  {Object} event
      * @return {void}
      */
-    _handle_machine_vagrant(widget, id, command) {
+    _handle_machine_vagrant(widget, event) {
         try {
             let action = this.settings.get_string('post-terminal-action');
             action = Enum.getValue(Vagrant.PostTerminalAction, action);
 
-            this.vagrant.execute(id, command, action);
+            this.vagrant.execute(event.id, event.command, action);
         } catch (e) {
             this.vagrant.emit('error', e);
         }
