@@ -23,7 +23,7 @@ var Base = class Base {
      *
      * @param  {String} title
      * @param  {String} icon
-     * @return {Void}
+     * @return {void}
      */
     constructor(title, icon) {
         this._title = title || Me.metadata.name;
@@ -35,7 +35,7 @@ var Base = class Base {
     /**
      * Prepare source
      *
-     * @return {Void}
+     * @return {void}
      */
     _prepare() {
         if (this._source !== null)
@@ -76,7 +76,7 @@ var Base = class Base {
      * Source destroy event handler:
      * clear source
      *
-     * @return {Void}
+     * @return {void}
      */
     _handle_destroy() {
         this._source = null;
@@ -87,7 +87,7 @@ var Base = class Base {
      *
      * @param  {String} title
      * @param  {String} message
-     * @return {Void}
+     * @return {void}
      */
     show(title, message) {
         this._prepare();

@@ -43,7 +43,7 @@ var Exception = class Exception {
     /**
      * Constructor
      *
-     * @return {Void}
+     * @return {void}
      */
     constructor(message, title) {
         this._message = message;
@@ -97,7 +97,7 @@ var Member = class Member {
      *
      * @param  {String} key
      * @param  {Number} value
-     * @return {Void}
+     * @return {void}
      */
     constructor(key, value) {
         if (typeof key !== 'string')
@@ -194,7 +194,7 @@ var Enum = class Enum {
      * Constructor
      *
      * @param  {Mixed} params
-     * @return {Void}
+     * @return {void}
      */
     constructor(params) {
         this._members = [];
@@ -506,7 +506,7 @@ var sum = function(self) {
  *
  * @param  {Object}   self     Enum
  * @param  {Function} callback method
- * @return {Void}
+ * @return {void}
  */
 var forEach = function(self, callback) {
     if (!isEnum(self))

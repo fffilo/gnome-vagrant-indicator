@@ -33,7 +33,7 @@ var Machine = class Machine extends PopupMenuSection {
     /**
      * Constructor
      *
-     * @return {Void}
+     * @return {void}
      */
     constructor() {
         super();
@@ -50,7 +50,7 @@ var Machine = class Machine extends PopupMenuSection {
     /**
      * Empty list
      *
-     * @return {Void}
+     * @return {void}
      */
     clear() {
         this.removeAll();
@@ -64,7 +64,7 @@ var Machine = class Machine extends PopupMenuSection {
      * Display error
      *
      * @param  {String} msg
-     * @return {Void}
+     * @return {void}
      */
     error(msg) {
         this.removeAll();
@@ -81,7 +81,7 @@ var Machine = class Machine extends PopupMenuSection {
      * @param  {String} path
      * @param  {String} state
      * @param  {Number} index (optional)
-     * @return {Void}
+     * @return {void}
      */
     add(id, path, state, index) {
         if (this.empty)
@@ -100,7 +100,7 @@ var Machine = class Machine extends PopupMenuSection {
     /**
      * Remove item from list
      *
-     * @return {Void}
+     * @return {void}
      */
     remove(id) {
         this._get_item(id).forEach(function(actor) {
@@ -116,7 +116,7 @@ var Machine = class Machine extends PopupMenuSection {
      *
      * @param  {String} id
      * @param  {String} value
-     * @return {Void}
+     * @return {void}
      */
     state(id, value) {
         this._get_item(id).forEach(function(actor) {
@@ -141,7 +141,7 @@ var Machine = class Machine extends PopupMenuSection {
      * Set DisplayVagrant
      *
      * @param  {Number} value
-     * @return {Void}
+     * @return {void}
      */
     setDisplayVagrant(value) {
         if (value < Enum.min(DisplayVagrant))
@@ -171,7 +171,7 @@ var Machine = class Machine extends PopupMenuSection {
      * Set DisplaySystem
      *
      * @param  {Number} value
-     * @return {Void}
+     * @return {void}
      */
     setDisplaySystem(value) {
         if (value < Enum.min(DisplaySystem))
@@ -199,7 +199,7 @@ var Machine = class Machine extends PopupMenuSection {
      * Property shorten setter
      *
      * @param  {Boolean} value
-     * @return {Void}
+     * @return {void}
      */
     set shorten(value) {
         this._shorten = !!value;
@@ -231,8 +231,8 @@ var Machine = class Machine extends PopupMenuSection {
      *
      * @param  {Object} widget
      * @param  {String} id
-     * @param  {String} command
-     * @return {Void}
+     * @param  {Number} command
+     * @return {void}
      */
     _handle_system(widget, id, command) {
         this.emit('system', id, command);
@@ -244,8 +244,8 @@ var Machine = class Machine extends PopupMenuSection {
      *
      * @param  {Object} widget
      * @param  {String} id
-     * @param  {String} command
-     * @return {Void}
+     * @param  {Number} command
+     * @return {void}
      */
     _handle_vagrant(widget, id, command) {
         this.emit('vagrant', id, command);
@@ -273,7 +273,7 @@ var Path = GObject.registerClass({
      * @param  {String} id
      * @param  {String} path
      * @param  {String} state
-     * @return {Void}
+     * @return {void}
      */
     _init(id, path, state) {
         super._init('unknown');
@@ -297,7 +297,7 @@ var Path = GObject.registerClass({
     /**
      * Create user interface
      *
-     * @return {Void}
+     * @return {void}
      */
     _ui() {
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-path');
@@ -312,7 +312,7 @@ var Path = GObject.registerClass({
      * Create user interface for
      * vagrant commands menu
      *
-     * @return {Void}
+     * @return {void}
      */
     _ui_vagrant() {
         this.vagrant = {};
@@ -352,7 +352,7 @@ var Path = GObject.registerClass({
      * Create user interface for
      * system commands menu
      *
-     * @return {Void}
+     * @return {void}
      */
     _ui_system() {
         this.system = {};
@@ -383,7 +383,7 @@ var Path = GObject.registerClass({
     /**
      * Bind events
      *
-     * @return {Void}
+     * @return {void}
      */
     _bind() {
         this.connect('activate', this._handle_activate.bind(this));
@@ -404,7 +404,7 @@ var Path = GObject.registerClass({
      * Set DisplayVagrant
      *
      * @param  {Number} value
-     * @return {Void}
+     * @return {void}
      */
     setDisplayVagrant(value) {
         if (value < Enum.min(DisplayVagrant))
@@ -432,7 +432,7 @@ var Path = GObject.registerClass({
      * Set DisplaySystem
      *
      * @param  {Number} value
-     * @return {Void}
+     * @return {void}
      */
     setDisplaySystem(value) {
         if (value < Enum.min(DisplaySystem))
@@ -450,7 +450,7 @@ var Path = GObject.registerClass({
      * when submenu is empty
      *
      * @param  {Booelan} open
-     * @return {Void}
+     * @return {void}
      */
     setSubmenuShown(open) {
         super.setSubmenuShown(open);
@@ -472,7 +472,7 @@ var Path = GObject.registerClass({
      * Property shorten setter
      *
      * @param  {Boolean} value
-     * @return {Void}
+     * @return {void}
      */
     set shorten(value) {
         this._shorten = !!value;
@@ -515,7 +515,7 @@ var Path = GObject.registerClass({
      * Property state setter
      *
      * @param  {String} value
-     * @return {Void}
+     * @return {void}
      */
     set state(value) {
         this.actor.remove_style_class_name(this.state);
@@ -531,7 +531,7 @@ var Path = GObject.registerClass({
      * Show/hide system/vagrant menu
      * items
      *
-     * @return {Void}
+     * @return {void}
      */
     _refresh_menu() {
         this._refresh_menu_by_display();
@@ -545,7 +545,7 @@ var Path = GObject.registerClass({
      * items based on user display
      * property
      *
-     * @return {Void}
+     * @return {void}
      */
     _refresh_menu_by_display() {
         let value = this.getDisplayVagrant();
@@ -577,7 +577,7 @@ var Path = GObject.registerClass({
      * Hide vagrant menu items based
      * on virtual machine state
      *
-     * @return {Void}
+     * @return {void}
      */
     _refresh_menu_by_state() {
         this.setSensitive(true);
@@ -634,7 +634,7 @@ var Path = GObject.registerClass({
     /**
      * Show/hide dropdown arrow
      *
-     * @return {Void}
+     * @return {void}
      */
     _refresh_menu_dropdown() {
         this._triangleBin.visible = false
@@ -658,7 +658,7 @@ var Path = GObject.registerClass({
      * Show/hide system/vagrant menu
      * headers
      *
-     * @return {Void}
+     * @return {void}
      */
     _refresh_menu_headers() {
         this.vagrant.header.actor.visible = false
@@ -702,7 +702,7 @@ var Path = GObject.registerClass({
      *
      * @param  {Object} widget
      * @param  {Clutter.Event.$gtype} event
-     * @return {Void}
+     * @return {void}
      */
     _handle_activate(widget, event) {
         this.emit('system', this.id, Vagrant.CommandSystem.TERMINAL);
@@ -713,11 +713,9 @@ var Path = GObject.registerClass({
      * execute event handler
      *
      * @param  {Object} widget
-     * @param  {String} id
-     * @param  {String} command
-     * @return {Void}
+     * @return {void}
      */
-    _handle_system(widget, id, command) {
+    _handle_system(widget) {
         this.emit('system', this.id, widget.command);
     }
 
@@ -726,10 +724,9 @@ var Path = GObject.registerClass({
      * execute event handler
      *
      * @param  {Object} widget
-     * @param  {Object} event
-     * @return {Void}
+     * @return {void}
      */
-    _handle_vagrant(widget, event) {
+    _handle_vagrant(widget) {
         this.emit('vagrant', this.id, widget.command);
     }
 
@@ -752,7 +749,7 @@ var Command = GObject.registerClass({
      * Constructor
      *
      * @param  {String} title
-     * @return {Void}
+     * @return {void}
      */
     _init(title) {
         super._init(title);
@@ -765,7 +762,7 @@ var Command = GObject.registerClass({
     /**
      * Initialize object properties
      *
-     * @return {Void}
+     * @return {void}
      */
     _def() {
         this._method = 'unknown';
@@ -774,7 +771,7 @@ var Command = GObject.registerClass({
     /**
      * Create user interface
      *
-     * @return {Void}
+     * @return {void}
      */
     _ui() {
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-command');
@@ -784,7 +781,7 @@ var Command = GObject.registerClass({
     /**
      * Bind events
      *
-     * @return {Void}
+     * @return {void}
      */
     _bind() {
         this.connect('activate', this._handle_activate.bind(this));
@@ -795,7 +792,7 @@ var Command = GObject.registerClass({
      *
      * @param  {Object} widget
      * @param  {Object} event
-     * @return {Void}
+     * @return {void}
      */
     _handle_activate(widget, event) {
         this.emit('execute');
@@ -814,7 +811,7 @@ var Command = GObject.registerClass({
      * Property method getter
      *
      * @param  {String} value
-     * @return {Void}
+     * @return {void}
      */
     set method(value) {
         this._method = value;
@@ -835,7 +832,7 @@ var Header = GObject.registerClass(class Header extends PopupMenuItem {
      * Constructor
      *
      * @param  {String} title
-     * @return {Void}
+     * @return {void}
      */
     _init(title) {
         super._init(title);

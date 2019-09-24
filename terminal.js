@@ -68,7 +68,7 @@ var Emulator = class Emulator {
      * @param  {String} cwd      (optional) working directory
      * @param  {String} command  (optional) command to execute
      * @param  {String} terminal (optional) terminal emulator
-     * @return {Void}
+     * @return {void}
      */
     popup(cwd, command, terminal) {
         cwd = cwd || '~';

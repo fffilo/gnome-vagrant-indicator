@@ -21,7 +21,7 @@ let indicator = null;
  * Extension initialization
  *
  * @param  {Object} extensionMeta
- * @return {Void}
+ * @return {void}
  */
 function init(extensionMeta) {
     Translation.init();
@@ -31,7 +31,7 @@ function init(extensionMeta) {
 /**
  * Extension enable
  *
- * @return {Void}
+ * @return {void}
  */
 function enable() {
     if (indicator)
@@ -43,7 +43,7 @@ function enable() {
 /**
  * Extension disable
  *
- * @return {Void}
+ * @return {void}
  */
 function disable() {
     if (!indicator)

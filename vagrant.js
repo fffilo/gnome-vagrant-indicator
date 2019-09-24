@@ -108,7 +108,7 @@ var Exception = class Exception {
     /**
      * Constructor
      *
-     * @return {Void}
+     * @return {void}
      */
     constructor(message, title) {
         this._message = message;
@@ -162,7 +162,7 @@ var Index = class Index {
     /**
      * Constructor
      *
-     * @return {Void}
+     * @return {void}
      */
     constructor() {
         this._path = VAGRANT_INDEX;
@@ -171,7 +171,7 @@ var Index = class Index {
     /**
      * Destructor
      *
-     * @return {Void}
+     * @return {void}
      */
     destroy() {
         // pass
@@ -235,7 +235,7 @@ var Monitor = class Monitor {
     /**
      * Constructor
      *
-     * @return {Void}
+     * @return {void}
      */
     constructor() {
         this._index = null;
@@ -252,7 +252,7 @@ var Monitor = class Monitor {
     /**
      * Destructor
      *
-     * @return {Void}
+     * @return {void}
      */
     destroy() {
         this.stop();
@@ -262,7 +262,7 @@ var Monitor = class Monitor {
      * Monitor vagrant machine index file
      * content change
      *
-     * @return {Void}
+     * @return {void}
      */
     start() {
         if (this._monitor)
@@ -276,7 +276,7 @@ var Monitor = class Monitor {
      * Unmonitor vagrant machine index file
      * content change
      *
-     * @return {Void}
+     * @return {void}
      */
     stop() {
         if (!this._monitor)
@@ -303,7 +303,7 @@ var Monitor = class Monitor {
      *
      * @param  {Object} monitor
      * @param  {Object} file
-     * @return {Void}
+     * @return {void}
      */
     _handle_monitor_changed(monitor, file) {
         let index = new Index();
@@ -372,7 +372,7 @@ var Emulator = class Emulator {
     /**
      * Constructor
      *
-     * @return {Void}
+     * @return {void}
      */
     constructor() {
         this._index = null;
@@ -394,7 +394,7 @@ var Emulator = class Emulator {
     /**
      * Destructor
      *
-     * @return {Void}
+     * @return {void}
      */
     destroy() {
         this.monitor.destroy();
@@ -427,7 +427,7 @@ var Emulator = class Emulator {
      * @param  {String} id     machine id
      * @param  {String} cmd    vagrant command (up|halt...)
      * @param  {Number} action (optional) PostTerminalAction
-     * @return {Void}
+     * @return {void}
      */
     _exec(id, cmd, action) {
         this._validate(id);
@@ -460,7 +460,7 @@ var Emulator = class Emulator {
      *
      * @param  {Object} monitor
      * @param  {Object} event
-     * @return {Void}
+     * @return {void}
      */
     _handle_monitor_change(monitor, event) {
         this._index = event.index;
@@ -551,7 +551,7 @@ var Emulator = class Emulator {
      * Parse vagrant machine index file content
      * and save it to this.index
      *
-     * @return {Void}
+     * @return {void}
      */
     refresh() {
         let index = new Index();
@@ -564,7 +564,7 @@ var Emulator = class Emulator {
      *
      * @param  {String} id  machine id
      * @param  {Number} cmd CommandSystem
-     * @return {Void}
+     * @return {void}
      */
     open(id, cmd) {
         this._validate(id);
@@ -588,7 +588,7 @@ var Emulator = class Emulator {
      * @param  {String} id     machine id
      * @param  {Number} cmd    CommandVagrant
      * @param  {Number} action (optional) PostTerminalAction
-     * @return {Void}
+     * @return {void}
      */
     execute(id, cmd, action) {
         this._validate(id);

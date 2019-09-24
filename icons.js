@@ -14,7 +14,7 @@ var DEFAULT = 'gnome-vagrant-indicator-symbolic';
 /**
  * Append assets path to theme
  *
- * @return {Void}
+ * @return {void}
  */
 var init = function() {
     IconTheme.get_default().append_search_path(Me.path + '/assets');

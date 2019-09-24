@@ -31,7 +31,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     /**
      * Constructor
      *
-     * @return {Void}
+     * @return {void}
      */
     _init() {
         super._init(null, Me.metadata.name);
@@ -45,7 +45,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     /**
      * Destructor
      *
-     * @return {Void}
+     * @return {void}
      */
     destroy() {
         if (this.vagrant)
@@ -59,7 +59,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     /**
      * Initialize object properties
      *
-     * @return {Void}
+     * @return {void}
      */
     _def() {
         this.notification = new Notification.Base();
@@ -78,7 +78,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     /**
      * Create user interface
      *
-     * @return {Void}
+     * @return {void}
      */
     _ui() {
         this.add_style_class_name('panel-status-button');
@@ -108,7 +108,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     /**
      * Refresh machine menu
      *
-     * @return {Void}
+     * @return {void}
      */
     refresh() {
         this.machine.clear();
@@ -164,7 +164,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Object} widget
      * @param  {String} key
-     * @return {Void}
+     * @return {void}
      */
     _handle_settings(widget, key) {
         if (key === 'machine-full-path')
@@ -180,7 +180,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Object} widget
      * @param  {Object} event
-     * @return {Void}
+     * @return {void}
      */
     _handle_vagrant_add(widget, event) {
         let machine = this.vagrant.index.machines[event.id];
@@ -194,7 +194,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Object} widget
      * @param  {Object} event
-     * @return {Void}
+     * @return {void}
      */
     _handle_vagrant_remove(widget, event) {
         this.machine.remove(event.id);
@@ -205,7 +205,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Object} widget
      * @param  {Object} event
-     * @return {Void}
+     * @return {void}
      */
     _handle_vagrant_state(widget, event) {
         let machine = this.vagrant.index.machines[event.id];
@@ -220,7 +220,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Object} widget
      * @param  {Object} event
-     * @return {Void}
+     * @return {void}
      */
     _handle_vagrant_error(widget, event) {
         if (!this.settings.get_boolean('notifications'))
@@ -244,8 +244,8 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Object} widget
      * @param  {String} id
-     * @param  {String} command
-     * @return {Void}
+     * @param  {Number} command
+     * @return {void}
      */
     _handle_machine_system(widget, id, command) {
         try {
@@ -261,8 +261,8 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Object} widget
      * @param  {String} id
-     * @param  {String} command
-     * @return {Void}
+     * @param  {Number} command
+     * @return {void}
      */
     _handle_machine_vagrant(widget, id, command) {
         try {
@@ -280,7 +280,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Object} widget
      * @param  {Object} event
-     * @return {Void}
+     * @return {void}
      */
     _handle_preferences(widget, event) {
         Util.spawn(['gnome-shell-extension-prefs', Me.metadata.uuid]);

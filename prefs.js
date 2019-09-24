@@ -17,7 +17,7 @@ const _ = Translation.translate;
 /**
  * Extension preferences initialization
  *
- * @return {Void}
+ * @return {void}
  */
 function init() {
     Translation.init();
@@ -26,7 +26,7 @@ function init() {
 /**
  * Extension preferences build widget
  *
- * @return {Void}
+ * @return {void}
  */
 function buildPrefsWidget() {
     return new Widget();
@@ -43,7 +43,7 @@ var Widget = GObject.registerClass(class Widget extends Gtk.Box {
     /**
      * Widget initialization
      *
-     * @return {Void}
+     * @return {void}
      */
     _init() {
         super._init({ orientation: Gtk.Orientation.VERTICAL, });
@@ -56,7 +56,7 @@ var Widget = GObject.registerClass(class Widget extends Gtk.Box {
     /**
      * Initialize object properties
      *
-     * @return {Void}
+     * @return {void}
      */
     _def() {
         this.settings = Settings.settings();
@@ -66,7 +66,7 @@ var Widget = GObject.registerClass(class Widget extends Gtk.Box {
     /**
      * Create user interface
      *
-     * @return {Void}
+     * @return {void}
      */
     _ui() {
         let css = new Gtk.CssProvider();
@@ -261,7 +261,7 @@ var Widget = GObject.registerClass(class Widget extends Gtk.Box {
     /**
      * Bind events
      *
-     * @return {Void}
+     * @return {void}
      */
     _bind() {
         this.connect('destroy', Lang.bind(this, this._handle_destroy));
@@ -272,7 +272,7 @@ var Widget = GObject.registerClass(class Widget extends Gtk.Box {
      *
      * @param  {Object} widget
      * @param  {Object} event
-     * @return {Void}
+     * @return {void}
      */
     _handle_destroy(widget, event) {
         if (this.settings)
@@ -284,7 +284,7 @@ var Widget = GObject.registerClass(class Widget extends Gtk.Box {
      *
      * @param  {String} widget
      * @param  {String} event
-     * @return {Void}
+     * @return {void}
      */
     _handle_widget(widget, event) {
         let old_value = this.settings['get_' + event.type](event.key);
@@ -298,7 +298,7 @@ var Widget = GObject.registerClass(class Widget extends Gtk.Box {
      *
      * @param  {Object} widget
      * @param  {String} key
-     * @return {Void}
+     * @return {void}
      */
     _handle_settings(widget, key) {
         // pass
@@ -350,7 +350,7 @@ var Label = GObject.registerClass(class Label extends Gtk.Label {
      * Constructor
      *
      * @param  {Object} options (optional)
-     * @return {Void}
+     * @return {void}
      */
     _init(options) {
         let o = options || {};
@@ -385,7 +385,7 @@ var Input = GObject.registerClass(class Input extends Box {
      * @param  {String} key
      * @param  {String} text
      * @param  {String} tooltip
-     * @return {Void}
+     * @return {void}
      */
     _init(key, text, tooltip) {
         super._init();
@@ -413,7 +413,7 @@ var Input = GObject.registerClass(class Input extends Box {
      * Value setter
      *
      * @param  {Mixed} value
-     * @return {Void}
+     * @return {void}
      */
     set value(value) {
         this._widget.value = value;
@@ -423,7 +423,7 @@ var Input = GObject.registerClass(class Input extends Box {
      * Input change event handler
      *
      * @param  {Object} widget
-     * @return {Void}
+     * @return {void}
      */
     _handle_change(widget) {
         this.emit('changed', {
@@ -450,7 +450,7 @@ var InputEntry = GObject.registerClass(class InputEntry extends Input {
     /**
      * Constructor
      *
-     * @return {Void}
+     * @return {void}
      */
     _init(key, value, text, tooltip) {
         super._init(key, text, tooltip);
@@ -467,7 +467,7 @@ var InputEntry = GObject.registerClass(class InputEntry extends Input {
      *
      * @param  {Object} actor
      * @param  {Object} event
-     * @return {Void}
+     * @return {void}
      */
     _handle_change(actor, event) {
         this.emit('changed', {
@@ -490,7 +490,7 @@ var InputEntry = GObject.registerClass(class InputEntry extends Input {
      * Value setter
      *
      * @param  {String} value
-     * @return {Void}
+     * @return {void}
      */
     set value(value) {
         this._widget.text = value;
@@ -511,7 +511,7 @@ var InputSwitch = GObject.registerClass(class InputSwitch extends Input {
     /**
      * Constructor
      *
-     * @return {Void}
+     * @return {void}
      */
     _init(key, value, text, tooltip) {
         super._init(key, text, tooltip);
@@ -527,7 +527,7 @@ var InputSwitch = GObject.registerClass(class InputSwitch extends Input {
      * Input change event handler
      *
      * @param  {Object} widget
-     * @return {Void}
+     * @return {void}
      */
     _handle_change(widget) {
         this.emit('changed', {
@@ -550,7 +550,7 @@ var InputSwitch = GObject.registerClass(class InputSwitch extends Input {
      * Value setter
      *
      * @param  {Boolean} value
-     * @return {Void}
+     * @return {void}
      */
     set value(value) {
         this._widget.active = value;
@@ -576,7 +576,7 @@ var InputComboBox = GObject.registerClass(class InputComboBox extends Input {
      * @param  {String} text
      * @param  {String} tooltip
      * @param  {Object} options
-     * @return {Void}
+     * @return {void}
      */
     _init(key, value, text, tooltip, options) {
         super._init(key, text, tooltip);
@@ -598,7 +598,7 @@ var InputComboBox = GObject.registerClass(class InputComboBox extends Input {
      * Widget change event handler
      *
      * @param  {Object} widget
-     * @return {Void}
+     * @return {void}
      */
     _handle_change(widget) {
         this.emit('changed', {
@@ -621,7 +621,7 @@ var InputComboBox = GObject.registerClass(class InputComboBox extends Input {
      * Value setter
      *
      * @param  {Boolean} value
-     * @return {Void}
+     * @return {void}
      */
     set value(value) {
         this._widget.set_active_id(value);
