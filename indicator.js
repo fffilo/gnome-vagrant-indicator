@@ -81,15 +81,15 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      * @return {Void}
      */
     _ui() {
-        this.actor.add_style_class_name('panel-status-button');
-        this.actor.add_style_class_name('gnome-vagrant-indicator');
+        this.add_style_class_name('panel-status-button');
+        this.add_style_class_name('gnome-vagrant-indicator');
 
         this.icon = new St.Icon({
             icon_name: Icons.DEFAULT,
             style_class: 'system-status-icon',
         });
         this.icon.set_gicon(Gio.icon_new_for_string(Me.path + '/assets/' + Icons.DEFAULT + ".svg"));
-        this.actor.add_actor(this.icon);
+        this.add_actor(this.icon);
 
         this.machine = new Menu.Machine(this);
         this.machine.shorten = !this.settings.get_boolean('machine-full-path');

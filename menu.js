@@ -4,8 +4,8 @@
 'use strict';
 
 // import modules
-const GLib = imports.gi.GLib;
 const PopupMenu = imports.ui.popupMenu;
+const {GLib, GObject, Clutter} = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Enum = Me.imports.enum;
@@ -15,8 +15,8 @@ const _ = Translation.translate;
 
 // PopupMenu proxies
 var Separator = PopupMenu.PopupSeparatorMenuItem;
-var Item = PopupMenu.PopupMenuItem;
-var SubMenu = PopupMenu.PopupSubMenuMenuItem;
+var PopupMenuItem = PopupMenu.PopupMenuItem;
+var PopupSubMenuMenuItem = PopupMenu.PopupSubMenuMenuItem;
 var Section = PopupMenu.PopupMenuSection;
 
 // Display enums
@@ -35,10 +35,10 @@ var Machine = class Machine extends Section {
      *
      * @return {Void}
      */
-    constructor() {
-        super();
+    _init() {
+        super._init();
 
-        this.actor.add_style_class_name('gnome-vagrant-indicator-menu-machine');
+        this.add_style_class_name('gnome-vagrant-indicator-menu-machine');
 
         this._shorten = false;
         this._display_vagrant = Enum.sum(DisplayVagrant);
@@ -55,7 +55,7 @@ var Machine = class Machine extends Section {
     clear() {
         this.removeAll();
 
-        this.empty = new Item(_("No Vagrant machines found"));
+        this.empty = new PopupMenuItem(_("No Vagrant machines found"));
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
     }
@@ -69,7 +69,7 @@ var Machine = class Machine extends Section {
     error(msg) {
         this.removeAll();
 
-        this.empty = new Item(msg || 'ERROR');
+        this.empty = new PopupMenuItem(msg || 'ERROR');
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
     }
@@ -265,7 +265,12 @@ var Machine = class Machine extends Section {
  * @param  {Object}
  * @return {Object}
  */
-var Path = class Path extends SubMenu {
+var Path = GObject.registerClass({
+    Signals: {
+        'system': { param_types: [String, String] },
+        'vagrant': { param_types: [String, String] },
+    }
+}, class Path extends PopupSubMenuMenuItem {
     /**
      * Constructor
      *
@@ -274,8 +279,8 @@ var Path = class Path extends SubMenu {
      * @param  {String} state
      * @return {Void}
      */
-    constructor(id, path, state) {
-        super('unknown');
+    _init(id, path, state) {
+        super._init('unknown');
 
         this._id = id;
         this._path = path;
@@ -299,7 +304,7 @@ var Path = class Path extends SubMenu {
      * @return {Void}
      */
     _ui() {
-        this.actor.add_style_class_name('gnome-vagrant-indicator-menu-path');
+        this.add_style_class_name('gnome-vagrant-indicator-menu-path');
         this.menu.actor.add_style_class_name('gnome-vagrant-indicator-menu-submenu');
         this.setOrnament(PopupMenu.Ornament.DOT);
 
@@ -517,8 +522,8 @@ var Path = class Path extends SubMenu {
      * @return {Void}
      */
     set state(value) {
-        this.actor.remove_style_class_name(this.state);
-        this.actor.add_style_class_name(value);
+        this.remove_style_class_name(this.state);
+        this.add_style_class_name(value);
 
         this._state = value;
 
@@ -622,7 +627,7 @@ var Path = class Path extends SubMenu {
             this.vagrant.halt.actor.visible = false;
             this.vagrant.destroy.actor.visible = false;
         }
-        //else if (this.state === 'aborted') {
+            //else if (this.state === 'aborted') {
         //}
         else {
             // disable menu on aborted or unknown state
@@ -742,7 +747,7 @@ var Path = class Path extends SubMenu {
 
     /* --- */
 
-};
+});
 
 /**
  * Menu.Command constructor
@@ -750,15 +755,19 @@ var Path = class Path extends SubMenu {
  * @param  {Object}
  * @return {Object}
  */
-var Command = class Command extends Item {
+var Command = GObject.registerClass({
+    Signals: {
+        'execute': { param_types: []},
+    }
+}, class Command extends PopupMenuItem {
     /**
      * Constructor
      *
      * @param  {String} title
      * @return {Void}
      */
-    constructor(title) {
-        super(title);
+    _init(title) {
+        super._init(title);
 
         this._def();
         this._ui();
@@ -780,8 +789,8 @@ var Command = class Command extends Item {
      * @return {Void}
      */
     _ui() {
-        this.actor.add_style_class_name('gnome-vagrant-indicator-menu-command');
-        this.actor.add_style_class_name(this.method);
+        this.add_style_class_name('gnome-vagrant-indicator-menu-command');
+        this.add_style_class_name(this.method);
     }
 
     /**
@@ -825,7 +834,7 @@ var Command = class Command extends Item {
 
     /* --- */
 
-};
+});
 
 /**
  * Menu.Header constructor
@@ -833,20 +842,20 @@ var Command = class Command extends Item {
  * @param  {Object}
  * @return {Object}
  */
-var Header = class Header extends Item {
+var Header = GObject.registerClass(class Header extends PopupMenuItem {
     /**
      * Constructor
      *
      * @param  {String} title
      * @return {Void}
      */
-    constructor(title) {
-        super(title);
+    _init(title) {
+        super._init(title);
 
-        this.actor.add_style_class_name('gnome-vagrant-indicator-menu-header');
+        this.add_style_class_name('gnome-vagrant-indicator-menu-header');
         this.setSensitive(false);
     }
 
     /* --- */
 
-};
+});

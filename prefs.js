@@ -389,13 +389,13 @@ var Input = GObject.registerClass(class Input extends Box {
      */
     _init(key, text, tooltip) {
         super._init();
-        this.actor.set_orientation(Gtk.Orientation.HORIZONTAL);
+        this.set_orientation(Gtk.Orientation.HORIZONTAL);
 
         this._key = key;
         this._label = new Gtk.Label({ label: text, xalign: 0, tooltip_text: tooltip || '' });
         this._widget = null;
 
-        this.actor.pack_start(this._label, true, true, 0);
+        this.pack_start(this._label, true, true, 0);
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-input');
     }
@@ -457,7 +457,7 @@ var InputEntry = GObject.registerClass(class InputEntry extends Input {
 
         this._widget = new Gtk.Entry({ text: value });
         this._widget.connect('notify::text', Lang.bind(this, this._handle_change));
-        this.actor.add(this._widget);
+        this.add(this._widget);
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-input-entry');
     }
@@ -518,7 +518,7 @@ var InputSwitch = GObject.registerClass(class InputSwitch extends Input {
 
         this._widget = new Gtk.Switch({ active: value });
         this._widget.connect('notify::active', Lang.bind(this, this._handle_change));
-        this.actor.add(this._widget);
+        this.add(this._widget);
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-input-switch');
     }
@@ -583,7 +583,7 @@ var InputComboBox = GObject.registerClass(class InputComboBox extends Input {
 
         this._widget = new Gtk.ComboBoxText();
         this._widget.connect('notify::active', Lang.bind(this, this._handle_change));
-        this.actor.add(this._widget);
+        this.add(this._widget);
 
         for (let id in options) {
             this._widget.append(id, options[id]);
