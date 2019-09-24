@@ -65,13 +65,13 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
         this.notification = new Notification.Base();
 
         this.settings = Settings.settings();
-        this.settings.connect('changed', Lang.bind(this, this._handle_settings));
+        this.settings.connect('changed', this._handle_settings.bind(this));
 
         this.vagrant = new Vagrant.Emulator();
-        this.vagrant.connect('error', Lang.bind(this, this._handle_vagrant_error));
-        this.vagrant.monitor.connect('add', Lang.bind(this, this._handle_vagrant_add));
-        this.vagrant.monitor.connect('remove', Lang.bind(this, this._handle_vagrant_remove));
-        this.vagrant.monitor.connect('state', Lang.bind(this, this._handle_vagrant_state));
+        this.vagrant.connect('error', this._handle_vagrant_error.bind(this));
+        this.vagrant.monitor.connect('add', this._handle_vagrant_add.bind(this));
+        this.vagrant.monitor.connect('remove', this._handle_vagrant_remove.bind(this));
+        this.vagrant.monitor.connect('state', this._handle_vagrant_state.bind(this));
         this.vagrant.monitor.start();
     }
 
@@ -95,13 +95,13 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
         this.machine.shorten = !this.settings.get_boolean('machine-full-path');
         this.machine.setDisplayVagrant(this._get_settings_machine_menu_display_vagrant());
         this.machine.setDisplaySystem(this._get_settings_machine_menu_display_system());
-        this.machine.connect('system', Lang.bind(this, this._handle_machine_system));
-        this.machine.connect('vagrant', Lang.bind(this, this._handle_machine_vagrant));
+        this.machine.connect('system', this._handle_machine_system.bind(this));
+        this.machine.connect('vagrant', this._handle_machine_vagrant.bind(this));
         this.menu.addMenuItem(this.machine);
-        this.menu.addMenuItem(new Menu.Separator());
+        this.menu.addMenuItem(new Menu.PopupSeparatorMenuItem());
 
-        this.preferences = new Menu.Item(_("Preferences"));
-        this.preferences.connect('activate', Lang.bind(this, this._handle_preferences));
+        this.preferences = new Menu.PopupMenuItem(_("Preferences"));
+        this.preferences.connect('activate', this._handle_preferences.bind(this));
         this.menu.addMenuItem(this.preferences);
     }
 
@@ -243,12 +243,13 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      * activate event handler
      *
      * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {String} id
+     * @param  {String} command
      * @return {Void}
      */
-    _handle_machine_system(widget, event) {
+    _handle_machine_system(widget, id, command) {
         try {
-            this.vagrant.open(event.id, event.command);
+            this.vagrant.open(id, command);
         } catch (e) {
             this.vagrant.emit('error', e);
         }
@@ -259,15 +260,16 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      * activate event handler
      *
      * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {String} id
+     * @param  {String} command
      * @return {Void}
      */
-    _handle_machine_vagrant(widget, event) {
+    _handle_machine_vagrant(widget, id, command) {
         try {
             let action = this.settings.get_string('post-terminal-action');
             action = Enum.getValue(Vagrant.PostTerminalAction, action);
 
-            this.vagrant.execute(event.id, event.command, action);
+            this.vagrant.execute(id, command, action);
         } catch (e) {
             this.vagrant.emit('error', e);
         }
