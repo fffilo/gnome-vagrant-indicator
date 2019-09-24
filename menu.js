@@ -17,7 +17,7 @@ const _ = Translation.translate;
 var Separator = PopupMenu.PopupSeparatorMenuItem;
 var PopupMenuItem = PopupMenu.PopupMenuItem;
 var PopupSubMenuMenuItem = PopupMenu.PopupSubMenuMenuItem;
-var Section = PopupMenu.PopupMenuSection;
+var PopupMenuSection = PopupMenu.PopupMenuSection;
 
 // Display enums
 var DisplayVagrant = Vagrant.CommandVagrant;
@@ -29,14 +29,14 @@ var DisplaySystem = Vagrant.CommandSystem;
  * @param  {Object}
  * @return {Object}
  */
-var Machine = class Machine extends Section {
+var Machine = class Machine extends PopupMenuSection {
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init() {
-        super._init();
+    constructor() {
+        super();
 
         this.add_style_class_name('gnome-vagrant-indicator-menu-machine');
 
@@ -267,8 +267,8 @@ var Machine = class Machine extends Section {
  */
 var Path = GObject.registerClass({
     Signals: {
-        'system': { param_types: [String, String] },
-        'vagrant': { param_types: [String, String] },
+        'system': { param_types: [GObject.TYPE_STRING, GObject.TYPE_STRING] },
+        'vagrant': { param_types: [GObject.TYPE_STRING, GObject.TYPE_STRING] },
     }
 }, class Path extends PopupSubMenuMenuItem {
     /**
@@ -757,7 +757,7 @@ var Path = GObject.registerClass({
  */
 var Command = GObject.registerClass({
     Signals: {
-        'execute': { param_types: []},
+        'execute': { param_types: GObject.TYPE_NONE},
     }
 }, class Command extends PopupMenuItem {
     /**
