@@ -394,10 +394,6 @@ var Monitor = new Lang.Class({
      * @return {Void}
      */
     _init: function() {
-        // @todo
-        //      - this._machines can be replaced with this._vagrant.index
-        //
-        this._machines = null;
         this._data = null;
 
         this._vagrant = new Vagrant.Monitor();
@@ -429,7 +425,6 @@ var Monitor = new Lang.Class({
         this._config = null;
         this._vagrant = null;
         this._data = null;
-        this._machines = null;
     },
 
     /**
@@ -438,9 +433,6 @@ var Monitor = new Lang.Class({
      * @return {Void}
      */
     start: function() {
-        let index = new Vagrant.Index();
-        let parse = index.parse();
-        this._machines = Object.keys(parse.machines);
         this._update();
 
         this._vagrant.start();
@@ -458,7 +450,6 @@ var Monitor = new Lang.Class({
         this._config.stop();
         this._schema.stop();
 
-        this._machines = null;
         this._update();
     },
 
@@ -468,7 +459,7 @@ var Monitor = new Lang.Class({
      * @return {Object}
      */
     getMachineList: function() {
-        return this._machines;
+        return this._vagrant && this._vagrant.index ? Object.keys(this._vagrant.index.machines) : null;
     },
 
     /**
@@ -480,7 +471,7 @@ var Monitor = new Lang.Class({
      * @return {Mixed}
      */
     getMachineDetail: function(machine, key) {
-        let index = this._vagrant.index;
+        let index = this._vagrant ? this._vagrant.index : null;
         if (index && index.machines && (machine in index.machines) && (typeof key === 'undefined'))
             return index.machines[machine];
         else if (index && index.machines && (machine in index.machines) && (key in index.machines[machine]))
@@ -537,11 +528,10 @@ var Monitor = new Lang.Class({
      */
     _update: function() {
         this._data = {};
-        if (!this._machines)
-            return;
 
-        for (let i = 0; i < this._machines.length; i++) {
-            this._updateMachine(this._machines[i]);
+        let machines = this.getMachineList() || [];
+        for (let i = 0; i < machines.length; i++) {
+            this._updateMachine(machines[i]);
         }
     },
 
@@ -552,10 +542,8 @@ var Monitor = new Lang.Class({
      * @return {Void}
      */
     _updateMachine: function(machine) {
-        if (!this._machines)
-            return;
-
-        let index = this._machines.indexOf(machine);
+        let machines = this.getMachineList() || [];
+        let index = machines.indexOf(machine);
         if (index !== -1) {
             this._data[machine] = {};
 
@@ -576,10 +564,8 @@ var Monitor = new Lang.Class({
      * @return {Void}
      */
     _updateMachineKey: function(machine, key) {
-        if (!this._machines)
-            return;
-
-        let index = this._machines.indexOf(machine);
+        let machines = this.getMachineList() || [];
+        let index = machines.indexOf(machine);
         if (index === -1)
             return;
 
@@ -613,7 +599,6 @@ var Monitor = new Lang.Class({
      * @return {Object}
      */
     _handleVagrantAdd: function(widget, event) {
-        this._machines.push(event.id);
         this._updateMachine(event.id);
 
         this.emit('add', event);
@@ -627,9 +612,6 @@ var Monitor = new Lang.Class({
      * @return {Object}
      */
     _handleVagrantRemove: function(widget, event) {
-        let index = this._machines.indexOf(event.id);
-        if (index !== -1)
-            this._machines.splice(index, 1);
         this._updateMachine(event.id);
 
         this.emit('remove', event);
@@ -689,16 +671,17 @@ var Monitor = new Lang.Class({
             return group.toUpperCase();
         });
 
+        let machines = this.getMachineList() || [];
         let data = JSON.parse(JSON.stringify(this._data));
-        for (let i = 0; i < this._machines.length; i++) {
-            let machine = this._machines[i];
+        for (let i = 0; i < machines.length; i++) {
+            let machine = machines[i];
             this._updateMachineKey(machine, key);
         }
 
         // compare and prepare emit object
         let emit = {};
-        for (let i = 0; i < this._machines.length; i++) {
-            let machine = this._machines[i];
+        for (let i = 0; i < machines.length; i++) {
+            let machine = machines[i];
             emit[machine] = [];
 
             if (this._data[machine][key] !== data[machine][key])
