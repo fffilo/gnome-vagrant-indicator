@@ -871,35 +871,6 @@ const Path = new Lang.Class({
         });
     },
 
-    /**
-     * Machine config file content
-     * change event handler
-     *
-     * @param  {Object} monitor
-     * @param  {Object} file
-     * @return {Void}
-     * /
-    _handleMonitorChanged: function(monitor, file) {
-        Mainloop.source_remove(this._configInterval);
-        this._configInterval = Mainloop.timeout_add(500, Lang.bind(this, this._handleMonitorChangedDelayed), null);
-    },
-
-    /**
-     * Adding delay after machine config
-     * file content change event handler
-     * which will prevent unnecessary
-     * multiple code execution
-     *
-     * @return {Boolean}
-     * /
-    _handleMonitorChangedDelayed: function() {
-        this._configInterval = null;
-        this._loadConfig();
-
-        // stop repeating
-        return false;
-    },
-
     /* --- */
 
 });

@@ -51,7 +51,6 @@ const Base = new Lang.Class({
         this.monitor.start();
 
         this._render();
-        this.refresh();
 
         Main.panel.addToStatusArea(Me.metadata.uuid, this);
     },
@@ -122,6 +121,8 @@ const Base = new Lang.Class({
         this.preferences = new Menu.Item(_("Preferences"));
         this.preferences.connect('activate', Lang.bind(this, this._handlePreferences));
         this.menu.addMenuItem(this.preferences);
+
+        this.refresh();
     },
 
     /**

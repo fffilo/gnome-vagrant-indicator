@@ -39,26 +39,53 @@ const PROPERTIES = [
     'displayVagrantDestroyForce',
 ];
 
+/**
+ * Monitor.Schema constructor
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
 const Schema = new Lang.Class({
 
     Name: 'Monitor.Schema',
 
+    /**
+     * Gio.Settings value getter for
+     * each setting type
+     *
+     * @type {Object}
+     */
     _getMethod: {
         b: 'get_boolean',
         i: 'get_int',
         s: 'get_string',
     },
 
+    /**
+     * Constructor
+     *
+     * @return {Void}
+     */
     _init: function() {
         this._settings = Settings.settings();
         this._signal = null;
     },
 
+    /**
+     * Destructor
+     *
+     * @return {Void}
+     */
     destroy: function() {
         this.stop();
         this._settings.run_dispose();
     },
 
+    /**
+     * Start monitoring
+     *
+     * @return {Void}
+     */
     start: function() {
         if (this._signal)
             return;
@@ -66,6 +93,11 @@ const Schema = new Lang.Class({
         this._signal = this._settings.connect('changed', Lang.bind(this, this._handleChange));
     },
 
+    /**
+     * Stop monitoring
+     *
+     * @return {Void}
+     */
     stop: function() {
         if (!this._signal)
             return;
@@ -74,6 +106,12 @@ const Schema = new Lang.Class({
         this._signal = null;
     },
 
+    /**
+     * Get value by key
+     *
+     * @param  {String} key
+     * @return {Mixed}
+     */
     getValue: function(key) {
         // PROPERTIES is list of camel-case properties
         key = key.replace(/\-([a-z])/g, function(match, group) {
@@ -101,7 +139,7 @@ const Schema = new Lang.Class({
     },
 
     /**
-     * Settings changed event handler
+     * Gio.Settings changed event handler
      *
      * @param  {Object} widget
      * @param  {String} key
@@ -113,14 +151,27 @@ const Schema = new Lang.Class({
         });
     },
 
+    /* --- */
+
 });
 
 Signals.addSignalMethods(Schema.prototype);
 
+/**
+ * Monitor.Config constructor
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
 const Config = new Lang.Class({
 
     Name: 'Monitor.Config',
 
+    /**
+     * Constructor
+     *
+     * @return {Void}
+     */
     _init: function() {
         this._file = Gio.File.new_for_path(this.path);
         this._monitor = null;
@@ -128,6 +179,11 @@ const Config = new Lang.Class({
         this._config = this._read() || {};
     },
 
+    /**
+     * Destructor
+     *
+     * @return {Void}
+     */
     destroy: function() {
         this.stop();
 
@@ -137,6 +193,11 @@ const Config = new Lang.Class({
         this._file = null;
     },
 
+    /**
+     * Path getter
+     *
+     * @return {String}
+     */
     get path() {
         return GLib.get_home_dir() + '/.' + Me.metadata.uuid;
     },
@@ -153,6 +214,11 @@ const Config = new Lang.Class({
         return 1000;
     },
 
+    /**
+     * Start monitoring
+     *
+     * @return {Void}
+     */
     start: function() {
         if (this._monitor)
             return;
@@ -161,6 +227,11 @@ const Config = new Lang.Class({
         this._monitor.connect('changed', Lang.bind(this, this._handleChange));
     },
 
+    /**
+     * Stop monitoring
+     *
+     * @return {Void}
+     */
     stop: function() {
         if (!this._monitor)
             return;
@@ -169,6 +240,13 @@ const Config = new Lang.Class({
         this._monitor = null;
     },
 
+    /**
+     * Get machine value by key
+     *
+     * @param  {String} machine
+     * @param  {String} key
+     * @return {Mixed}
+     */
     getValue: function(machine, key) {
         if (key)
             key = key.replace(/\-([a-z])/g, function(match, group) {
@@ -185,10 +263,22 @@ const Config = new Lang.Class({
         return null;
     },
 
+    /**
+     * Compare two objects
+     *
+     * @param  {Object}  src
+     * @param  {Object}  dst
+     * @return {Boolean}
+     */
     _compare: function(src, dst) {
         return JSON.stringify(src, Object.keys(src).sort()) === JSON.stringify(dst, Object.keys(dst).sort());
     },
 
+    /**
+     * Read json file
+     *
+     * @return {Object}
+     */
     _read: function() {
         let result = null;
 
@@ -213,9 +303,9 @@ const Config = new Lang.Class({
     },
 
     /**
-     * Parse content of file and store
-     * it to this._config and return
-     * list of changed machines
+     * Parse content of file, store it to
+     * this._config and return list of
+     * changed machines
      *
      * @return {Mixed}
      */
@@ -251,11 +341,24 @@ const Config = new Lang.Class({
         return result;
     },
 
+    /**
+     * File monitor change event handler
+     *
+     * @param  {Object} monitor
+     * @param  {Object} file
+     * @return {Void}
+     */
     _handleChange: function(monitor, file) {
         Mainloop.source_remove(this._interval);
         this._interval = Mainloop.timeout_add(this.delay, Lang.bind(this, this._handleChangeDelayed), null);
     },
 
+    /**
+     * File monitor change event handler
+     * (delayed)
+     *
+     * @return {Void}
+     */
     _handleChangeDelayed: function() {
         this._interval = null;
 
@@ -268,6 +371,8 @@ const Config = new Lang.Class({
         // stop repeating
         return false;
     },
+
+    /* --- */
 
 });
 
@@ -304,6 +409,11 @@ const Monitor = new Lang.Class({
         this._schema.connect('change', Lang.bind(this, this._handleSchemaChange));
     },
 
+    /**
+     * Destructor
+     *
+     * @return {Void}
+     */
     destroy: function() {
         if (this._schema)
             this._schema.destroy();
@@ -319,6 +429,11 @@ const Monitor = new Lang.Class({
         this._machines = null;
     },
 
+    /**
+     * Start monitoring
+     *
+     * @return {Void}
+     */
     start: function() {
         let index = new Vagrant.Index();
         let parse = index.parse();
@@ -330,6 +445,11 @@ const Monitor = new Lang.Class({
         this._schema.start();
     },
 
+    /**
+     * Stop monitoring
+     *
+     * @return {Void}
+     */
     stop: function() {
         this._vagrant.stop();
         this._config.stop();
@@ -339,14 +459,37 @@ const Monitor = new Lang.Class({
         this._update();
     },
 
+    /**
+     * Get value by key (from Schema object)
+     *
+     * @param  {String} key
+     * @return {Mixed}
+     */
     getSchemaValue: function(key) {
         return this._schema.getValue(key);
     },
 
+    /**
+     * Get machine value by key (for
+     * Config object)
+     *
+     * @param  {String} machine
+     * @param  {String} key
+     * @return {Mixed}
+     */
     getConfigValue: function(machine, key) {
         return this._config.getValue(machine, key);
     },
 
+    /**
+     * Get machine value by key (get config
+     * value and use schema value as
+     * fallback)
+     *
+     * @param  {String} machine
+     * @param  {String} key
+     * @return {Mixed}
+     */
     getValue: function(machine, key) {
         let result = null;
         if (result === null)
@@ -357,6 +500,11 @@ const Monitor = new Lang.Class({
         return result;
     },
 
+    /**
+     * Update data
+     *
+     * @return {Void}
+     */
     _update: function() {
         this._data = {};
         if (!this._machines)
@@ -367,6 +515,12 @@ const Monitor = new Lang.Class({
         }
     },
 
+    /**
+     * Update data for specific machine
+     *
+     * @param  {String} machine
+     * @return {Void}
+     */
     _updateMachine: function(machine) {
         if (!this._machines)
             return;
@@ -383,6 +537,14 @@ const Monitor = new Lang.Class({
             delete this._data[machine];
     },
 
+    /**
+     * Update data for specific machine
+     * by key
+     *
+     * @param  {String} machine
+     * @param  {String} key
+     * @return {Void}
+     */
     _updateMachineKey: function(machine, key) {
         if (!this._machines)
             return;
@@ -402,10 +564,24 @@ const Monitor = new Lang.Class({
         this._data[machine][key] = this.getValue(machine, key);
     },
 
+    /**
+     * Vagrant state event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Object}
+     */
     _handleVagrantState: function(widget, event) {
         this.emit('state', event);
     },
 
+    /**
+     * Vagrant add event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Object}
+     */
     _handleVagrantAdd: function(widget, event) {
         this._machines.push(event.id);
         this._updateMachine(event.id);
@@ -413,6 +589,13 @@ const Monitor = new Lang.Class({
         this.emit('add', event);
     },
 
+    /**
+     * Vagrant remove event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Object}
+     */
     _handleVagrantRemove: function(widget, event) {
         let index = this._machines.indexOf(event.id);
         if (index !== -1)
@@ -422,6 +605,13 @@ const Monitor = new Lang.Class({
         this.emit('remove', event);
     },
 
+    /**
+     * Config change event handler
+     *
+     * @param  {Object} widget
+     * @param  {Object} event
+     * @return {Object}
+     */
     _handleConfigChange: function(widget, event) {
         // get and update this._data
         let data = JSON.parse(JSON.stringify(this._data));
@@ -456,7 +646,7 @@ const Monitor = new Lang.Class({
     },
 
     /**
-     * Settings changed event handler
+     * Schema change event handler
      *
      * @param  {Object} widget
      * @param  {String} event
@@ -492,6 +682,8 @@ const Monitor = new Lang.Class({
         if (Object.keys(emit).length)
             this.emit('change', emit);
     },
+
+    /* --- */
 
 });
 
