@@ -133,15 +133,16 @@ var Base = new Lang.Class({
     refresh: function() {
         this.machine.clear();
 
-        for (let id in this.vagrant.index.machines) {
-            let machine = this.vagrant.index.machines[id];
-            let path = machine.vagrantfile_path;
-            let state = machine.state;
-            let item = this.machine.add(id, path, state);
+        let machines = this.monitor.getMachineList();
+        for (let i = 0; i < machines.length; i++) {
+            let id = machines[i];
+            let path = this.monitor.getMachineDetail(id, 'vagrantfile_path');
+            let state = this.monitor.getMachineDetail(id, 'state');
             let shorten = !this.monitor.getValue(id, 'machine-full-path');
             let displayVagrant = this._getDisplayVagrant(id);
             let displaySystem = this._getDisplaySystem(id);
 
+            let item = this.machine.add(id, path, state);
             item.shorten = shorten;
             item.displayVagrant = displayVagrant;
             item.displaySystem = displaySystem;
@@ -227,12 +228,17 @@ var Base = new Lang.Class({
      */
     _handleMonitorAdd: function(widget, event) {
         let id = event.id;
-        let machine = this.vagrant.index.machines[id];
-        let path = machine.vagrantfile_path;
-        let state = machine.state;
-        let index = Object.keys(this.vagrant.index.machines).indexOf(id);
+        let path = event.path;
+        let state = event.state;
+        let shorten = !this.monitor.getValue(id, 'machine-full-path');
+        let displayVagrant = this._getDisplayVagrant(id);
+        let displaySystem = this._getDisplaySystem(id);
+        let index = Object.keys(this.monitor.getMachineList()).indexOf(id);
 
-        this.machine.add(id, path, state, index);
+        let item = this.machine.add(id, path, state, index);
+        item.shorten = shorten;
+        item.displayVagrant = displayVagrant;
+        item.displaySystem = displaySystem;
     },
 
     /**
@@ -243,7 +249,14 @@ var Base = new Lang.Class({
      * @return {Void}
      */
     _handleMonitorRemove: function(widget, event) {
-        this.machine.remove(event.id);
+        let id = event.id;
+        let path = event.path;
+
+        this.machine.remove(id);
+
+        let notify = this.monitor.getValue(id, 'notifications');
+        if (notify)
+            this.notification.show('Machine destroyed', path);
     },
 
     /**
@@ -255,9 +268,8 @@ var Base = new Lang.Class({
      */
     _handleMonitorState: function(widget, event) {
         let id = event.id;
-        let machine = this.vagrant.index.machines[id];
-        let state = machine.state;
-        let path = machine.vagrantfile_path;
+        let state = event.state;
+        let path = event.path;
 
         this.machine.setState(id, state);
 

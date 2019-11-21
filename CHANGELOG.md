@@ -1,6 +1,8 @@
 # Changelog
 
 ## [Unreleased]
+### Added
+- Machine destroyed notification
 ### Changed
 - Machine specific settings
 - Monitor optimization

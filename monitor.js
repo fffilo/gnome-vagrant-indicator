@@ -393,7 +393,10 @@ var Monitor = new Lang.Class({
      *
      * @return {Void}
      */
-    _init: function(message, title) {
+    _init: function() {
+        // @todo
+        //      - this._machines can be replaced with this._vagrant.index
+        //
         this._machines = null;
         this._data = null;
 
@@ -457,6 +460,33 @@ var Monitor = new Lang.Class({
 
         this._machines = null;
         this._update();
+    },
+
+    /**
+     * Get machine list
+     *
+     * @return {Object}
+     */
+    getMachineList: function() {
+        return this._machines;
+    },
+
+    /**
+     * Get machine detail (from vagrant
+     * index file)
+     *
+     * @param  {String} machine
+     * @param  {String} key     (optional)
+     * @return {Mixed}
+     */
+    getMachineDetail: function(machine, key) {
+        let index = this._vagrant.index;
+        if (index && index.machines && (machine in index.machines) && (typeof key === 'undefined'))
+            return index.machines[machine];
+        else if (index && index.machines && (machine in index.machines) && (key in index.machines[machine]))
+            return index.machines[machine][key];
+
+        return null;
     },
 
     /**

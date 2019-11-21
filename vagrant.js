@@ -247,11 +247,8 @@ var Monitor = new Lang.Class({
         this._monitor = null;
         this._interval = null;
 
-        let index = new Index();
-        this._index = index.parse();
-        this._file = Gio.File.new_for_path(index.path);
-        this.emit('change');
-        index.destroy();
+        let path = this.refresh();
+        this._file = Gio.File.new_for_path(path);
     },
 
     /**
@@ -261,6 +258,11 @@ var Monitor = new Lang.Class({
      */
     destroy: function() {
         this.stop();
+
+        this._interval = null;
+        this._monitor = null;
+        this._file = null;
+        this._index = null;
     },
 
     /**
@@ -291,6 +293,25 @@ var Monitor = new Lang.Class({
 
         this._monitor.cancel();
         this._monitor = null;
+        this._interval = null;
+    },
+
+    /**
+     * Parse vagrant machine index file content,
+     * save it to this.index and return vagrant
+     * path
+     *
+     * @return {String}
+     */
+    refresh: function() {
+        let index = new Index();
+        let result = index.path;
+
+        this._index = index.parse();
+
+        index.destroy();
+
+        return result;
     },
 
     /**
@@ -314,6 +335,17 @@ var Monitor = new Lang.Class({
      */
     get delay() {
         return 1000;
+    },
+
+    /**
+     * Deep clone object
+     *
+     * @param  {Object} src
+     * @return {Object}
+     */
+    _clone: function(src) {
+        // @todo
+        return JSON.parse(JSON.stringify(src));
     },
 
     /**
@@ -341,40 +373,56 @@ var Monitor = new Lang.Class({
     _handleMonitorChangedDelayed: function() {
         this._interval = null;
 
-        let index = new Index();
         let emit = [];
-        let _new = index.parse();
-        let _old = this.index;
-        index.destroy();
+        let _old = this._clone(this.index);
+        let _new = null;
+        this.refresh();
+        _new = this._clone(this.index);
 
         // check actual changes
+        // @todo - sort keys
         if (JSON.stringify(_old) === JSON.stringify(_new))
             return false;
 
         // check if machine is missing
         for (let id in _old.machines) {
             if (!(id in _new.machines))
-                emit = emit.concat('remove', id);
+                emit = emit.concat('remove', {
+                    id: id,
+                    name: _old.machines[id].name,
+                    provider: _old.machines[id].provider,
+                    state: _old.machines[id].state,
+                    path : _old.machines[id].vagrantfile_path,
+                });
         }
 
         // check if machine is added
         for (let id in _new.machines) {
             if (!(id in _old.machines))
-                emit = emit.concat('add', id);
+                emit = emit.concat('add', {
+                    id: id,
+                    name: _new.machines[id].name,
+                    provider: _new.machines[id].provider,
+                    state: _new.machines[id].state,
+                    path : _new.machines[id].vagrantfile_path,
+                });
         }
 
         // check if state changed
         for (let id in _new.machines) {
             if (id in _old.machines && _new.machines[id].state !== _old.machines[id].state)
-                emit = emit.concat('state', id);
+                emit = emit.concat('state', {
+                    id: id,
+                    name: _new.machines[id].name,
+                    provider: _new.machines[id].provider,
+                    state: _new.machines[id].state,
+                    path : _new.machines[id].vagrantfile_path,
+                });
         }
 
         // no changes
         if (!emit.length)
             return false;
-
-        // save new index
-        this._index = _new;
 
         // emit change
         this.emit('change', {
@@ -383,9 +431,7 @@ var Monitor = new Lang.Class({
 
         // emit remove/add/state signal(s)
         for (let i = 0; i < emit.length; i += 2) {
-            this.emit(emit[i], {
-                id: emit[i + 1],
-            });
+            this.emit(emit[i], emit[i + 1]);
         }
 
         // stop repeating
@@ -415,15 +461,10 @@ var Emulator = new Lang.Class({
      * @return {Void}
      */
     _init: function() {
-        this._index = null;
         this._monitor = null;
         this._terminal = null;
         this._command = null;
         this._version = null;
-
-        let index = new Index();
-        this._index = index.parse();
-        index.destroy();
 
         this._monitor = new Monitor();
         this._monitor.connect('change', Lang.bind(this, this._handleMonitorChange));

@@ -94,7 +94,8 @@ var Machine = new Lang.Class({
         item.connect('error', Lang.bind(this, this._handleError));
         item.connect('system', Lang.bind(this, this._handleSystem));
         item.connect('vagrant', Lang.bind(this, this._handleVagrant));
-        this.addMenuItem(item, index);
+
+        this.addMenuItem(item, index > -1 ? index : undefined);
 
         return item;
     },
