@@ -17,7 +17,7 @@ const Convenience = Me.imports.convenience;
  * @param  {String} domain (optional)
  * @return {Void}
  */
-const init = Convenience.initTranslations;
+var init = Convenience.initTranslations;
 
 /**
  * Translate message
@@ -28,4 +28,4 @@ const init = Convenience.initTranslations;
  * @param  {String} message
  * @return {String}
  */
-const translate = Gettext.gettext;
+var translate = Gettext.gettext;

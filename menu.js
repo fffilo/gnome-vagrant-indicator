@@ -32,7 +32,7 @@ const DisplaySystem = Vagrant.CommandSystem;
  * @param  {Object}
  * @return {Object}
  */
-const Machine = new Lang.Class({
+var Machine = new Lang.Class({
 
     Name: 'Menu.Machine',
     Extends: Section,
@@ -327,7 +327,7 @@ const Machine = new Lang.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Path = new Lang.Class({
+var Path = new Lang.Class({
 
     Name: 'Menu.Path',
     Extends: SubMenu,
@@ -881,7 +881,7 @@ const Path = new Lang.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Command = new Lang.Class({
+var Command = new Lang.Class({
 
     Name: 'Menu.Command',
     Extends: Item,
@@ -968,7 +968,7 @@ const Command = new Lang.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Header = new Lang.Class({
+var Header = new Lang.Class({
 
     Name: 'Menu.Header',
     Extends: Item,

@@ -45,7 +45,7 @@ const PROPERTIES = [
  * @param  {Object}
  * @return {Object}
  */
-const Schema = new Lang.Class({
+var Schema = new Lang.Class({
 
     Name: 'Monitor.Schema',
 
@@ -163,7 +163,7 @@ Signals.addSignalMethods(Schema.prototype);
  * @param  {Object}
  * @return {Object}
  */
-const Config = new Lang.Class({
+var Config = new Lang.Class({
 
     Name: 'Monitor.Config',
 
@@ -384,7 +384,7 @@ Signals.addSignalMethods(Config.prototype);
  * @param  {Object}
  * @return {Object}
  */
-const Monitor = new Lang.Class({
+var Monitor = new Lang.Class({
 
     Name: 'Monitor.Monitor',
 

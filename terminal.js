@@ -119,7 +119,7 @@ const UNSUPPORTED = [
  * @param  {Object}
  * @return {Object}
  */
-const Emulator = new Lang.Class({
+var Emulator = new Lang.Class({
 
     Name: 'Terminal.Emulator',
 

@@ -17,7 +17,7 @@ const Icons = Me.imports.icons;
  * @param  {Object}
  * @return {Object}
  */
-const Base = new Lang.Class({
+var Base = new Lang.Class({
 
     Name: 'Notification.Base',
 

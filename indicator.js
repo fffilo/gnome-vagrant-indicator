@@ -26,7 +26,7 @@ const _ = Translation.translate;
  * @param  {Object}
  * @return {Object}
  */
-const Base = new Lang.Class({
+var Base = new Lang.Class({
 
     Name: 'Indicator.Base',
     Extends: PanelMenu.Button,

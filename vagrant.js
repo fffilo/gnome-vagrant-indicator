@@ -46,19 +46,19 @@ const VAGRANT_HOME = GLib.getenv('VAGRANT_HOME') || GLib.getenv('HOME') + '/.vag
 const VAGRANT_INDEX = '%s/data/machine-index/index'.format(VAGRANT_HOME);
 
 // translations
-let MESSAGE_KEYPRESS = 'Press any key to close terminal...';
-let MESSAGE_VAGRANT_NOT_INSTALLED = 'Vagrant not installed on your system';
-let MESSAGE_INVALID_MACHINE = 'Invalid machine id';
-let MESSAGE_CORRUPTED_DATA = 'Corrupted data';
-let MESSAGE_INVALID_PATH= 'Path does not exist';
-let MESSAGE_MISSING_VAGRANTFILE = 'Missing Vagrantfile';
+const MESSAGE_KEYPRESS = 'Press any key to close terminal...';
+const MESSAGE_VAGRANT_NOT_INSTALLED = 'Vagrant not installed on your system';
+const MESSAGE_INVALID_MACHINE = 'Invalid machine id';
+const MESSAGE_CORRUPTED_DATA = 'Corrupted data';
+const MESSAGE_INVALID_PATH= 'Path does not exist';
+const MESSAGE_MISSING_VAGRANTFILE = 'Missing Vagrantfile';
 
 /**
  * Vagrant command enum
  *
  * @type {Object}
  */
-const CommandVagrant = new Enum.Enum([
+var CommandVagrant = new Enum.Enum([
     'NONE',
     'UP',
     'UP_PROVISION',
@@ -79,7 +79,7 @@ const CommandVagrant = new Enum.Enum([
  *
  * @type {Object}
  */
-const CommandSystem = new Enum.Enum([
+var CommandSystem = new Enum.Enum([
     'NONE',
     'TERMINAL',
     'FILE_MANAGER',
@@ -92,7 +92,7 @@ const CommandSystem = new Enum.Enum([
  *
  * @type {Object}
  */
-const PostTerminalAction = new Enum.Enum([
+var PostTerminalAction = new Enum.Enum([
     'NONE',
     'PAUSE',
     'EXIT',
@@ -106,7 +106,7 @@ Enum.addMember(PostTerminalAction, 'BOTH', Enum.sum(PostTerminalAction));
  * @param  {Object}
  * @return {Object}
  */
-const Exception = new Lang.Class({
+var Exception = new Lang.Class({
 
     Name: 'Vagrant.Exception',
 
@@ -162,7 +162,7 @@ const Exception = new Lang.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Index = new Lang.Class({
+var Index = new Lang.Class({
 
     Name: 'Vagrant.Index',
 
@@ -232,7 +232,7 @@ const Index = new Lang.Class({
  * @param  {Object}
  * @return {Object}
  */
-const Monitor = new Lang.Class({
+var Monitor = new Lang.Class({
 
     Name: 'Vagrant.Monitor',
 
@@ -405,7 +405,7 @@ Signals.addSignalMethods(Monitor.prototype);
  * @param  {Object}
  * @return {Object}
  */
-const Emulator = new Lang.Class({
+var Emulator = new Lang.Class({
 
     Name: 'Vagrant.Emulator',
 
