@@ -36,6 +36,16 @@ const Base = new Lang.Class({
     },
 
     /**
+     * Destructor
+     *
+     * @return {Void}
+     */
+    destroy: function() {
+        if (this._source !== null)
+            this._source.destroy();
+    },
+
+    /**
      * Prepare source
      *
      * @return {Void}
@@ -97,7 +107,6 @@ const Base = new Lang.Class({
 
         let notify = this._notification(title, message);
         this._source.notify(notify);
-
     },
 
     /* --- */

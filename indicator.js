@@ -15,8 +15,8 @@ const Menu = Me.imports.menu;
 const Notification = Me.imports.notification;
 const Enum = Me.imports.enum;
 const Vagrant = Me.imports.vagrant;
+const Monitor = Me.imports.monitor;
 const Icons = Me.imports.icons;
-const Settings = Me.imports.settings;
 const Translation = Me.imports.translation;
 const _ = Translation.translate;
 
@@ -39,8 +39,18 @@ const Base = new Lang.Class({
     _init: function() {
         this.parent(null, Me.metadata.name);
 
-        this._def();
-        this._ui();
+        this._notification = new Notification.Base();
+        this._vagrant = new Vagrant.Emulator();
+        this._monitor = new Monitor.Monitor();
+
+        this.vagrant.connect('error', Lang.bind(this, this._handleVagrantError));
+        this.monitor.connect('state', Lang.bind(this, this._handleMonitorState));
+        this.monitor.connect('add', Lang.bind(this, this._handleMonitorAdd));
+        this.monitor.connect('remove', Lang.bind(this, this._handleMonitorRemove));
+        this.monitor.connect('change', Lang.bind(this, this._handleMonitorChange));
+        this.monitor.start();
+
+        this._render();
         this.refresh();
 
         Main.panel.addToStatusArea(Me.metadata.uuid, this);
@@ -52,39 +62,47 @@ const Base = new Lang.Class({
      * @return {Void}
      */
     destroy: function() {
+        if (this.monitor)
+            this.monitor.destroy();
         if (this.vagrant)
             this.vagrant.destroy();
-        if (this.settings)
-            this.settings.run_dispose();
 
         this.parent();
     },
 
     /**
-     * Initialize object properties
+     * Notification getter
      *
-     * @return {Void}
+     * @return {Object}
      */
-    _def: function() {
-        this.notification = new Notification.Base();
-
-        this.settings = Settings.settings();
-        this.settings.connect('changed', Lang.bind(this, this._handleSettings));
-
-        this.vagrant = new Vagrant.Emulator();
-        this.vagrant.connect('error', Lang.bind(this, this._handleVagrantError));
-        this.vagrant.monitor.connect('add', Lang.bind(this, this._handleVagrantAdd));
-        this.vagrant.monitor.connect('remove', Lang.bind(this, this._handleVagrantRemove));
-        this.vagrant.monitor.connect('state', Lang.bind(this, this._handleVagrantState));
-        this.vagrant.monitor.start();
+    get notification() {
+        return this._notification;
     },
 
     /**
-     * Create user interface
+     * Vagrant getter
+     *
+     * @return {Object}
+     */
+    get vagrant() {
+        return this._vagrant;
+    },
+
+    /**
+     * Monitor getter
+     *
+     * @return {Object}
+     */
+    get monitor() {
+        return this._monitor;
+    },
+
+    /**
+     * Render menu
      *
      * @return {Void}
      */
-    _ui: function() {
+    _render: function() {
         this.actor.add_style_class_name('panel-status-button');
         this.actor.add_style_class_name('gnome-vagrant-indicator');
 
@@ -95,9 +113,6 @@ const Base = new Lang.Class({
         this.actor.add_actor(this.icon);
 
         this.machine = new Menu.Machine(this);
-        this.machine.shorten = !this.settings.get_boolean('machine-full-path');
-        this.machine.setDisplayVagrant(this._getSettingsMachineMenuDisplayVagrant());
-        this.machine.setDisplaySystem(this._getSettingsMachineMenuDisplaySystem());
         this.machine.connect('error', Lang.bind(this, this._handleMachineError));
         this.machine.connect('system', Lang.bind(this, this._handleMachineSystem));
         this.machine.connect('vagrant', Lang.bind(this, this._handleMachineVagrant));
@@ -119,64 +134,87 @@ const Base = new Lang.Class({
 
         for (let id in this.vagrant.index.machines) {
             let machine = this.vagrant.index.machines[id];
-            this.machine.add(id, machine.vagrantfile_path, machine.state);
+            let path = machine.vagrantfile_path;
+            let state = machine.state;
+            let item = this.machine.add(id, path, state);
+            let shorten = !this.monitor.getValue(id, 'machine-full-path');
+            let displayVagrant = this._getDisplayVagrant(id);
+            let displaySystem = this._getDisplaySystem(id);
+
+            item.shorten = shorten;
+            item.displayVagrant = displayVagrant;
+            item.displaySystem = displaySystem;
         }
     },
 
     /**
-     * Convert settings boolean display-vagrant
-     * values to Menu.DisplayVagrant value
+     * Convert boolean display-vagrant values
+     * to Menu.Path.displayVagrant value
      *
+     * @param  {String} id
      * @return {Number}
      */
-    _getSettingsMachineMenuDisplayVagrant: function() {
+    _getDisplayVagrant: function(id) {
         let display = Enum.toObject(Menu.DisplayVagrant);
         let result = 0;
 
         for (let key in display) {
             let value = display[key];
-            let setting = 'display-vagrant-' + key.toLowerCase().replace(/_/g, '-');
+            let prop = 'display-vagrant-' + key.toLowerCase().replace(/_/g, '-');
+            let enabled = this.monitor.getValue(id, prop);
 
-            result += this.settings.get_boolean(setting) ? display[key] : 0;
+            result += enabled ? value : 0;
         }
 
         return result;
     },
 
     /**
-     * Convert settings boolean display-system
-     * values to Menu.DisplaySystem value
+     * Convert boolean display-system values
+     * to Menu.Path.displaySystem value
      *
+     * @param  {String} id
      * @return {Number}
      */
-    _getSettingsMachineMenuDisplaySystem: function() {
+    _getDisplaySystem: function(id) {
         let display = Enum.toObject(Menu.DisplaySystem);
         let result = 0;
 
         for (let key in display) {
             let value = display[key];
-            let setting = 'display-system-' + key.toLowerCase().replace(/_/g, '-');
+            let prop = 'display-system-' + key.toLowerCase().replace(/_/g, '-');
+            let enabled = this.monitor.getValue(id, prop);
 
-            result += this.settings.get_boolean(setting) ? display[key] : 0;
+            result += enabled ? value : 0;
         }
 
         return result;
     },
 
     /**
-     * Settings changed event handler
+     * Monitor change event handler
      *
      * @param  {Object} widget
-     * @param  {String} key
+     * @param  {Object} event
      * @return {Void}
      */
-    _handleSettings: function(widget, key) {
-        if (key === 'machine-full-path')
-            this.machine.shorten = !widget.get_boolean(key);
-        else if (key.startsWith('display-system-'))
-            this.machine.setDisplaySystem(this._getSettingsMachineMenuDisplaySystem());
-        else if (key.startsWith('display-vagrant-'))
-            this.machine.setDisplayVagrant(this._getSettingsMachineMenuDisplayVagrant());
+    _handleMonitorChange: function(widget, event) {
+        for (let id in event) {
+            let props = event[id];
+            let label = props.indexOf('label') === -1 ? 0 : 1;
+            let machineFullPath = props.indexOf('machineFullPath') === -1 ? 0 : 1;
+            let displaySystem = props.filter(function(item) { return item.startsWith('displaySystem'); }).length;
+            let displayVagrant = props.filter(function(item) { return item.startsWith('displayVagrant'); }).length;
+
+            if (label)
+                this.machine.setTitle(id, this.monitor.getValue(id, 'label'));
+            if (machineFullPath)
+                this.machine.setShorten(id, !this.monitor.getValue(id, 'machineFullPath'));
+            if (displayVagrant)
+                this.machine.setDisplayVagrant(id, this._getDisplayVagrant(id));
+            if (displaySystem)
+                this.machine.setDisplaySystem(id, this._getDisplaySystem(id));
+        }
     },
 
     /**
@@ -186,11 +224,14 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handleVagrantAdd: function(widget, event) {
-        let machine = this.vagrant.index.machines[event.id];
-        let index = Object.keys(this.vagrant.index.machines).indexOf(event.id);
+    _handleMonitorAdd: function(widget, event) {
+        let id = event.id;
+        let machine = this.vagrant.index.machines[id];
+        let path = machine.vagrantfile_path;
+        let state = machine.state;
+        let index = Object.keys(this.vagrant.index.machines).indexOf(id);
 
-        this.machine.add(event.id, machine.vagrantfile_path, machine.state, index);
+        this.machine.add(id, path, state, index);
     },
 
     /**
@@ -200,7 +241,7 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handleVagrantRemove: function(widget, event) {
+    _handleMonitorRemove: function(widget, event) {
         this.machine.remove(event.id);
     },
 
@@ -211,15 +252,17 @@ const Base = new Lang.Class({
      * @param  {Object} event
      * @return {Void}
      */
-    _handleVagrantState: function(widget, event) {
-        let machine = this.vagrant.index.machines[event.id];
-        this.machine.state(event.id, machine.state);
+    _handleMonitorState: function(widget, event) {
+        let id = event.id;
+        let machine = this.vagrant.index.machines[id];
+        let state = machine.state;
+        let path = machine.vagrantfile_path;
 
-        let notify = this.machine.getConfig(event.id, 'settings.notifications');
-        if (notify === null || typeof notify === 'undefined')
-            notify = this.settings.get_boolean('notifications');
+        this.machine.setState(id, state);
+
+        let notify = this.monitor.getValue(id, 'notifications');
         if (notify)
-            this.notification.show('Machine went %s'.format(machine.state), machine.vagrantfile_path);
+            this.notification.show('Machine went %s'.format(state), path);
     },
 
     /**
@@ -230,9 +273,7 @@ const Base = new Lang.Class({
      * @return {Void}
      */
     _handleError: function(widget, event) {
-        let notify = this.machine.getConfig(event.id, 'settings.notifications');
-        if (notify === null || typeof notify === 'undefined')
-            notify = this.settings.get_boolean('notifications');
+        let notify = this.monitor.getValue(null, 'notifications');
         if (!notify)
             return;
 
@@ -300,16 +341,16 @@ const Base = new Lang.Class({
      */
     _handleMachineVagrant: function(widget, event) {
         try {
-            let action = this.machine.getConfig(event.id, 'settings.postTerminalAction');
-            if (typeof action !== 'string')
-                action = this.settings.get_string('post-terminal-action');
+            let id = event.id;
+            let command = event.command;
+            let action = this.monitor.getValue(id, 'post-terminal-action');
             action = Enum.getValue(Vagrant.PostTerminalAction, action);
 
-            this.vagrant.execute(event.id, event.command, action);
+            this.vagrant.execute(id, command, action);
         }
         catch(e) {
             this.vagrant.emit('error', {
-                id: event.id,
+                id: id,
                 error: e,
             });
         }

@@ -305,6 +305,18 @@ const Monitor = new Lang.Class({
     },
 
     /**
+     * Delay (in miliseconds) for event
+     * emitting. This will prevent same
+     * event emit on continuously file
+     * save every few miliseconds.
+     *
+     * @return {Number}
+     */
+    get delay() {
+        return 1000;
+    },
+
+    /**
      * Vagrant machine index file content
      * change event handler
      *
@@ -314,7 +326,7 @@ const Monitor = new Lang.Class({
      */
     _handleMonitorChanged: function(monitor, file) {
         Mainloop.source_remove(this._interval);
-        this._interval = Mainloop.timeout_add(1000, Lang.bind(this, this._handleMonitorChangedDelayed), null);
+        this._interval = Mainloop.timeout_add(this.delay, Lang.bind(this, this._handleMonitorChangedDelayed), null);
     },
 
     /**
@@ -415,6 +427,7 @@ const Emulator = new Lang.Class({
 
         this._monitor = new Monitor();
         this._monitor.connect('change', Lang.bind(this, this._handleMonitorChange));
+        this._monitor.start();
 
         this._terminal = new Terminal.Emulator();
     },

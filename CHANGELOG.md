@@ -1,7 +1,10 @@
 # Changelog
 
 ## [Unreleased]
-- (none)
+### Changed
+- Machine specific settings
+- Monitor optimization
+- Minor bug fixes
 
 ## Version 5 - 2018-01-08
 ### Changed

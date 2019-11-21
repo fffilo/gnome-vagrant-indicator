@@ -46,11 +46,6 @@ const Machine = new Lang.Class({
         this.parent();
 
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-machine');
-
-        this._shorten = false;
-        this._displayVagrant = Enum.sum(DisplayVagrant);
-        this._displaySystem = Enum.sum(DisplaySystem);
-
         this.clear();
     },
 
@@ -88,7 +83,7 @@ const Machine = new Lang.Class({
      * @param  {String} path
      * @param  {String} state
      * @param  {Number} index (optional)
-     * @return {Void}
+     * @return {Object}
      */
     add: function(id, path, state, index) {
         if (this.empty)
@@ -96,13 +91,12 @@ const Machine = new Lang.Class({
         this.empty = null;
 
         let item = new Path(id, path, state);
-        item.shorten = this.shorten;
-        item.setDisplayVagrant(this.getDisplayVagrant());
-        item.setDisplaySystem(this.getDisplaySystem());
         item.connect('error', Lang.bind(this, this._handleError));
         item.connect('system', Lang.bind(this, this._handleSystem));
         item.connect('vagrant', Lang.bind(this, this._handleVagrant));
         this.addMenuItem(item, index);
+
+        return item;
     },
 
     /**
@@ -120,17 +114,85 @@ const Machine = new Lang.Class({
     },
 
     /**
+     * Get item state
+     *
+     * @param  {String} id
+     * @return {Void}
+     */
+    getState: function(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+
+        return item[0].state;
+    },
+
+    /**
      * Set item state
      *
      * @param  {String} id
      * @param  {String} value
      * @return {Void}
      */
-    state: function(id, value) {
+    setState: function(id, value) {
         this._getItem(id).forEach(function(actor) {
             actor.actor.remove_style_class_name(actor.state);
             actor.actor.add_style_class_name(value);
             actor.state = value;
+        });
+    },
+
+    /**
+     * Get item shorten property
+     *
+     * @param  {String}  id
+     * @return {Boolean}
+     */
+    getShorten: function(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+
+        return item[0].shorten;
+    },
+
+    /**
+     * Set item shorten property
+     *
+     * @param  {String}  id
+     * @param  {Boolean} value
+     * @return {Void}
+     */
+    setShorten: function(id, value) {
+        this._getItem(id).forEach(function(actor) {
+            actor.shorten = value;
+        });
+    },
+
+    /**
+     * Get item title
+     *
+     * @param  {String}  id
+     * @return {Mixed}
+     */
+    getTitle: function(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+
+        return item[0].title;
+    },
+
+    /**
+     * Set item title
+     *
+     * @param  {String}  id
+     * @param  {Boolean} value
+     * @return {Void}
+     */
+    setTitle: function(id, value) {
+        this._getItem(id).forEach(function(actor) {
+            actor.title = value;
         });
     },
 
@@ -141,8 +203,12 @@ const Machine = new Lang.Class({
      *
      * @return {Number}
      */
-    getDisplayVagrant: function() {
-        return this._displayVagrant;
+    getDisplayVagrant: function(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+
+        return item[0].displayVagrant;
     },
 
     /**
@@ -151,18 +217,14 @@ const Machine = new Lang.Class({
      * @param  {Number} value
      * @return {Void}
      */
-    setDisplayVagrant: function(value) {
-        // @todo: this.machine.getConfig
-
+    setDisplayVagrant: function(id, value) {
         if (value < Enum.min(DisplayVagrant))
             value = Enum.min(DisplayVagrant);
         else if (value > Enum.sum(DisplayVagrant))
             value = Enum.sum(DisplayVagrant);
 
-        this._displayVagrant = value;
-
-        this._getItem().forEach(function(actor) {
-            actor.setDisplayVagrant(value);
+        this._getItem(id).forEach(function(actor) {
+            actor.displayVagrant = value;
         });
     },
 
@@ -173,8 +235,12 @@ const Machine = new Lang.Class({
      *
      * @return {Number}
      */
-    getDisplaySystem: function() {
-        return this._displaySystem;
+    getDisplaySystem: function(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+
+        return item[0].displaySystem;
     },
 
     /**
@@ -183,57 +249,14 @@ const Machine = new Lang.Class({
      * @param  {Number} value
      * @return {Void}
      */
-    setDisplaySystem: function(value) {
-        // @todo: this.machine.getConfig
-
+    setDisplaySystem: function(id, value) {
         if (value < Enum.min(DisplaySystem))
             value = Enum.min(DisplaySystem);
         else if (value > Enum.sum(DisplaySystem))
             value = Enum.sum(DisplaySystem);
 
-        this._displaySystem = value;
-
-        this._getItem().forEach(function(actor) {
-            actor.setDisplaySystem(value);
-        });
-    },
-
-    /**
-     * Get machine specific config
-     *
-     * @param  {String} id
-     * @param  {String} key (optional)
-     * @return {Mixed}
-     */
-    getConfig: function(id, key) {
-        let result;
         this._getItem(id).forEach(function(actor) {
-            result = actor.getConfig(key);
-        });
-
-        return result;
-    },
-
-    /**
-     * Property shorten getter
-     *
-     * @return {Boolean}
-     */
-    get shorten() {
-        return this._shorten;
-    },
-
-    /**
-     * Property shorten setter
-     *
-     * @param  {Boolean} value
-     * @return {Void}
-     */
-    set shorten(value) {
-        this._shorten = !!value;
-
-        this._getItem().forEach(function(actor) {
-            actor.shorten = value;
+            actor.displaySystem = value;
         });
     },
 
@@ -322,40 +345,18 @@ const Path = new Lang.Class({
 
         this._id = id;
         this._path = path;
+        this._title = null;
         this._state = 'unknown';
         this._shorten = true;
-
-        this._configFile = Gio.File.new_for_path(this.path + '/.' + Me.metadata.uuid);
-        this._configMonitor = null;
-        this._configInterval = null;
-        this._configData = {};
+        this._displayVagrant = Enum.sum(DisplayVagrant);
+        this._displaySystem = Enum.sum(DisplaySystem);
 
         this._ui();
         this._bind();
-        this._loadConfig(true);
-
-        this.setDisplayVagrant(DisplayVagrant.NONE);
-        this.setDisplaySystem(DisplaySystem.NONE);
 
         // with setter we're making sure className
         // (machine state) is set
         this.state = state;
-    },
-
-    /**
-     * Destructor
-     *
-     * @return {Void}
-     */
-    destroy: function() {
-        Mainloop.source_remove(this._configInterval);
-
-        this._configMonitor.cancel();
-        this._configMonitor = null;
-        this._configFile = null;
-        this._configInterval = null;
-
-        this.parent();
     },
 
     /**
@@ -452,65 +453,6 @@ const Path = new Lang.Class({
      */
     _bind: function() {
         this.connect('activate', Lang.bind(this, this._handleActivate));
-
-        this._configMonitor = this._configFile.monitor(Gio.FileMonitorFlags.NONE, null);
-        this._configMonitor.connect('changed', Lang.bind(this, this._handleMonitorChanged));
-    },
-
-    /**
-     * Get DisplayVagrant:
-     * display vagrant menu subitems
-     * from DisplayVagrant enum
-     *
-     * @return {Number}
-     */
-    getDisplayVagrant: function() {
-        return this._displayVagrant;
-    },
-
-    /**
-     * Set DisplayVagrant
-     *
-     * @param  {Number} value
-     * @return {Void}
-     */
-    setDisplayVagrant: function(value) {
-        if (value < Enum.min(DisplayVagrant))
-            value = Enum.min(DisplayVagrant);
-        else if (value > Enum.sum(DisplayVagrant))
-            value = Enum.sum(DisplayVagrant);
-
-        this._displayVagrant = value;
-
-        this._refreshMenu();
-    },
-
-    /**
-     * Get DisplaySystem:
-     * display system menu subitems
-     * from DisplaySystem enum
-     *
-     * @return {Number}
-     */
-    getDisplaySystem: function() {
-        return this._displaySystem;
-    },
-
-    /**
-     * Set DisplaySystem
-     *
-     * @param  {Number} value
-     * @return {Void}
-     */
-    setDisplaySystem: function(value) {
-        if (value < Enum.min(DisplaySystem))
-            value = Enum.min(DisplaySystem);
-        else if (value > Enum.sum(DisplaySystem))
-            value = Enum.sum(DisplaySystem);
-
-        this._displaySystem = value;
-
-        this._refreshMenu();
     },
 
     /**
@@ -525,28 +467,6 @@ const Path = new Lang.Class({
 
         if (!this.system.header.actor.visible && !this.vagrant.header.actor.visible)
             this.emit('activate');
-    },
-
-    /**
-     * Get configuration from config file
-     *
-     * @param  {String} key (optional)
-     * @return {Mixed}
-     */
-    getConfig: function(key) {
-        let result = this._configData;
-        if (!key)
-            return result;
-
-        let arr = key.split('.');
-        for (let i = 0; i < arr.length; i++) {
-            if (!(arr[i] in result))
-                return undefined;
-
-            result = result[arr[i]];
-        }
-
-        return result;
     },
 
     /**
@@ -567,7 +487,7 @@ const Path = new Lang.Class({
     set shorten(value) {
         this._shorten = !!value;
 
-        this._refreshMenuByLabel();
+        this._refreshMenu();
     },
 
     /**
@@ -612,61 +532,78 @@ const Path = new Lang.Class({
         this._refreshMenu();
     },
 
-    /**
-     * Default machine configuration
-     *
-     * @return {Object}
-     */
-    _defaultConfig: function() {
-        return {
-            'label': null,
-            'settings': {
-                'notifications': null,
-                'machineFullPath': null,
-                'postTerminalAction': null,
-                'displaySystemNone': null,
-                'displaySystemTerminal': null,
-                'displaySystemFileManager': null,
-                'displaySystemVagrantfile': null,
-                'displaySystemMachineConfig': null,
-                'displayVagrantNone': null,
-                'displayVagrantUp': null,
-                'displayVagrantUpProvision': null,
-                'displayVagrantUpSsh': null,
-                'displayVagrantUpRdp': null,
-                'displayVagrantProvision': null,
-                'displayVagrantSsh': null,
-                'displayVagrantRdp': null,
-                'displayVagrantResume': null,
-                'displayVagrantSuspend': null,
-                'displayVagrantHalt': null,
-                'displayVagrantDestroy': null,
-                'displayVagrantDestroyForce': null,
-            }
-        };
+    get title() {
+        return this._title;
+    },
+
+    set title(value) {
+        try {
+            if (value)
+                value = value.toString();
+        }
+        catch(e) {
+            value = null;
+        }
+
+        this._title = value || null;
+
+        this._refreshMenu();
     },
 
     /**
-     * Load config and store it to
-     * this._configData
+     * Get DisplayVagrant:
+     * display vagrant menu subitems
+     * from DisplayVagrant enum
      *
-     * @param  {Boolean} skipRefresh (optional)
+     * @return {Number}
+     */
+    get displayVagrant() {
+        return this._displayVagrant;
+    },
+
+    /**
+     * Set DisplayVagrant
+     *
+     * @param  {Number} value
      * @return {Void}
      */
-    _loadConfig: function(skipRefresh) {
-        try {
-            let [ ok, contents ] = GLib.file_get_contents(this._configFile.get_path());
-            if (ok)
-                this._configData = JSON.parse(contents);
-            else
-                throw '';
-        }
-        catch(e) {
-            this._configData = {};
-        }
+    set displayVagrant(value) {
+        if (value < Enum.min(DisplayVagrant))
+            value = Enum.min(DisplayVagrant);
+        else if (value > Enum.sum(DisplayVagrant))
+            value = Enum.sum(DisplayVagrant);
 
-        if (!skipRefresh)
-            this._refreshMenu();
+        this._displayVagrant = value;
+
+        this._refreshMenu();
+    },
+
+    /**
+     * Get DisplaySystem:
+     * display system menu subitems
+     * from DisplaySystem enum
+     *
+     * @return {Number}
+     */
+    get displaySystem() {
+        return this._displaySystem;
+    },
+
+    /**
+     * Set DisplaySystem
+     *
+     * @param  {Number} value
+     * @return {Void}
+     */
+    set displaySystem(value) {
+        if (value < Enum.min(DisplaySystem))
+            value = Enum.min(DisplaySystem);
+        else if (value > Enum.sum(DisplaySystem))
+            value = Enum.sum(DisplaySystem);
+
+        this._displaySystem = value;
+
+        this._refreshMenu();
     },
 
     /**
@@ -676,44 +613,41 @@ const Path = new Lang.Class({
      * @return {Void}
      */
     _refreshMenu: function() {
-        this._refreshMenuByLabel();
-        this._refreshMenuByDisplay();
+        this._refreshMenuByTitle();
+        this._refreshMenuByDisplayVagrant();
+        this._refreshMenuByDisplaySystem();
         this._refreshMenuByState();
         this._refreshMenuDropdown();
         this._refreshMenuHeaders();
     },
 
     /**
-     * Set menu label based on  shorten
-     * property
+     * Set menu label based on shorten
+     * property or title
+     *
+     * @todo - depricated
      *
      * @return {Void}
      */
-    _refreshMenuByLabel: function() {
-        let text = this.getConfig('label');
-        if (!text) {
-            let full = this.getConfig('settings.machineFullPath');
-            let shorten = !full;
-            if (full === null || typeof full === 'undefined')
-                shorten = this.shorten;
-
-            text = this.path;
-            if (shorten)
-                text = GLib.basename(text);
+    _refreshMenuByTitle: function() {
+        let title = this.title;
+        if (!title) {
+            title = this.path;
+            if (this.shorten)
+                title = GLib.basename(title);
         }
 
-        this.label.text = text;
+        this.label.text = title;
     },
 
     /**
-     * Show/hide system/vagrant menu
-     * items based on user display
-     * property
+     * Show/hide vagrant menu items
+     * based on user display property
      *
      * @return {Void}
      */
-    _refreshMenuByDisplay: function() {
-        let value = this.getDisplayVagrant();
+    _refreshMenuByDisplayVagrant: function() {
+        let value = this.displayVagrant;
         for (let key in this.vagrant) {
             if (key === 'header')
                 continue;
@@ -724,8 +658,16 @@ const Path = new Lang.Class({
 
             menu.actor.visible = visible;
         }
+    },
 
-        value = this.getDisplaySystem();
+    /**
+     * Show/hide system menu items
+     * based on user display property
+     *
+     * @return {Void}
+     */
+    _refreshMenuByDisplaySystem: function() {
+        let value = this.displaySystem;
         for (let key in this.system) {
             if (key === 'header')
                 continue;
@@ -747,7 +689,11 @@ const Path = new Lang.Class({
     _refreshMenuByState: function() {
         this.setSensitive(true);
 
-        if (this.state === 'poweroff' || this.state === 'shutoff') {
+        let state = this.state;
+        if (state === 'shutoff')
+            state = 'poweroff';
+
+        if (state === 'poweroff') {
             this.vagrant.provision.actor.visible = false;
             this.vagrant.ssh.actor.visible = false;
             this.vagrant.rdp.actor.visible = false;
@@ -755,7 +701,7 @@ const Path = new Lang.Class({
             this.vagrant.suspend.actor.visible = false;
             this.vagrant.halt.actor.visible = false;
         }
-        else if (this.state === 'preparing') {
+        else if (state === 'preparing') {
             this.vagrant.up.actor.visible = false;
             this.vagrant.up_provision.actor.visible = false;
             this.vagrant.up_ssh.actor.visible = false;
@@ -767,7 +713,7 @@ const Path = new Lang.Class({
             this.vagrant.suspend.actor.visible = false;
             this.vagrant.destroy.actor.visible = false;
         }
-        else if (this.state === 'running') {
+        else if (state === 'running') {
             this.vagrant.up.actor.visible = false;
             this.vagrant.up_provision.actor.visible = false;
             this.vagrant.up_ssh.actor.visible = false;
@@ -776,7 +722,7 @@ const Path = new Lang.Class({
             this.vagrant.suspend.actor.visible = false;
             this.vagrant.destroy.actor.visible = false;
         }
-        else if (this.state === 'saved') {
+        else if (state === 'saved') {
             this.vagrant.up.actor.visible = false;
             this.vagrant.up_provision.actor.visible = false;
             this.vagrant.up_ssh.actor.visible = false;
@@ -788,7 +734,8 @@ const Path = new Lang.Class({
             this.vagrant.halt.actor.visible = false;
             this.vagrant.destroy.actor.visible = false;
         }
-        //else if (this.state === 'aborted') {
+        //else if (state === 'aborted') {
+        //    @todo - what to do here?
         //}
         else {
             // disable menu on aborted or unknown state
@@ -901,40 +848,6 @@ const Path = new Lang.Class({
     },
 
     /**
-     * Before menu subitem (system command
-     * machine_config) event handler:
-     * create default config file (if not
-     * exists)
-     *
-     * @param  {Object}  widget
-     * @param  {Object}  event
-     * @return {Boolean}
-     */
-    _handleSystemMachineConfig: function(widget, event) {
-        let path = this._configFile.get_path();
-        if (GLib.file_test(path, GLib.FileTest.EXISTS))
-            return false;
-
-        try {
-            let data = this._defaultConfig();
-            data = JSON.stringify(data, null, 4);
-            data += '\n';
-
-            GLib.file_set_contents(path, data);
-        }
-        catch(e) {
-            this.emit('error', {
-                id: this.id,
-                error: e,
-            });
-
-            return true;
-        }
-
-        return false;
-    },
-
-    /**
      * Menu subitem (vagrant command)
      * execute event handler
      *
@@ -965,7 +878,7 @@ const Path = new Lang.Class({
      * @param  {Object} monitor
      * @param  {Object} file
      * @return {Void}
-     */
+     * /
     _handleMonitorChanged: function(monitor, file) {
         Mainloop.source_remove(this._configInterval);
         this._configInterval = Mainloop.timeout_add(500, Lang.bind(this, this._handleMonitorChangedDelayed), null);
@@ -978,7 +891,7 @@ const Path = new Lang.Class({
      * multiple code execution
      *
      * @return {Boolean}
-     */
+     * /
     _handleMonitorChangedDelayed: function() {
         this._configInterval = null;
         this._loadConfig();
