@@ -467,7 +467,6 @@ var Emulator = new Lang.Class({
         this._version = null;
 
         this._monitor = new Monitor();
-        this._monitor.connect('change', Lang.bind(this, this._handleMonitorChange));
         this._monitor.start();
 
         this._terminal = new Terminal.Emulator();
@@ -538,27 +537,6 @@ var Emulator = new Lang.Class({
     },
 
     /**
-     * Moniror change signal event handler
-     *
-     * @param  {Object} monitor
-     * @param  {Object} event
-     * @return {Void}
-     */
-    _handleMonitorChange: function(monitor, event) {
-        this._index = event.index;
-    },
-
-    /**
-     * Property index getter:
-     * parsed vagrant machine index file content
-     *
-     * @return {Object}
-     */
-    get index() {
-        return this._index;
-    },
-
-    /**
      * Property monitor getter
      *
      * @return {Object}
@@ -617,18 +595,6 @@ var Emulator = new Lang.Class({
         }
 
         return this._version;
-    },
-
-    /**
-     * Parse vagrant machine index file content
-     * and save it to this.index
-     *
-     * @return {Void}
-     */
-    refresh: function() {
-        let index = new Index();
-        this._index = index.parse();
-        index.destroy();
     },
 
     /**
