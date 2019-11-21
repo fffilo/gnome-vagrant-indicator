@@ -124,6 +124,15 @@ var Emulator = new Lang.Class({
     Name: 'Terminal.Emulator',
 
     /**
+     * Destructor
+     *
+     * @return {Void}
+     */
+    destroy: function() {
+        // pass
+    },
+
+    /**
      * Get output of shell command (sync)
      * without throwing exception (instead
      * exception result is null)

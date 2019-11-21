@@ -65,6 +65,12 @@ var Base = new Lang.Class({
             this.monitor.destroy();
         if (this.vagrant)
             this.vagrant.destroy();
+        if (this.notification)
+            this.notification.destroy();
+
+        this._monitor = null;
+        this._vagrant = null;
+        this._notification = null;
 
         this.parent();
     },

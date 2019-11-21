@@ -478,7 +478,15 @@ var Emulator = new Lang.Class({
      * @return {Void}
      */
     destroy: function() {
-        this.monitor.destroy();
+        if (this.terminal)
+            this.terminal.destroy();
+        if (this.monitor)
+            this.monitor.destroy();
+
+        this._version = null;
+        this._command = null;
+        this._terminal = null;
+        this._monitor = null;
     },
 
     /**
