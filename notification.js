@@ -46,6 +46,24 @@ const Base = new Lang.Class({
     },
 
     /**
+     * Title getter
+     *
+     * @return {String}
+     */
+    get title() {
+        return this._title;
+    },
+
+    /**
+     * Icon getter
+     *
+     * @return {String}
+     */
+    get icon() {
+        return this._icon;
+    },
+
+    /**
      * Prepare source
      *
      * @return {Void}
@@ -54,7 +72,7 @@ const Base = new Lang.Class({
         if (this._source !== null)
             return;
 
-        this._source = new MessageTray.Source(this._title, this._icon);
+        this._source = new MessageTray.Source(this.title, this.icon);
         this._source.connect('destroy', Lang.bind(this, this._handleDestroy));
 
         Main.messageTray.add(this._source);
