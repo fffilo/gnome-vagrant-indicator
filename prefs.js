@@ -218,10 +218,6 @@ const Widget = new GObject.Class({
         this.ui.system.vagrantfile.connect('changed', Lang.bind(this, this._handleWidget));
         this.ui.system.page.actor.add(this.ui.system.vagrantfile);
 
-        this.ui.system.machine_config = new InputSwitch('display-system-machine-config', this.settings.get_boolean('display-system-machine-config'), _("Machine Config"), _("Display Machine Config system menu"));
-        this.ui.system.machine_config.connect('changed', Lang.bind(this, this._handleWidget));
-        this.ui.system.page.actor.add(this.ui.system.machine_config);
-
         return this.ui.system.page;
     },
 

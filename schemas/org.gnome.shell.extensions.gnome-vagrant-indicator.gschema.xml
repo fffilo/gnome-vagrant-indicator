@@ -36,11 +36,6 @@
             <summary>Edit Vagrantfile</summary>
             <description>Display Edit Vagrantfile system menu</description>
         </key>
-        <key name="display-system-machine-config" type="b">
-            <default>false</default>
-            <summary>Machine Config</summary>
-            <description>Display Machine Config system menu</description>
-        </key>
         <key name="display-vagrant-none" type="b">
             <default>false</default>
             <summary>Disabled</summary>

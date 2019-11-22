@@ -23,7 +23,6 @@ const PROPERTIES = [
     'displaySystemTerminal',
     'displaySystemFileManager',
     'displaySystemVagrantfile',
-    //'displaySystemMachineConfig',
     'displayVagrantNone',
     'displayVagrantUp',
     'displayVagrantUpProvision',
