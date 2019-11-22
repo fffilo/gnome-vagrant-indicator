@@ -41,7 +41,7 @@ var Base = new Lang.Class({
 
         this._notification = new Notification.Base();
         this._vagrant = new Vagrant.Emulator();
-        this._monitor = new Monitor.Monitor();
+        this._monitor = new Monitor.Monitor(this.vagrant.monitor);
 
         this.vagrant.connect('error', Lang.bind(this, this._handleVagrantError));
         this.monitor.connect('state', Lang.bind(this, this._handleMonitorState));

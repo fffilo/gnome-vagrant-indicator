@@ -391,21 +391,41 @@ var Monitor = new Lang.Class({
     /**
      * Constructor
      *
+     * @param  {Object} vagrantMonitor (optional)
+     * @param  {Object} configMonitor  (optional)
+     * @param  {Object} schemaMonitor  (optional)
      * @return {Void}
      */
-    _init: function() {
+    _init: function(vagrantMonitor, configMonitor, schemaMonitor) {
+        this._destroy = [];
+        this._signal = {};
         this._data = null;
 
-        this._vagrant = new Vagrant.Monitor();
-        this._vagrant.connect('state', Lang.bind(this, this._handleVagrantState));
-        this._vagrant.connect('add', Lang.bind(this, this._handleVagrantAdd));
-        this._vagrant.connect('remove', Lang.bind(this, this._handleVagrantRemove));
+        // use arguments or instance new objects
+        if (!(vagrantMonitor instanceof Vagrant.Monitor)) {
+            vagrantMonitor = new Vagrant.Monitor();
+            this._destroy.push(vagrantMonitor);
+        }
+        if (!(configMonitor instanceof Config)) {
+            configMonitor = new Config();
+            this._destroy.push(configMonitor);
+        }
+        if (!(schemaMonitor instanceof Schema)) {
+            schemaMonitor = new Schema();
+            this._destroy.push(schemaMonitor);
+        }
 
-        this._config = new Config();
-        this._config.connect('change', Lang.bind(this, this._handleConfigChange));
+        // store
+        this._vagrant = vagrantMonitor;
+        this._config = configMonitor;
+        this._schema = schemaMonitor;
 
-        this._schema = new Schema();
-        this._schema.connect('change', Lang.bind(this, this._handleSchemaChange));
+        // connect signals
+        this._signal.vagrantState = this._vagrant.connect('state', Lang.bind(this, this._handleVagrantState));
+        this._signal.vagrantAdd = this._vagrant.connect('add', Lang.bind(this, this._handleVagrantAdd));
+        this._signal.vagrantRemove = this._vagrant.connect('remove', Lang.bind(this, this._handleVagrantRemove));
+        this._signal.configChange = this._config.connect('change', Lang.bind(this, this._handleConfigChange));
+        this._signal.schemaChange = this._schema.connect('change', Lang.bind(this, this._handleSchemaChange));
     },
 
     /**
@@ -414,17 +434,26 @@ var Monitor = new Lang.Class({
      * @return {Void}
      */
     destroy: function() {
-        if (this._schema)
-            this._schema.destroy();
-        if (this._config)
-            this._config.destroy();
-        if (this._vagrant)
-            this._vagrant.destroy();
+        if (this.vagrant) {
+            this.vagrant.disconnect(this._signal.vagrantState);
+            this.vagrant.disconnect(this._signal.vagrantAdd);
+            this.vagrant.disconnect(this._signal.vagrantRemove);
+        }
+        if (this.config)
+            this.config.disconnect(this._signal.configChange);
+        if (this.schema)
+            this.schema.disconnect(this._signal.schemaChange);
+
+        while (this._destroy && this._destroy.length) {
+            this._destroy.pop().destroy();
+        }
 
         this._schema = null;
         this._config = null;
         this._vagrant = null;
         this._data = null;
+        this._signal = null;
+        this._destroy = null;
     },
 
     /**
