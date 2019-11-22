@@ -15,7 +15,7 @@ const Icons = Me.imports.icons;
  * Notification.Base constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Base = new Lang.Class({
 
@@ -82,9 +82,9 @@ var Base = new Lang.Class({
      * Get existing notification from
      * source or create new one
      *
-     * @param  {String} title
-     * @param  {String} message
-     * @return {Object}
+     * @param  {String}       title
+     * @param  {String}       message
+     * @return {Notification}
      */
     _notification: function(title, message) {
         let result = null;

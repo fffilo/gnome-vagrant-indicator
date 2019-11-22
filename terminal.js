@@ -117,7 +117,7 @@ const UNSUPPORTED = [
  * Terminal.Emulator constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Emulator = new Lang.Class({
 
@@ -138,7 +138,7 @@ var Emulator = new Lang.Class({
      * exception result is null)
      *
      * @param  {String} command command to execute
-     * @return {Mixed}          output (string) or null on fail
+     * @return {String}         output string or null on fail
      */
     _shellOutput: function(command) {
         try {

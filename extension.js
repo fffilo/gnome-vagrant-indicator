@@ -13,7 +13,7 @@ const Indicator = Me.imports.indicator;
 /**
  * Global indicator object
  *
- * @type {Object}
+ * @type {Indicator.Base}
  */
 let indicator = null;
 

@@ -30,7 +30,7 @@ const DisplaySystem = Vagrant.CommandSystem;
  * Menu.Machine constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Machine = new Lang.Class({
 
@@ -65,13 +65,13 @@ var Machine = new Lang.Class({
     /**
      * Display error
      *
-     * @param  {String} msg
+     * @param  {String} message
      * @return {Void}
      */
-    error: function(msg) {
+    error: function(message) {
         this.removeAll();
 
-        this.empty = new Item(msg || 'ERROR');
+        this.empty = new Item(message || 'ERROR');
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
     },
@@ -79,11 +79,11 @@ var Machine = new Lang.Class({
     /**
      * Add item to list
      *
-     * @param  {String} id
-     * @param  {String} path
-     * @param  {String} state
-     * @param  {Number} index (optional)
-     * @return {Object}
+     * @param  {String}    id
+     * @param  {String}    path
+     * @param  {String}    state
+     * @param  {Number}    index (optional)
+     * @return {Menu.Path}
      */
     add: function(id, path, state, index) {
         if (this.empty)
@@ -118,7 +118,7 @@ var Machine = new Lang.Class({
      * Get item state
      *
      * @param  {String} id
-     * @return {Void}
+     * @return {String}
      */
     getState: function(id) {
         let item = this._getItem(id);
@@ -173,7 +173,7 @@ var Machine = new Lang.Class({
     /**
      * Get item title
      *
-     * @param  {String}  id
+     * @param  {String} id
      * @return {Mixed}
      */
     getTitle: function(id) {
@@ -187,8 +187,8 @@ var Machine = new Lang.Class({
     /**
      * Set item title
      *
-     * @param  {String}  id
-     * @param  {Boolean} value
+     * @param  {String} id
+     * @param  {Mixed}  value
      * @return {Void}
      */
     setTitle: function(id, value) {
@@ -202,6 +202,7 @@ var Machine = new Lang.Class({
      * display vagrant menu subitems
      * from DisplayVagrant enum
      *
+     * @param  {String} id
      * @return {Number}
      */
     getDisplayVagrant: function(id) {
@@ -215,6 +216,7 @@ var Machine = new Lang.Class({
     /**
      * Set DisplayVagrant
      *
+     * @param  {String} id
      * @param  {Number} value
      * @return {Void}
      */
@@ -234,6 +236,7 @@ var Machine = new Lang.Class({
      * display system menu subitems
      * from DisplaySystem enum
      *
+     * @param  {String} id
      * @return {Number}
      */
     getDisplaySystem: function(id) {
@@ -247,6 +250,7 @@ var Machine = new Lang.Class({
     /**
      * Set DisplaySystem
      *
+     * @param  {String} id
      * @param  {Number} value
      * @return {Void}
      */
@@ -265,7 +269,7 @@ var Machine = new Lang.Class({
      * Get submenu item from menu list
      *
      * @param  {String} id (optional)
-     * @return {Object}
+     * @return {Array}
      */
     _getItem: function(id) {
         return this.box.get_children()
@@ -280,8 +284,8 @@ var Machine = new Lang.Class({
     /**
      * Error handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Menu.Path} widget
+     * @param  {Object}    event
      * @return {Void}
      */
     _handleError: function(widget, event) {
@@ -292,8 +296,8 @@ var Machine = new Lang.Class({
      * Menu subitem (system command)
      * execute event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Menu.Path} widget
+     * @param  {Object}    event
      * @return {Void}
      */
     _handleSystem: function(widget, event) {
@@ -307,8 +311,8 @@ var Machine = new Lang.Class({
      * Menu subitem (vagrant command)
      * execute event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Menu.Path} widget
+     * @param  {Object}    event
      * @return {Void}
      */
     _handleVagrant: function(widget, event) {
@@ -326,7 +330,7 @@ var Machine = new Lang.Class({
  * Menu.Path constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Path = new Lang.Class({
 
@@ -533,10 +537,21 @@ var Path = new Lang.Class({
         this._refreshMenu();
     },
 
+    /**
+     * Property title getter
+     *
+     * @return {Mixed}
+     */
     get title() {
         return this._title;
     },
 
+    /**
+     * Property title setter
+     *
+     * @param  {Mixed} value
+     * @return {Void}
+     */
     set title(value) {
         try {
             if (value)
@@ -625,8 +640,6 @@ var Path = new Lang.Class({
     /**
      * Set menu label based on shorten
      * property or title
-     *
-     * @todo - depricated
      *
      * @return {Void}
      */
@@ -797,7 +810,7 @@ var Path = new Lang.Class({
      * Get submenu item from menu list
      *
      * @param  {String} method (optional)
-     * @return {Object}
+     * @return {Array}
      */
     _getItem: function(method) {
         return this.get_children()
@@ -813,8 +826,8 @@ var Path = new Lang.Class({
      * Menu item activate event handler
      * (called only if submenu is empty)
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Menu.Path}     widget
+     * @param  {Clutter.Event} event
      * @return {Void}
      */
     _handleActivate: function(widget, event) {
@@ -828,8 +841,8 @@ var Path = new Lang.Class({
      * Menu subitem (system command)
      * execute event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Menu.Command} widget
+     * @param  {Object}       event
      * @return {Void}
      */
     _handleSystem: function(widget, event) {
@@ -852,8 +865,8 @@ var Path = new Lang.Class({
      * Menu subitem (vagrant command)
      * execute event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Menu.Command} widget
+     * @param  {Object}       event
      * @return {Void}
      */
     _handleVagrant: function(widget, event) {
@@ -880,7 +893,7 @@ var Path = new Lang.Class({
  * Menu.Command constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Command = new Lang.Class({
 
@@ -932,8 +945,8 @@ var Command = new Lang.Class({
     /**
      * Activate event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Menu.Command}  widget
+     * @param  {Clutter.Event} event
      * @return {Void}
      */
     _handleActivate: function(widget, event) {
@@ -967,7 +980,7 @@ var Command = new Lang.Class({
  * Menu.Header constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Header = new Lang.Class({
 

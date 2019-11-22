@@ -24,7 +24,7 @@ const _ = Translation.translate;
  * Indicator.Base constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Base = new Lang.Class({
 
@@ -78,7 +78,7 @@ var Base = new Lang.Class({
     /**
      * Notification getter
      *
-     * @return {Object}
+     * @return {Notification.Base}
      */
     get notification() {
         return this._notification;
@@ -87,7 +87,7 @@ var Base = new Lang.Class({
     /**
      * Vagrant getter
      *
-     * @return {Object}
+     * @return {Vagrant.Emulator}
      */
     get vagrant() {
         return this._vagrant;
@@ -96,7 +96,7 @@ var Base = new Lang.Class({
     /**
      * Monitor getter
      *
-     * @return {Object}
+     * @return {Monitor.Monitor}
      */
     get monitor() {
         return this._monitor;
@@ -202,8 +202,8 @@ var Base = new Lang.Class({
     /**
      * Monitor change event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Monitor.Monitor} widget
+     * @param  {Object}          event
      * @return {Void}
      */
     _handleMonitorChange: function(widget, event) {
@@ -228,8 +228,8 @@ var Base = new Lang.Class({
     /**
      * Monitor machine add event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Monitor.Monitor} widget
+     * @param  {Object}          event
      * @return {Void}
      */
     _handleMonitorAdd: function(widget, event) {
@@ -250,8 +250,8 @@ var Base = new Lang.Class({
     /**
      * Monitor machine remove event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Monitor.Monitor} widget
+     * @param  {Object}          event
      * @return {Void}
      */
     _handleMonitorRemove: function(widget, event) {
@@ -268,8 +268,8 @@ var Base = new Lang.Class({
     /**
      * Monitor machine state change event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Monitor.Monitor} widget
+     * @param  {Object}          event
      * @return {Void}
      */
     _handleMonitorState: function(widget, event) {
@@ -287,16 +287,15 @@ var Base = new Lang.Class({
     /**
      * Default error event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {String} error
      * @return {Void}
      */
-    _handleError: function(widget, event) {
+    _notifyError: function(error) {
         let notify = this.monitor.getValue(null, 'notifications');
         if (!notify)
             return;
 
-        let arr = event.error.toString().split(':');
+        let arr = error.toString().split(':');
         let title = arr[0].trim();
         let message = arr.slice(1).join(':').trim();
 
@@ -311,31 +310,31 @@ var Base = new Lang.Class({
     /**
      * Monitor error event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Vagrant.Emulator} widget
+     * @param  {Object}           event
      * @return {Void}
      */
     _handleVagrantError: function(widget, event) {
-        this._handleError(widget, event);
+        this._notifyError(event.error);
     },
 
     /**
      * Machine error event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Menu.Machine} widget
+     * @param  {Object}       event
      * @return {Void}
      */
     _handleMachineError: function(widget, event) {
-        this._handleError(widget, event);
+        this._notifyError(event.error);
     },
 
     /**
      * Machines item (system command)
      * activate event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Menu.Machine} widget
+     * @param  {Object}       event
      * @return {Void}
      */
     _handleMachineSystem: function(widget, event) {
@@ -354,8 +353,8 @@ var Base = new Lang.Class({
      * Machines item (vagrant command)
      * activate event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Menu.Machine} widget
+     * @param  {Object}       event
      * @return {Void}
      */
     _handleMachineVagrant: function(widget, event) {
@@ -378,8 +377,8 @@ var Base = new Lang.Class({
     /**
      * Preferences activate event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {PopupMenuItem} widget
+     * @param  {Clutter.Event} event
      * @return {Void}
      */
     _handlePreferences: function(widget, event) {

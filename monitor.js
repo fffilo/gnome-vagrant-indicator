@@ -43,7 +43,7 @@ const PROPERTIES = [
  * Monitor.Schema constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Schema = new Lang.Class({
 
@@ -161,7 +161,7 @@ Signals.addSignalMethods(Schema.prototype);
  * Monitor.Config constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Config = new Lang.Class({
 
@@ -344,8 +344,8 @@ var Config = new Lang.Class({
     /**
      * File monitor change event handler
      *
-     * @param  {Object} monitor
-     * @param  {Object} file
+     * @param  {GInotifyFileMonitor} monitor
+     * @param  {GLocalFile}          file
      * @return {Void}
      */
     _handleChange: function(monitor, file) {
@@ -382,7 +382,7 @@ Signals.addSignalMethods(Config.prototype);
  * Monitor.Monitor constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Monitor = new Lang.Class({
 
@@ -391,9 +391,9 @@ var Monitor = new Lang.Class({
     /**
      * Constructor
      *
-     * @param  {Object} vagrantMonitor (optional)
-     * @param  {Object} configMonitor  (optional)
-     * @param  {Object} schemaMonitor  (optional)
+     * @param  {Vagrant.Monitor} vagrantMonitor (optional)
+     * @param  {Monitor.Config}  configMonitor  (optional)
+     * @param  {Monitor.Schema}  schemaMonitor  (optional)
      * @return {Void}
      */
     _init: function(vagrantMonitor, configMonitor, schemaMonitor) {
@@ -485,7 +485,7 @@ var Monitor = new Lang.Class({
     /**
      * Get machine list
      *
-     * @return {Object}
+     * @return {Array} null on fail
      */
     getMachineList: function() {
         return this._vagrant && this._vagrant.index ? Object.keys(this._vagrant.index.machines) : null;
@@ -497,7 +497,7 @@ var Monitor = new Lang.Class({
      *
      * @param  {String} machine
      * @param  {String} key     (optional)
-     * @return {Mixed}
+     * @return {Object}         null on fail
      */
     getMachineDetail: function(machine, key) {
         let index = this._vagrant ? this._vagrant.index : null;
@@ -612,8 +612,8 @@ var Monitor = new Lang.Class({
     /**
      * Vagrant state event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Vagrant.Monitor} widget
+     * @param  {Object}          event
      * @return {Object}
      */
     _handleVagrantState: function(widget, event) {
@@ -623,8 +623,8 @@ var Monitor = new Lang.Class({
     /**
      * Vagrant add event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Vagrant.Monitor} widget
+     * @param  {Object}          event
      * @return {Object}
      */
     _handleVagrantAdd: function(widget, event) {
@@ -636,8 +636,8 @@ var Monitor = new Lang.Class({
     /**
      * Vagrant remove event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Vagrant.Monitor} widget
+     * @param  {Object}          event
      * @return {Object}
      */
     _handleVagrantRemove: function(widget, event) {
@@ -649,8 +649,8 @@ var Monitor = new Lang.Class({
     /**
      * Config change event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
+     * @param  {Monitor.Config} widget
+     * @param  {Object}         event
      * @return {Object}
      */
     _handleConfigChange: function(widget, event) {
@@ -689,8 +689,8 @@ var Monitor = new Lang.Class({
     /**
      * Schema change event handler
      *
-     * @param  {Object} widget
-     * @param  {String} event
+     * @param  {Monitor.Schema} widget
+     * @param  {Object}         event
      * @return {Void}
      */
     _handleSchemaChange: function(widget, event) {

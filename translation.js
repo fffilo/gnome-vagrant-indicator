@@ -22,6 +22,8 @@ var init = Convenience.initTranslations;
 /**
  * Translate message
  *
+ * proxy for Gettext.gettext
+ *
  * note: make sure you call init()
  * on extension initialize
  *

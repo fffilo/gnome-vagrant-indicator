@@ -56,7 +56,7 @@ const MESSAGE_MISSING_VAGRANTFILE = 'Missing Vagrantfile';
 /**
  * Vagrant command enum
  *
- * @type {Object}
+ * @type {Enum.Enum}
  */
 var CommandVagrant = new Enum.Enum([
     'NONE',
@@ -77,7 +77,7 @@ var CommandVagrant = new Enum.Enum([
 /**
  * System command enum
  *
- * @type {Object}
+ * @type {Enum.Enum}
  */
 var CommandSystem = new Enum.Enum([
     'NONE',
@@ -90,7 +90,7 @@ var CommandSystem = new Enum.Enum([
 /**
  * Post terminal action enum
  *
- * @type {Object}
+ * @type {Enum.Enum}
  */
 var PostTerminalAction = new Enum.Enum([
     'NONE',
@@ -104,7 +104,7 @@ Enum.addMember(PostTerminalAction, 'BOTH', Enum.sum(PostTerminalAction));
  * Vagrant.Exception constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Exception = new Lang.Class({
 
@@ -160,7 +160,7 @@ var Exception = new Lang.Class({
  * content
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Index = new Lang.Class({
 
@@ -230,7 +230,7 @@ var Index = new Lang.Class({
  * index file
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Monitor = new Lang.Class({
 
@@ -352,8 +352,8 @@ var Monitor = new Lang.Class({
      * Vagrant machine index file content
      * change event handler
      *
-     * @param  {Object} monitor
-     * @param  {Object} file
+     * @param  {GInotifyFileMonitor} monitor
+     * @param  {GLocalFile}          file
      * @return {Void}
      */
     _handleMonitorChanged: function(monitor, file) {
@@ -547,7 +547,7 @@ var Emulator = new Lang.Class({
     /**
      * Property monitor getter
      *
-     * @return {Object}
+     * @return {Vagrant.Monitor}
      */
     get monitor() {
         return this._monitor;
@@ -557,7 +557,7 @@ var Emulator = new Lang.Class({
      * Property terminal getter:
      * terminal emulator
      *
-     * @return {Object}
+     * @return {Terminal.Emulator}
      */
     get terminal() {
         return this._terminal;
@@ -609,7 +609,7 @@ var Emulator = new Lang.Class({
      * Execute system command
      *
      * @param  {String} id  machine id
-     * @param  {Number} cmd CommandSystem
+     * @param  {Number} cmd CommandSystem enum
      * @return {Void}
      */
     open: function(id, cmd) {
@@ -636,8 +636,8 @@ var Emulator = new Lang.Class({
      * Execute vagrant command
      *
      * @param  {String} id     machine id
-     * @param  {Number} cmd    CommandVagrant
-     * @param  {Number} action (optional) PostTerminalAction
+     * @param  {Number} cmd    CommandVagrant enum
+     * @param  {Number} action (optional) PostTerminalAction enum
      * @return {Void}
      */
     execute: function(id, cmd, action) {
