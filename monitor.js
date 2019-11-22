@@ -290,10 +290,6 @@ var Config = new Lang.Class({
             result = JSON.parse(contents);
             if (!result || typeof result !== 'object' || result === null || result instanceof Array)
                 throw '';
-
-            // @todo
-            //      - validate machine
-            //      - validate properties
         }
         catch(e) {
             result = null;

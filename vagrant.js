@@ -496,7 +496,8 @@ var Emulator = new Lang.Class({
      * @return {Boolean}
      */
     _validate: function(id) {
-        let machine = this.index.machines[id];
+        let index = this.monitor.index;
+        let machine = index.machines[id] || null;
 
         if (!this.command || !GLib.file_test(this.command, GLib.FileTest.EXISTS) || !GLib.file_test(this.command, GLib.FileTest.IS_EXECUTABLE))
             throw new Exception(MESSAGE_VAGRANT_NOT_INSTALLED, 'Vagrant.Emulator');
@@ -521,7 +522,8 @@ var Emulator = new Lang.Class({
     _exec: function(id, cmd, action) {
         this._validate(id);
 
-        let cwd = this.index.machines[id].vagrantfile_path;
+        let index = this.monitor.index;
+        let cwd = index.machines[id].vagrantfile_path;
         let exe = '';
 
         if (cmd instanceof Array) {
@@ -615,19 +617,20 @@ var Emulator = new Lang.Class({
     open: function(id, cmd) {
         this._validate(id);
 
+        let index = this.monitor.index;
         if ((cmd | CommandSystem.TERMINAL) === cmd) {
-            this.terminal.popup(this.index.machines[id].vagrantfile_path);
+            this.terminal.popup(index.machines[id].vagrantfile_path);
         }
         if ((cmd | CommandSystem.VAGRANTFILE) === cmd) {
-            let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path + '/Vagrantfile', null);
+            let uri = GLib.filename_to_uri(index.machines[id].vagrantfile_path + '/Vagrantfile', null);
             Gio.AppInfo.launch_default_for_uri(uri, null);
         }
         if ((cmd | CommandSystem.FILE_MANAGER) === cmd) {
-            let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path, null);
+            let uri = GLib.filename_to_uri(index.machines[id].vagrantfile_path, null);
             Gio.AppInfo.launch_default_for_uri(uri, null);
         }
         if ((cmd | CommandSystem.MACHINE_CONFIG) === cmd) {
-            let uri = GLib.filename_to_uri(this.index.machines[id].vagrantfile_path + '/.' + Me.metadata.uuid, null);
+            let uri = GLib.filename_to_uri(index.machines[id].vagrantfile_path + '/.' + Me.metadata.uuid, null);
             Gio.AppInfo.launch_default_for_uri(uri, null);
         }
     },

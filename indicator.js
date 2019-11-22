@@ -339,7 +339,10 @@ var Base = new Lang.Class({
      */
     _handleMachineSystem: function(widget, event) {
         try {
-            this.vagrant.open(event.id, event.command);
+            let id = event.id;
+            let command = event.command;
+
+            this.vagrant.open(id, command);
         }
         catch(e) {
             this.vagrant.emit('error', {
@@ -368,7 +371,7 @@ var Base = new Lang.Class({
         }
         catch(e) {
             this.vagrant.emit('error', {
-                id: id,
+                id: event.id,
                 error: e,
             });
         }

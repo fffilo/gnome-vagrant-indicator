@@ -846,15 +846,6 @@ var Path = new Lang.Class({
      * @return {Void}
      */
     _handleSystem: function(widget, event) {
-        let key = Enum.getKey(DisplaySystem, widget.command);
-        key = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
-        key = key.replace(/_[a-z]/g, function(match) {
-            return match.charAt(1).toUpperCase();
-        });
-        if (typeof this['_handleSystem' + key] === 'function')
-            if (this['_handleSystem' + key].call(this, widget, event))
-                return;
-
         this.emit('system', {
             id: this.id,
             command: widget.command,
@@ -870,15 +861,6 @@ var Path = new Lang.Class({
      * @return {Void}
      */
     _handleVagrant: function(widget, event) {
-        let key = Enum.getKey(DisplayVagrant, widget.command);
-        key = key.charAt(0).toUpperCase() + key.slice(1).toLowerCase();
-        key = key.replace(/_[a-z]/g, function(match) {
-            return match.charAt(1).toUpperCase();
-        });
-        if (typeof this['_handleVagrant' + key] === 'function')
-            if (this['_handleVagrant' + key].call(this, widget, event))
-                return;
-
         this.emit('vagrant', {
             id: this.id,
             command: widget.command,
