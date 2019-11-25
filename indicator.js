@@ -144,11 +144,13 @@ var Base = new Lang.Class({
             let id = machines[i];
             let path = this.monitor.getMachineDetail(id, 'vagrantfile_path');
             let state = this.monitor.getMachineDetail(id, 'state');
+            let title = this.monitor.getValue(id, 'label');
             let shorten = !this.monitor.getValue(id, 'machine-full-path');
             let displayVagrant = this._getDisplayVagrant(id);
             let displaySystem = this._getDisplaySystem(id);
 
             let item = this.machine.add(id, path, state);
+            item.title = title;
             item.shorten = shorten;
             item.displayVagrant = displayVagrant;
             item.displaySystem = displaySystem;
