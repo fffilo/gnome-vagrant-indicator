@@ -115,6 +115,63 @@ var Machine = new Lang.Class({
     },
 
     /**
+     * Get item index
+     *
+     * @param  {String} id
+     * @return {Number}
+     */
+    getItemIndex: function(id) {
+        let result = -1;
+        this.box.get_children()
+            .map(function(actor) {
+                return actor._delegate;
+            })
+            .filter(function(actor) {
+                return actor instanceof Path;
+            })
+            .forEach(function(actor, index) {
+                if (id ? actor.id === id : true)
+                    result = index;
+            });
+
+        return result;
+    },
+
+    /**
+     * Set item index
+     *
+     * @param  {String} id
+     * @param  {Number} index
+     * @return {Void}
+     */
+    setItemIndex: function(id, index) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return;
+        item = item[0];
+
+        if (index < 0 || index >= this._getItem().length || this.getItemIndex(id) === index)
+            return;
+
+        // this.moveMenuItem not working
+        // (it moves menuItem, but not it's subMenu)
+        //this.moveMenuItem(item, index);
+
+        // ...let's remove old and add new item
+        let path = item.path;
+        let state = item.state;
+        let shorten = item.shorten;
+        let displayVagrant = item.displayVagrant;
+        let displaySystem = item.displaySystem;
+
+        this.remove(id);
+        item = this.add(id, path, state, index);
+        item.shorten = shorten;
+        item.displayVagrant = displayVagrant;
+        item.displaySystem = displaySystem;
+    },
+
+    /**
      * Get item state
      *
      * @param  {String} id
@@ -124,8 +181,9 @@ var Machine = new Lang.Class({
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
+        item = item[0];
 
-        return item[0].state;
+        return item.state;
     },
 
     /**
@@ -153,8 +211,9 @@ var Machine = new Lang.Class({
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
+        item = item[0];
 
-        return item[0].shorten;
+        return item.shorten;
     },
 
     /**
@@ -180,8 +239,9 @@ var Machine = new Lang.Class({
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
+        item = item[0];
 
-        return item[0].title;
+        return item.title;
     },
 
     /**
@@ -209,8 +269,9 @@ var Machine = new Lang.Class({
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
+        item = item[0];
 
-        return item[0].displayVagrant;
+        return item.displayVagrant;
     },
 
     /**
@@ -243,8 +304,9 @@ var Machine = new Lang.Class({
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
+        item = item[0];
 
-        return item[0].displaySystem;
+        return item.displaySystem;
     },
 
     /**

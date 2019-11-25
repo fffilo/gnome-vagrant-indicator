@@ -3,8 +3,8 @@
 ## [Unreleased]
 ### Added
 - Machine destroyed notification
-### Changed
 - Machine specific settings
+### Changed
 - Monitor optimization
 - Minor bug fixes
 

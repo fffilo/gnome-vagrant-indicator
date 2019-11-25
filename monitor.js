@@ -15,6 +15,7 @@ const Vagrant = Me.imports.vagrant;
 const Settings = Me.imports.settings;
 
 const PROPERTIES = [
+    'order',
     'label',
     'notifications',
     'machineFullPath',
@@ -120,7 +121,7 @@ var Schema = new Lang.Class({
         // validate
         if (PROPERTIES.indexOf(key) === -1)
             return null;
-        if (key === 'label')
+        if (key === 'label' || key === 'order')
             return null;
 
         // Gio.Settings use kebab-case properties
@@ -478,12 +479,34 @@ var Monitor = new Lang.Class({
     },
 
     /**
-     * Get machine list
+     * Get sorted machine list
      *
      * @return {Array} null on fail
      */
     getMachineList: function() {
-        return this._vagrant && this._vagrant.index ? Object.keys(this._vagrant.index.machines) : null;
+        var machines = this._vagrant && this._vagrant.index ? Object.keys(this._vagrant.index.machines) : null;
+        if (machines)
+            machines.sort(Lang.bind(this, function(id1, id2) {
+                // sort by order
+                let compare1 = this.getValue(id1, 'order') || 9999;
+                let compare2 = this.getValue(id2, 'order') || 9999;
+                if (compare1 < compare2)
+                    return -1;
+                else if (compare1 > compare2)
+                    return 1;
+
+                // order is equal, sort by machine path
+                compare1 = this.getMachineDetail(id1, 'vagrantfile_path') || id1;
+                compare2 = this.getMachineDetail(id2, 'vagrantfile_path') || id2;
+                if (compare1 < compare2)
+                    return -1;
+                else if (compare1 > compare2)
+                    return 1;
+
+                return 0;
+            }));
+
+        return machines;
     },
 
     /**

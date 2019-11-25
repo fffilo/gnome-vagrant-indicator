@@ -209,6 +209,7 @@ var Base = new Lang.Class({
     _handleMonitorChange: function(widget, event) {
         for (let id in event) {
             let props = event[id];
+            let order = props.indexOf('order') === -1 ? 0 : 1;
             let label = props.indexOf('label') === -1 ? 0 : 1;
             let machineFullPath = props.indexOf('machineFullPath') === -1 ? 0 : 1;
             let displaySystem = props.filter(function(item) { return item.startsWith('displaySystem'); }).length;
