@@ -22,10 +22,10 @@ from status area.
 	- halt
 	- destroy
 
-_Last known state of Vagrant-managed VMs_ is taken from vagrant machine index
-file, which means that the state in indicator will only be accurate if
-machine is managed by vagrant. If the machine is powered with eq.
-virtualbox, the state in indicator won't change.
+**Important** : _Last known state of Vagrant-managed VMs_ is taken from vagrant
+machine index file, which means that the state in indicator will only be accurate
+if machine is managed by vagrant. If the machine is powered with eq. virtualbox,
+the state in indicator won't change.
 
 ## Installation
 
@@ -43,30 +43,32 @@ must be installed on your system.
 
 Use _Preferences_ to setup your indicator. Those settings will apply to all machines.
 
-If you want you can set specific setting for individual machine. Create (or open) file
-`~/.config/gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com/config.json`
-and edit it. It should look something like this:
+If you want you can set specific setting for individual machine. Open file
+`~/.config/gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com/config.json`.
+Set it's content to look something like this:
 
 	{
-		"machine_id": {
-			"property_key": "value",
-			"another_property_key": "value"
+		"xxx": {
+			"order": 1,
+			"label": "My App"
 		},
-		"another_machine_id": {
-			"another_property_key": "value"
+		yyy": {
+			"order": 2,
+			"notifications": false
 		}
 	}
 
-Adjust your machine id(s) and property key(s) (see _Config keys_) and save file.
-Indicator should immediately refresh. Note that you do not need to add all machine
-ids to config, nor you do not need to add all config keys for each machine.
+...where `xxx` and `yyy` are machine ids. Adjust your machine id(s) and property
+key(s) (see _Config keys_) and save file. Indicator should immediately refresh.
+Note that you do not need to add all machine ids to config, nor you do not need
+to add all config keys for each machine.
 
 **Important** : If config is not valid json file it will be ignored (all machines
 will use settings set in _Preferences_).
 
 ### Config command line helper
 
-To make things easier for you can use `config-index` helper:
+To make things easier you can use `config-index` helper:
 
 	gjs ~/.local/share/gnome-shell/extensions/gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com/config-index.js
 

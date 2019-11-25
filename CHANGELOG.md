@@ -1,6 +1,6 @@
 # Changelog
 
-## [Unreleased]
+## Version 6 - 2019-11-25
 ### Added
 - Machine destroyed notification
 - Machine specific settings
