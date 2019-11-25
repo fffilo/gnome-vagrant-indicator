@@ -177,7 +177,7 @@ var Config = new Lang.Class({
             let dir = GLib.path_get_dirname(this.path);
             if (!GLib.file_test(dir, GLib.FileTest.IS_DIR))
                 GLib.mkdir_with_parents(dir, parseInt('0755', 8));
-            if (!GLib.file_test(this.path, GLib.FileTest.IS_DIR))
+            if (!GLib.file_test(this.path, GLib.FileTest.IS_REGULAR))
                 GLib.file_set_contents(this.path, '');
         }
         catch(e) {
@@ -317,13 +317,8 @@ var Config = new Lang.Class({
      * @return {Mixed}
      */
     _parse: function() {
-        let json = this._read();
-        if (!json)
-            return null;
-
-        // store
         let config = Object.assign({}, this._config);
-        this._config = json;
+        this._config = this._read() || {};
 
         // check if machine is missing
         let result = null;
