@@ -199,7 +199,7 @@ var Config = new Lang.Class({
      * @return {String}
      */
     get path() {
-        return GLib.get_home_dir() + '/.' + Me.metadata.uuid;
+        return GLib.get_user_config_dir() + '/' + Me.metadata.uuid + '/config.json';
     },
 
     /**
