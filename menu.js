@@ -160,12 +160,14 @@ var Machine = new Lang.Class({
         // ...let's remove old and add new item
         let path = item.path;
         let state = item.state;
+        let title = item.title;
         let shorten = item.shorten;
         let displayVagrant = item.displayVagrant;
         let displaySystem = item.displaySystem;
 
         this.remove(id);
         item = this.add(id, path, state, index);
+        item.title = title;
         item.shorten = shorten;
         item.displayVagrant = displayVagrant;
         item.displaySystem = displaySystem;

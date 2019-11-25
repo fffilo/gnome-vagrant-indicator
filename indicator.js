@@ -217,6 +217,8 @@ var Base = new Lang.Class({
             let displaySystem = props.filter(function(item) { return item.startsWith('displaySystem'); }).length;
             let displayVagrant = props.filter(function(item) { return item.startsWith('displayVagrant'); }).length;
 
+            if (order)
+                this.machine.setItemIndex(id, this.monitor.getMachineList().indexOf(id));
             if (label)
                 this.machine.setTitle(id, this.monitor.getValue(id, 'label'));
             if (machineFullPath)
@@ -239,12 +241,14 @@ var Base = new Lang.Class({
         let id = event.id;
         let path = event.path;
         let state = event.state;
+        let title = this.monitor.getValue(id, 'label');
         let shorten = !this.monitor.getValue(id, 'machine-full-path');
         let displayVagrant = this._getDisplayVagrant(id);
         let displaySystem = this._getDisplaySystem(id);
         let index = Object.keys(this.monitor.getMachineList()).indexOf(id);
 
         let item = this.machine.add(id, path, state, index);
+        item.title = title;
         item.shorten = shorten;
         item.displayVagrant = displayVagrant;
         item.displaySystem = displaySystem;
