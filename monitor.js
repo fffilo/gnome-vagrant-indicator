@@ -173,6 +173,17 @@ var Config = new Lang.Class({
      * @return {Void}
      */
     _init: function() {
+        try {
+            let dir = GLib.path_get_dirname(this.path);
+            if (!GLib.file_test(dir, GLib.FileTest.IS_DIR))
+                GLib.mkdir_with_parents(dir, parseInt('0755', 8));
+            if (!GLib.file_test(this.path, GLib.FileTest.IS_DIR))
+                GLib.file_set_contents(this.path, '');
+        }
+        catch(e) {
+            // pass
+        }
+
         this._file = Gio.File.new_for_path(this.path);
         this._monitor = null;
         this._interval = null;
