@@ -1,5 +1,9 @@
 # Changelog
 
+## Unreleased
+### Added
+- Preferences: refresh machine status (`vagrant global-status --prune`)
+
 ## Version 6 - 2019-11-25
 ### Added
 - Machine destroyed notification

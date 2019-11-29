@@ -3,6 +3,7 @@
 // import modules
 const Lang = imports.lang;
 const Signals = imports.signals;
+const Mainloop = imports.mainloop;
 const GObject = imports.gi.GObject;
 const Gtk = imports.gi.Gtk;
 const Gdk = imports.gi.Gdk;
@@ -12,6 +13,7 @@ const Me = ExtensionUtils.getCurrentExtension();
 const Icons = Me.imports.icons;
 const Settings = Me.imports.settings;
 const Translation = Me.imports.translation;
+const Vagrant = Me.imports.vagrant;
 const _ = Translation.translate;
 
 /**
@@ -111,6 +113,21 @@ const Widget = new GObject.Class({
         this.ui.settings = {};
         this.ui.settings.page = this._page();
         this.ui.settings.page.get_style_context().add_class('gnome-vagrant-indicator-prefs-page-settings');
+
+        let desc = _("<i>Refresh machines status</i> will get state of all active Vagrant environments and prune invalid entries from the list. Note that this can be heavy task and can last some time if you have many boxes.");
+        let label = new Label({ label: desc, });
+        label.get_style_context().add_class('gnome-vagrant-indicator-prefs-info');
+        this.ui.settings.page.actor.add(label);
+
+        this.ui.settings.autoglobalstatusprune = new InputSwitch('auto-global-status-prune', this.settings.get_boolean('auto-global-status-prune'), _("Refresh machines status at startup"), _("Refresh machines status at startup (work in progress)"));
+        this.ui.settings.autoglobalstatusprune.connect('changed', Lang.bind(this, this._handleWidget));
+        this.ui.settings.page.actor.add(this.ui.settings.autoglobalstatusprune);
+
+        this.ui.settings.execglobalstatusprune = new InputButton(_("Execute"), _("Refresh machines status"), _("Refresh machines status"));
+        this.ui.settings.execglobalstatusprune.connect('changed', Lang.bind(this, this._handleGlobalStatusPrune));
+        this.ui.settings.page.actor.add(this.ui.settings.execglobalstatusprune);
+
+        this.ui.settings.page.actor.add(new Separator());
 
         this.ui.settings.notifications = new InputSwitch('notifications', this.settings.get_boolean('notifications'), _("Show notifications"), _("Display notification on vagrant machine state change"));
         this.ui.settings.notifications.connect('changed', Lang.bind(this, this._handleWidget));
@@ -299,6 +316,29 @@ const Widget = new GObject.Class({
     },
 
     /**
+     * Settings widget click event handler
+     *
+     * @param  {String} widget
+     * @param  {String} event
+     * @return {Void}
+     */
+    _handleGlobalStatusPrune: function(widget, event) {
+        let vagrant = new Vagrant.Emulator();
+        vagrant.globalStatus();
+
+        // this can be heavy task, so let's disable
+        // widget for a moment to prevent multiple
+        // button clicks
+        widget.enabled = false;
+        Mainloop.timeout_add(1000, Lang.bind(this, function() {
+            widget.enabled = true;
+
+            // stop repeating
+            return false;
+        }), null);        
+    },
+
+    /**
      * Settings changed event handler
      *
      * @param  {Object} widget
@@ -339,6 +379,29 @@ const Box = new GObject.Class({
         this.add(this.actor);
 
         this.get_style_context().add_class('gnome-vagrant-indicator-prefs-box');
+    },
+
+    /* --- */
+
+});
+
+/**
+ * Separator constructor
+ * extends Gtk.Separator
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
+const Separator = new GObject.Class({
+
+    Name: 'Prefs.Separator',
+    GTypeName: 'GnomeVagrantIndicatorPrefsSeparator',
+    Extends: Gtk.Separator,
+
+    _init: function() {
+        this.parent({ orientation: Gtk.Orientation.HORIZONTAL });
+
+        this.get_style_context().add_class('gnome-vagrant-indicator-prefs-separator');
     },
 
     /* --- */
@@ -432,6 +495,25 @@ const Input = new GObject.Class({
             value: widget.value,
             type: typeof widget.value,
         });
+    },
+    
+    /**
+     * Enabled getter
+     *
+     * @return {Boolean}
+     */
+    get enabled() {
+        return this._widget.is_sensitive();
+    },
+
+    /**
+     * Enabled setter
+     *
+     * @param  {Boolean} value
+     * @return {Void}
+     */
+    set enabled(value) {
+        this._widget.set_sensitive(value);
     },
 
     /**
@@ -584,6 +666,71 @@ const InputSwitch = new GObject.Class({
      */
     set value(value) {
         this._widget.active = value;
+    },
+
+    /* --- */
+
+});
+
+/**
+ * InputButton constructor
+ * extends Input
+ *
+ * @param  {Object}
+ * @return {Object}
+ */
+const InputButton = new GObject.Class({
+
+    Name: 'Prefs.InputButton',
+    GTypeName: 'GnomeVagrantIndicatorPrefsInputButton',
+    Extends: Input,
+
+    /**
+     * Constructor
+     *
+     * @return {Void}
+     */
+    _init: function(label, text, tooltip) {
+        this.parent(null, text, tooltip);
+
+        this._widget = new Gtk.Button({ label: label, expand: false });
+        this._widget.connect('clicked', Lang.bind(this, this._handleChange));
+        this.actor.add(this._widget);
+
+        this.get_style_context().add_class('gnome-vagrant-indicator-prefs-input-button');
+    },
+
+    /**
+     * Input click event handler
+     *
+     * @param  {Object} widget
+     * @return {Void}
+     */
+    _handleChange: function(widget) {
+        this.emit('changed', {
+            key: null,
+            value: null,
+            type: null,
+        });
+    },
+
+    /**
+     * Value getter
+     *
+     * @return {Boolean}
+     */
+    get value() {
+        return null;
+    },
+
+    /**
+     * Value setter
+     *
+     * @param  {Boolean} value
+     * @return {Void}
+     */
+    set value(value) {
+        // pass
     },
 
     /* --- */

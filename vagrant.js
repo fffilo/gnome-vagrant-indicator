@@ -672,8 +672,31 @@ var Emulator = new Lang.Class({
             this._exec(id, 'destroy --force', action);
     },
 
-    // @todo:
-    // vagrant global-status --prune
+    /**
+     * Open terminal emulator and execute
+     * vagrant global-status {--prune}
+     * 
+     * @param  {Boolean} prune (optional)
+     * @return {Void}
+     */
+    globalStatus: function(prune) {
+        let cwd = GLib.getenv('HOME');
+        let exe = 'vagrant global-status' + (prune ? ' --prune' : '');
+
+        this.terminal.popup(cwd, exe);
+    },
+
+    /**
+     * Execute vagrant global-status {--prune}
+     * in the background
+     * 
+     * @param  {Boolean}  prune    (optional)
+     * @param  {Function} callback (optional)
+     * @return {Void}
+     */
+    globalStatusAsync: function(prune, callback) {
+        // @todo
+    },
 
     /* --- */
 

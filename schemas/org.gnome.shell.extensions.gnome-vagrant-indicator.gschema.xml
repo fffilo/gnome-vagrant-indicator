@@ -16,6 +16,11 @@
             <summary>Post terminal action</summary>
             <description>Action after `vagrant` command execution</description>
         </key>
+        <key name="auto-global-status-prune" type="b">
+            <default>false</default>
+            <summary>Refresh machines status at startup</summary>
+            <description>Refresh machines status at startup</description>
+        </key>
         <key name="display-system-none" type="b">
             <default>false</default>
             <summary>Disabled</summary>
