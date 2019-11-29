@@ -681,7 +681,10 @@ var Emulator = new Lang.Class({
      */
     globalStatus: function(prune) {
         let cwd = GLib.getenv('HOME');
-        let exe = 'vagrant global-status' + (prune ? ' --prune' : '');
+        let exe = ''
+            + this.command
+            + ' global-status'
+            + (prune ? ' --prune' : '');
 
         this.terminal.popup(cwd, exe);
     },
@@ -695,7 +698,10 @@ var Emulator = new Lang.Class({
      * @return {Void}
      */
     globalStatusAsync: function(prune, callback) {
-        let exe = 'vagrant global-status' + (prune ? ' --prune' : '');
+        let exe = ''
+            + this.command
+            + ' global-status'
+            + (prune ? ' --prune' : '');
 
         try {
             let subprocess = new Gio.Subprocess({
