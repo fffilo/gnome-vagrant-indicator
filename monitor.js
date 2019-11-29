@@ -15,6 +15,7 @@ const Vagrant = Me.imports.vagrant;
 const Settings = Me.imports.settings;
 
 const PROPERTIES = [
+    'autoGlobalStatusPrune',
     'order',
     'label',
     'notifications',
@@ -263,6 +264,9 @@ var Config = new Lang.Class({
             key = key.replace(/\-([a-z])/g, function(match, group) {
                 return group.toUpperCase();
             });
+
+        if (key === 'autoGlobalStatusPrune')
+            return null;
 
         if (!machine)
             return this._config;

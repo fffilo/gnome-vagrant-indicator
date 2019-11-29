@@ -324,13 +324,13 @@ const Widget = new GObject.Class({
      */
     _handleGlobalStatusPrune: function(widget, event) {
         let vagrant = new Vagrant.Emulator();
-        vagrant.globalStatus();
+        vagrant.globalStatus(true);
 
         // this can be heavy task, so let's disable
         // widget for a moment to prevent multiple
         // button clicks
         widget.enabled = false;
-        Mainloop.timeout_add(1000, Lang.bind(this, function() {
+        Mainloop.timeout_add(5000, Lang.bind(this, function() {
             widget.enabled = true;
 
             // stop repeating

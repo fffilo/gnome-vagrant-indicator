@@ -43,6 +43,9 @@ var Base = new Lang.Class({
         this._vagrant = new Vagrant.Emulator();
         this._monitor = new Monitor.Monitor(this.vagrant.monitor);
 
+        if (this.monitor.getValue(null, "autoGlobalStatusPrune"))
+            this.vagrant.globalStatusAsync(true);
+
         this.vagrant.connect('error', Lang.bind(this, this._handleVagrantError));
         this.monitor.connect('state', Lang.bind(this, this._handleMonitorState));
         this.monitor.connect('add', Lang.bind(this, this._handleMonitorAdd));
@@ -145,7 +148,7 @@ var Base = new Lang.Class({
             let path = this.monitor.getMachineDetail(id, 'vagrantfile_path');
             let state = this.monitor.getMachineDetail(id, 'state');
             let title = this.monitor.getValue(id, 'label');
-            let shorten = !this.monitor.getValue(id, 'machine-full-path');
+            let shorten = !this.monitor.getValue(id, 'machineFullPath');
             let displayVagrant = this._getDisplayVagrant(id);
             let displaySystem = this._getDisplaySystem(id);
 
@@ -242,7 +245,7 @@ var Base = new Lang.Class({
         let path = event.path;
         let state = event.state;
         let title = this.monitor.getValue(id, 'label');
-        let shorten = !this.monitor.getValue(id, 'machine-full-path');
+        let shorten = !this.monitor.getValue(id, 'machineFullPath');
         let displayVagrant = this._getDisplayVagrant(id);
         let displaySystem = this._getDisplaySystem(id);
         let index = Object.keys(this.monitor.getMachineList()).indexOf(id);
@@ -371,7 +374,7 @@ var Base = new Lang.Class({
         try {
             let id = event.id;
             let command = event.command;
-            let action = this.monitor.getValue(id, 'post-terminal-action');
+            let action = this.monitor.getValue(id, 'postTerminalAction');
             action = Enum.getValue(Vagrant.PostTerminalAction, action);
 
             this.vagrant.execute(id, command, action);
