@@ -39,6 +39,7 @@ const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Enum = Me.imports.enum;
 const Terminal = Me.imports.terminal;
+const Dict =  Me.imports.dict;
 
 // global properties
 const VAGRANT_EXE = 'vagrant';
@@ -202,7 +203,7 @@ var Index = new Lang.Class({
     parse: function() {
         try {
             let [ok, content] = GLib.file_get_contents(this.path);
-            let data = JSON.parse(content);
+            let data = Dict.jsonDecode(content);
 
             if (typeof data !== 'object') throw '';
             if (typeof data.machines !== 'object') throw '';
@@ -338,17 +339,6 @@ var Monitor = new Lang.Class({
     },
 
     /**
-     * Deep clone object
-     *
-     * @param  {Object} src
-     * @return {Object}
-     */
-    _clone: function(src) {
-        // @todo
-        return JSON.parse(JSON.stringify(src));
-    },
-
-    /**
      * Vagrant machine index file content
      * change event handler
      *
@@ -374,15 +364,14 @@ var Monitor = new Lang.Class({
         this._interval = null;
 
         let emit = [];
-        let _old = this._clone(this.index);
+        let _old = Dict.deepClone(this.index);
         let _new = null;
         this.refresh();
-        _new = this._clone(this.index);
+        _new = Dict.deepClone(this.index);
 
         // check actual changes
-        // @todo - sort keys
-        if (JSON.stringify(_old) === JSON.stringify(_new))
-            return false;
+        if (Dict.isEqual(_old, _new))
+            return;
 
         // check if machine is missing
         for (let id in _old.machines) {

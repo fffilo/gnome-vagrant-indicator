@@ -12,6 +12,7 @@ const GLib = imports.gi.GLib;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Vagrant = Me.imports.vagrant;
+const Dict = Me.imports.dict;
 const Settings = Me.imports.settings;
 
 const PROPERTIES = [
@@ -275,17 +276,6 @@ var Config = new Lang.Class({
     },
 
     /**
-     * Compare two objects
-     *
-     * @param  {Object}  src
-     * @param  {Object}  dst
-     * @return {Boolean}
-     */
-    _compare: function(src, dst) {
-        return JSON.stringify(src, Object.keys(src).sort()) === JSON.stringify(dst, Object.keys(dst).sort());
-    },
-
-    /**
      * Read json file
      *
      * @return {Object}
@@ -298,7 +288,7 @@ var Config = new Lang.Class({
             if (!ok)
                 throw '';
 
-            result = JSON.parse(contents);
+            result = Dict.jsonDecode(contents);
             if (!result || typeof result !== 'object' || result === null || result instanceof Array)
                 throw '';
         }
@@ -335,7 +325,7 @@ var Config = new Lang.Class({
 
         // check if config changed
         for (let machine in this._config) {
-            if (machine in config && !this._compare(this._config[machine], config[machine]))
+            if (machine in config && !Dict.isEqual(this._config[machine], config[machine]))
                 result = (result || []).concat([machine]);
         }
 
@@ -689,7 +679,7 @@ var Monitor = new Lang.Class({
             return;
 
         // get and update this._data
-        let data = JSON.parse(JSON.stringify(this._data));
+        let data = Dict.deepClone(this._data);
         for (let i = 0; i < changes.length; i++) {
             let machine = changes[i];
             this._updateMachine(machine);
@@ -735,7 +725,7 @@ var Monitor = new Lang.Class({
         });
 
         let machines = this.getMachineList() || [];
-        let data = JSON.parse(JSON.stringify(this._data));
+        let data = Dict.deepClone(this._data);
         for (let i = 0; i < machines.length; i++) {
             let machine = machines[i];
             this._updateMachineKey(machine, key);
