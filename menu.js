@@ -23,8 +23,8 @@ const SubMenu = PopupMenu.PopupSubMenuMenuItem;
 const Section = PopupMenu.PopupMenuSection;
 
 // Display enums
-const DisplayVagrant = Vagrant.CommandVagrant;
-const DisplaySystem = Vagrant.CommandSystem;
+var DisplayVagrant = Vagrant.CommandVagrant;
+var DisplaySystem = Vagrant.CommandSystem;
 
 /**
  * Menu.Machine constructor
