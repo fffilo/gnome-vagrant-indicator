@@ -678,17 +678,27 @@ var Monitor = new Lang.Class({
      * @return {Object}
      */
     _handleConfigChange: function(widget, event) {
+        // get machine list
+        let machines = this.getMachineList() || [];
+        let changes = event.id.filter(function(item) {
+            return machines.indexOf(item) !== -1;
+        });
+
+        // no changes on existing machines
+        if (!changes.length)
+            return;
+
         // get and update this._data
         let data = JSON.parse(JSON.stringify(this._data));
-        for (let i = 0; i < event.id.length; i++) {
-            let machine = event.id[i];
+        for (let i = 0; i < changes.length; i++) {
+            let machine = changes[i];
             this._updateMachine(machine);
         }
 
         // compare and prepare emit object
         let emit = {};
-        for (let i = 0; i < event.id.length; i++) {
-            let machine = event.id[i];
+        for (let i = 0; i < changes.length; i++) {
+            let machine = changes[i];
             emit[machine] = [];
 
             if (!(machine in data))
