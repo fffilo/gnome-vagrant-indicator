@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+### Changed
+- Monitor optimization
+- Minor bug fixes
+
 ## Version 6 - 2019-11-25
 ### Added
 - Machine destroyed notification

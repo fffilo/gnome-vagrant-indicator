@@ -292,9 +292,9 @@ const Widget = new GObject.Class({
      * @return {Void}
      */
     _handleWidget: function(widget, event) {
-        let old_value = this.settings['get_' + event.type](event.key);
+        let oldValue = this.settings['get_' + event.type](event.key);
 
-        if (old_value != event.value)
+        if (oldValue != event.value)
             this.settings['set_' + event.type](event.key, event.value);
     },
 
@@ -398,6 +398,11 @@ const Input = new GObject.Class({
     Name: 'Prefs.Input',
     GTypeName: 'GnomeVagrantIndicatorPrefsInput',
     Extends: Box,
+    Signals: {
+        changed: {
+            param_types: [ GObject.TYPE_OBJECT ],
+        },
+    },
 
     /**
      * Constructor
@@ -427,11 +432,30 @@ const Input = new GObject.Class({
      * @return {Void}
      */
     _handleChange: function(widget) {
-        this.emit('changed', {
-            key: this._key,
-            value: widget.value,
-            type: typeof widget.value,
-        });
+        let emit = new GObject.Object();
+        emit.key = this.key;
+        emit.value = this.value;
+        emit.type = this.type;
+
+        this.emit('changed', emit);
+    },
+
+    /**
+     * Type getter
+     *
+     * @return {String}
+     */
+    get type() {
+        return 'variant';
+    },
+
+    /**
+     * Key getter
+     *
+     * @return {String}
+     */
+    get key() {
+        return this._key;
     },
 
     /**
@@ -456,8 +480,6 @@ const Input = new GObject.Class({
     /* --- */
 
 });
-
-Signals.addSignalMethods(Input.prototype);
 
 /**
  * InputEntry constructor
@@ -488,18 +510,12 @@ const InputEntry = new GObject.Class({
     },
 
     /**
-     * Input change event handler
+     * Type getter
      *
-     * @param  {Object} actor
-     * @param  {Object} event
-     * @return {Void}
+     * @return {String}
      */
-    _handleChange: function(actor, event) {
-        this.emit('changed', {
-            key: this._key,
-            value: this.value,
-            type: 'string',
-        });
+    get type() {
+        return 'string';
     },
 
     /**
@@ -554,17 +570,12 @@ const InputSwitch = new GObject.Class({
     },
 
     /**
-     * Input change event handler
+     * Type getter
      *
-     * @param  {Object} widget
-     * @return {Void}
+     * @return {String}
      */
-    _handleChange: function(widget) {
-        this.emit('changed', {
-            key: this._key,
-            value: widget.active,
-            type: 'boolean',
-        });
+    get type() {
+        return 'boolean';
     },
 
     /**
@@ -630,17 +641,12 @@ const InputComboBox = new GObject.Class({
     },
 
     /**
-     * Widget change event handler
+     * Type getter
      *
-     * @param  {Object} widget
-     * @return {Void}
+     * @return {String}
      */
-    _handleChange: function(widget) {
-        this.emit('changed', {
-            key: this._key,
-            value: this.value,
-            type: 'string'
-        });
+    get type() {
+        return 'string';
     },
 
     /**
