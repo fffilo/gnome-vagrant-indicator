@@ -661,8 +661,78 @@ var Emulator = new Lang.Class({
             this._exec(id, 'destroy --force', action);
     },
 
-    // @todo:
-    // vagrant global-status --prune
+    /**
+     * Open terminal emulator and execute
+     * vagrant global-status {--prune}
+     * 
+     * @param  {Boolean} prune (optional)
+     * @return {Void}
+     */
+    globalStatus: function(prune) {
+        let cwd = GLib.getenv('HOME');
+        let exe = ''
+            + this.command
+            + ' global-status'
+            + (prune ? ' --prune' : '');
+
+        this.terminal.popup(cwd, exe);
+    },
+
+    /**
+     * Execute vagrant global-status {--prune}
+     * in the background
+     * 
+     * @param  {Boolean}  prune    (optional)
+     * @param  {Function} callback (optional)
+     * @return {Void}
+     */
+    globalStatusAsync: function(prune, callback) {
+        let exe = ''
+            + this.command
+            + ' global-status'
+            + (prune ? ' --prune' : '');
+
+        try {
+            let subprocess = new Gio.Subprocess({
+                argv: exe.split(' '),
+                flags: Gio.SubprocessFlags.STDOUT_PIPE | Gio.SubprocessFlags.STDERR_PIPE,
+            });
+
+            subprocess.init(null);
+            subprocess.communicate_utf8_async(null, null, Lang.bind(this, this._handleGlobalStatus, exe, callback));
+        }
+        catch(e) {
+            if (typeof callback === 'function')
+                callback.call(this, {
+                    status: -1,
+                    stdin: exe,
+                    stdout: '',
+                    stderr: e.toString(),
+                });
+        }
+    },
+
+    /**
+     * Async shell exec event handler
+     *
+     * @param  {Gio.Subprocess} source
+     * @param  {Gio.Task}       resource
+     * @param  {String}         stdin
+     * @param  {Function}       callback (optional)
+     * @return {Void}
+     */
+    _handleGlobalStatus: function(source, resource, stdin, callback) {
+        let status = source.get_exit_status();
+        let [, stdout, stderr] = source.communicate_utf8_finish(resource);
+
+        if (typeof callback === 'function')
+            callback.call(this, {
+                status: status,
+                stdin: stdin,
+                stdout: stdout,
+                stderr: stderr,
+            });
+    },
 
     /* --- */
 
