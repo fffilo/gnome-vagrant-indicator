@@ -32,12 +32,17 @@
 /**
  * Get real element type
  *
+ * We're using toString.call() to get real type
+ * of variable. In mozilla documentation stands
+ * that "null and undefined will be replaced
+ * with the global object, and primitive values
+ * will be boxed", so let's eliminate null and
+ * undefined before we call toString method...
+ *
  * @param  {Mixed}  src
  * @return {String}
  */
 var getType = function(src) {
-    // null and undefined results as GjsGlobal,
-    // so lets elimitate them
     if (src === null)
         return 'Null'
     else if (src === undefined)
@@ -49,6 +54,7 @@ var getType = function(src) {
     if (match)
         return match[2];
 
+    // typeof fallback
     let result = typeof src;
     result = result.charAt(0).toUpperCase() + result.slice(1);
 
@@ -172,10 +178,8 @@ var deepClone = function(src) {
     }
     else if (['String', 'Number', 'Boolean', 'Null'].indexOf(type) !== -1)
         result = src;
-    else {
-        global.log("vagrant", JSON.stringify(src), type);
+    else
         throw 'Can not deep clone object (only Object/Array/String/Number/Boolean/Null types supported)';
-    }
 
     return result;
 }
