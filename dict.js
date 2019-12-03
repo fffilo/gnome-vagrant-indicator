@@ -82,7 +82,7 @@ var isEmptyObject = function(src) {
  * @return {Boolean}
  */
 var isPlainObject = function(src) {
-    return getType(src) === 'Object';
+    return src && '__proto__' in src && src.__proto__ === Object.prototype;
 }
 
 /**
@@ -92,7 +92,7 @@ var isPlainObject = function(src) {
  * @return {Boolean}
  */
 var isArray = function(src) {
-    return getType(src) === 'Array';
+    return Array.isArray(src);
 }
 
 /**
