@@ -513,15 +513,15 @@ var Emulator = new Lang.Class({
 
         let index = this.monitor.index;
         let cwd = index.machines[id].vagrantfile_path;
+        let name = 'name' in index.machines[id] ? index.machines[id].name : '';
         let exe = '';
 
-        if (cmd instanceof Array) {
+        if (cmd instanceof Array)
             for (let i in cmd) {
-                exe += '%s %s;'.format(this.command, cmd[i]);
+                exe += '%s %s %s;'.format(this.command, cmd[i], name);
             }
-        }
         else if (typeof cmd === 'string')
-            exe += '%s %s;'.format(this.command, cmd);
+            exe += '%s %s %s;'.format(this.command, cmd, name);
         else
             exe += this.command + ';';
 
@@ -664,7 +664,7 @@ var Emulator = new Lang.Class({
     /**
      * Open terminal emulator and execute
      * vagrant global-status {--prune}
-     * 
+     *
      * @param  {Boolean} prune (optional)
      * @return {Void}
      */
@@ -681,7 +681,7 @@ var Emulator = new Lang.Class({
     /**
      * Execute vagrant global-status {--prune}
      * in the background
-     * 
+     *
      * @param  {Boolean}  prune    (optional)
      * @param  {Function} callback (optional)
      * @return {Void}

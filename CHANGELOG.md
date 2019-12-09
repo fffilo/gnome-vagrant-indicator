@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 8 - 2019-12-09
+### Added
+- Vagrant multi-machine environment support
+
 ## Version 7 - 2019-12-03
 ### Added
 - Preferences: refresh machine status

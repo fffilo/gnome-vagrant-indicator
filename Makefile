@@ -29,5 +29,3 @@ clean:
 
 uninstall:
 	rm -rf $(INSTALL_PATH)/$(INSTALL_NAME)
-
-
