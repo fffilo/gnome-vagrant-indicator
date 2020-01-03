@@ -342,7 +342,7 @@ var Machine = class Machine extends PopupMenuSection {
      * Error handler
      *
      * @param  {Menu.Path} widget
-     * @param  {Object}    event
+     * @param  {GObject.Object}    event
      * @return {Void}
      */
     _handleError(widget, event) {
@@ -354,7 +354,7 @@ var Machine = class Machine extends PopupMenuSection {
      * execute event handler
      *
      * @param  {Menu.Path} widget
-     * @param  {GObject}   object
+     * @param  {GObject.Object}   object
      * @return {Void}
      */
     _handleSystem(widget, object) {
@@ -366,7 +366,7 @@ var Machine = class Machine extends PopupMenuSection {
      * execute event handler
      *
      * @param  {Menu.Path} widget
-     * @param  {GObject}   object
+     * @param  {GObject.Object}   object
      * @return {Void}
      */
     _handleVagrant(widget, object) {
