@@ -353,26 +353,24 @@ var Machine = class Machine extends PopupMenuSection {
      * Menu subitem (system command)
      * execute event handler
      *
-     * @param  {Menu.Path}    widget
-     * @param  {GLib.Variant} object
+     * @param  {Menu.Path} widget
+     * @param  {GObject}   object
      * @return {Void}
      */
     _handleSystem(widget, object) {
-        let unpack = object.recursiveUnpack();
-        this.emit('system', unpack);
+        this.emit('system', object);
     }
 
     /**
      * Menu subitem (vagrant command)
      * execute event handler
      *
-     * @param  {Menu.Path}    widget
-     * @param  {GLib.Variant} object
+     * @param  {Menu.Path} widget
+     * @param  {GObject}   object
      * @return {Void}
      */
     _handleVagrant(widget, object) {
-        let unpack = object.recursiveUnpack();
-        this.emit('vagrant', unpack);
+        this.emit('vagrant', object);
     }
 
     /* --- */
@@ -387,8 +385,8 @@ var Machine = class Machine extends PopupMenuSection {
  */
 var Path = GObject.registerClass({
     Signals: {
-        'system': { param_types: [ GObject.TYPE_VARIANT ] },
-        'vagrant': { param_types: [ GObject.TYPE_VARIANT ] },
+        'system': { param_types: [ GObject.TYPE_OBJECT ] },
+        'vagrant': { param_types: [ GObject.TYPE_OBJECT ] },
         'error': { param_types: [ GObject.TYPE_NONE ]},
     }
 }, class Path extends PopupSubMenuMenuItem {
@@ -886,11 +884,10 @@ var Path = GObject.registerClass({
      * @return {Void}
      */
     _handleActivate(widget, event) {
-        let data = new GLib.Variant('a{sv}', {
-            'id': new GLib.Variant('s', this.id),
-            'command': new GLib.Variant('i', DisplaySystem.TERMINAL),
-        });
-        this.emit('system', data);
+        let emit = new GObject.Object();
+        emit.id = this.id;
+        emit.command = DisplaySystem.TERMINAL;
+        this.emit('system', emit);
     }
 
     /**
@@ -898,15 +895,13 @@ var Path = GObject.registerClass({
      * execute event handler
      *
      * @param  {Menu.Command} widget
-     * @param  {Object}       event
      * @return {Void}
      */
     _handleSystem(widget) {
-        let data = new GLib.Variant('a{sv}', {
-            'id': new GLib.Variant('s', this.id),
-            'command': new GLib.Variant('i', widget.command),
-        });
-        this.emit('system', data);
+        let emit = new GObject.Object();
+        emit.id = this.id;
+        emit.command = widget.command;
+        this.emit('system', emit);
     }
 
     /**
@@ -918,11 +913,10 @@ var Path = GObject.registerClass({
      * @return {Void}
      */
     _handleVagrant(widget, event) {
-        let data = new GLib.Variant('a{sv}', {
-            'id': new GLib.Variant('s', this.id),
-            'command': new GLib.Variant('i', widget.command),
-        });
-        this.emit('vagrant', data);
+        let emit = new GObject.Object();
+        emit.id = this.id;
+        emit.command = widget.command;
+        this.emit('vagrant', emit);
     }
 
     /* --- */
