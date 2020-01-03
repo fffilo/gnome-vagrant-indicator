@@ -4,7 +4,6 @@
 'use strict';
 
 // import modules
-const Lang = imports.lang;
 const { St, Gio, GObject } = imports.gi;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
@@ -31,7 +30,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     /**
      * Constructor
      *
-     * @return {void}
+     * @return {Void}
      */
     _init() {
         super._init(null, Me.metadata.name);
@@ -43,11 +42,11 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
         if (this.monitor.getValue(null, "autoGlobalStatusPrune"))
             this.vagrant.globalStatusAsync(true);
 
-        this.vagrant.connect('error', Lang.bind(this, this._handleVagrantError));
-        this.monitor.connect('state', Lang.bind(this, this._handleMonitorState));
-        this.monitor.connect('add', Lang.bind(this, this._handleMonitorAdd));
-        this.monitor.connect('remove', Lang.bind(this, this._handleMonitorRemove));
-        this.monitor.connect('change', Lang.bind(this, this._handleMonitorChange));
+        this.vagrant.connect('error', this._handleVagrantError.bind(this));
+        this.monitor.connect('state', this._handleMonitorState.bind(this));
+        this.monitor.connect('add', this._handleMonitorAdd.bind(this));
+        this.monitor.connect('remove', this._handleMonitorRemove.bind(this));
+        this.monitor.connect('change', this._handleMonitorChange.bind(this));
         this.monitor.start();
 
         this._render();
@@ -58,7 +57,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     /**
      * Destructor
      *
-     * @return {void}
+     * @return {Void}
      */
     destroy() {
         if (this.monitor)
@@ -105,7 +104,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     /**
      * Render menu
      *
-     * @return {void}
+     * @return {Void}
      */
     _render() {
         this.add_style_class_name('panel-status-button');
@@ -135,7 +134,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     /**
      * Refresh machine menu
      *
-     * @return {void}
+     * @return {Void}
      */
     refresh() {
         this.machine.clear();
@@ -207,7 +206,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Monitor.Monitor} widget
      * @param  {Object}          event
-     * @return {void}
+     * @return {Void}
      */
     _handleMonitorChange(widget, event) {
         for (let id in event) {
@@ -236,7 +235,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Monitor.Monitor} widget
      * @param  {Object}          event
-     * @return {void}
+     * @return {Void}
      */
     _handleMonitorAdd(widget, event) {
         let id = event.id;
@@ -260,7 +259,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Monitor.Monitor} widget
      * @param  {Object}          event
-     * @return {void}
+     * @return {Void}
      */
     _handleMonitorRemove(widget, event) {
         let id = event.id;
@@ -278,7 +277,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Monitor.Monitor} widget
      * @param  {Object}          event
-     * @return {void}
+     * @return {Void}
      */
     _handleMonitorState(widget, event) {
         let id = event.id;
@@ -296,7 +295,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      * Default error event handler
      *
      * @param  {String} error
-     * @return {void}
+     * @return {Void}
      */
     _notifyError(error) {
         let notify = this.monitor.getValue(null, 'notifications');
@@ -343,7 +342,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Menu.Machine} widget
      * @param  {Object}       event
-     * @return {void}
+     * @return {Void}
      */
     _handleMachineSystem(widget, event) {
         try {
@@ -366,7 +365,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {Menu.Machine} widget
      * @param  {Object}       event
-     * @return {void}
+     * @return {Void}
      */
     _handleMachineVagrant(widget, event) {
         try {
@@ -390,7 +389,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      *
      * @param  {PopupMenuItem} widget
      * @param  {Clutter.Event} event
-     * @return {void}
+     * @return {Void}
      */
     _handlePreferences(widget, event) {
         Util.spawn(['gnome-shell-extension-prefs', Me.metadata.uuid]);

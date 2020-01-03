@@ -497,7 +497,7 @@ var Emulator = class Emulator {
      * @param  {String} id     machine id
      * @param  {String} cmd    vagrant command (up|halt...)
      * @param  {Number} action (optional) PostTerminalAction
-     * @return {void}
+     * @return {Void}
      */
     _exec(id, cmd, action) {
         this._validate(id);

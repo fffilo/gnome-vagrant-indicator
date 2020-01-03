@@ -4,8 +4,7 @@
 'use strict';
 
 // import modules
-const Mainloop = imports.mainloop;
-const {Gio, GLib, GObject, Clutter} = imports.gi;
+const {GLib, GObject, Clutter} = imports.gi;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -85,7 +84,7 @@ var Machine = class Machine extends PopupMenuSection {
         this.empty = null;
 
         let item = new Path(id, path, state);
-        item.connect('error', this._handleError.bind(this));
+        //item.connect('error', this._handleError.bind(this));
         item.connect('system', this._handleSystem.bind(this));
         item.connect('vagrant', this._handleVagrant.bind(this));
 
@@ -354,30 +353,26 @@ var Machine = class Machine extends PopupMenuSection {
      * Menu subitem (system command)
      * execute event handler
      *
-     * @param  {Menu.Path} widget
-     * @param  {Object}    event
+     * @param  {Menu.Path}    widget
+     * @param  {GLib.Variant} object
      * @return {Void}
      */
-    _handleSystem(widget, event) {
-        this.emit('system', {
-            id: event.id,
-            command: event.command,
-        });
+    _handleSystem(widget, object) {
+        let unpack = object.recursiveUnpack();
+        this.emit('system', unpack);
     }
 
     /**
      * Menu subitem (vagrant command)
      * execute event handler
      *
-     * @param  {Menu.Path} widget
-     * @param  {Object}    event
+     * @param  {Menu.Path}    widget
+     * @param  {GLib.Variant} object
      * @return {Void}
      */
-    _handleVagrant(widget, event) {
-        this.emit('vagrant', {
-            id: event.id,
-            command: event.command,
-        });
+    _handleVagrant(widget, object) {
+        let unpack = object.recursiveUnpack();
+        this.emit('vagrant', unpack);
     }
 
     /* --- */
@@ -394,6 +389,7 @@ var Path = GObject.registerClass({
     Signals: {
         'system': { param_types: [ GObject.TYPE_VARIANT ] },
         'vagrant': { param_types: [ GObject.TYPE_VARIANT ] },
+        'error': { param_types: [ GObject.TYPE_NONE ]},
     }
 }, class Path extends PopupSubMenuMenuItem {
     /**
@@ -516,7 +512,7 @@ var Path = GObject.registerClass({
      * @return {Void}
      */
     _bind() {
-        this.connect('activate', this._handleActivate.bind());
+        this.connect('activate', this._handleActivate.bind(this));
     }
 
     /**
@@ -536,7 +532,7 @@ var Path = GObject.registerClass({
     /**
      * Property shorten getter
      *
-     * @return {boolean}
+     * @return {Boolean}
      */
     get shorten() {
         return this._shorten;
@@ -546,7 +542,7 @@ var Path = GObject.registerClass({
      * Property shorten setter
      *
      * @param  {Boolean} value
-     * @return {void}
+     * @return {Void}
      */
     set shorten(value) {
         this._shorten = !!value;
@@ -585,7 +581,7 @@ var Path = GObject.registerClass({
      * Property state setter
      *
      * @param  {String} value
-     * @return {void}
+     * @return {Void}
      */
     set state(value) {
         this.actor.remove_style_class_name(this.state);
@@ -948,7 +944,7 @@ var Command = GObject.registerClass({
      * Constructor
      *
      * @param  {String} title
-     * @return {void}
+     * @return {Void}
      */
     _init(title) {
         super._init(title);
@@ -961,7 +957,7 @@ var Command = GObject.registerClass({
     /**
      * Initialize object properties
      *
-     * @return {void}
+     * @return {Void}
      */
     _def() {
         this._method = 'unknown';
@@ -970,7 +966,7 @@ var Command = GObject.registerClass({
     /**
      * Create user interface
      *
-     * @return {void}
+     * @return {Void}
      */
     _ui() {
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-command');
@@ -980,7 +976,7 @@ var Command = GObject.registerClass({
     /**
      * Bind events
      *
-     * @return {void}
+     * @return {Void}
      */
     _bind() {
         this.connect('activate', this._handleActivate.bind(this));
@@ -1010,7 +1006,7 @@ var Command = GObject.registerClass({
      * Property method getter
      *
      * @param  {String} value
-     * @return {void}
+     * @return {Void}
      */
     set method(value) {
         this._method = value;
@@ -1031,7 +1027,7 @@ var Header = GObject.registerClass(class Header extends PopupMenuItem {
      * Constructor
      *
      * @param  {String} title
-     * @return {void}
+     * @return {Void}
      */
     _init(title) {
         super._init(title);

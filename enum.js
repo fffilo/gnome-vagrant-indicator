@@ -29,9 +29,6 @@
 // strict mode
 'use strict';
 
-// import modules
-const Lang = imports.lang;
-
 /**
  * Enum.Exception constructor
  *
@@ -43,7 +40,7 @@ var Exception = class Exception {
     /**
      * Constructor
      *
-     * @return {void}
+     * @return {Void}
      */
     constructor(message, title) {
         this._message = message;
@@ -97,7 +94,7 @@ var Member = class Member {
      *
      * @param  {String} key
      * @param  {Number} value
-     * @return {void}
+     * @return {Void}
      */
     constructor(key, value) {
         if (typeof key !== 'string')
@@ -194,7 +191,7 @@ var Enum = class Enum {
      * Constructor
      *
      * @param  {Mixed} params
-     * @return {void}
+     * @return {Void}
      */
     constructor(params) {
         this._members = [];
@@ -505,7 +502,7 @@ var sum = function(self) {
  *
  * @param  {Enum.Enum} self     Enum.Enum
  * @param  {Function}  callback method
- * @return {void}
+ * @return {Void}
  */
 var forEach = function(self, callback) {
     if (!isEnum(self))
