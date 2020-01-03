@@ -328,7 +328,7 @@ var Widget = GObject.registerClass(class Widget extends Gtk.Box {
 
             // stop repeating
             return false;
-        }).bind(this, null));
+        }).bind(this), null);
     }
 
     /**
