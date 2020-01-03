@@ -36,7 +36,7 @@ const Lang = imports.lang;
  * Enum.Exception constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Exception = class Exception {
 
@@ -88,7 +88,7 @@ var Exception = class Exception {
  * Enum.Member constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Member = class Member {
 
@@ -186,7 +186,7 @@ var Member = class Member {
  *     1
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Enum = class Enum {
 
@@ -251,14 +251,13 @@ var isMember = function(item) {
 /**
  * Add member to enumeration.
  *
- *
  * Info: instead of self/member you can pass
  * self/key/value arguments for same functionality.
  *
- * @param  {Object}  self   Enum
- * @param  {Mixed}   key    Member or member key (string)
- * @param  {Number}  value  (optional) member value (ignored if key is member)
- * @return {Boolean}        success (always true)
+ * @param  {Enum.Enum} eelf   Enum.Enum
+ * @param  {Mixed}     key    Enum.Member or member key (string)
+ * @param  {Number}    value  (optional) member value (ignored if key is member)
+ * @return {Boolean}          success (always true)
  */
 var addMember = function(self, key, value) {
     if (!isEnum(self))
@@ -300,9 +299,9 @@ var addMember = function(self, key, value) {
 /**
  * Remove member from enumeration
  *
- * @param  {Object}  self   Enum
- * @param  {Mixed}   member Member, member key (string) or member value (number)
- * @return {Boolean}        success
+ * @param  {Enum.Enum} self   Enum.Enum
+ * @param  {Mixed}     member Enum-Member, member key (string) or member value (number)
+ * @return {Boolean}          success
  */
 var removeMember = function(self, member) {
     if (!isEnum(self))
@@ -321,9 +320,9 @@ var removeMember = function(self, member) {
 /**
  * Get enumeration member(s) key(s)
  *
- * @param  {Object} self   Enum
- * @param  {Mixed}  member (optional) Member or member value (number)
- * @return {Mixed}         member key string, null on fail or array of keys if member is not defined
+ * @param  {Enum.Enum} self   Enum
+ * @param  {Mixed}     member (optional) Enum.Member or member value (number)
+ * @return {Mixed}            member key string, null on fail or array of keys if member is not defined
  */
 var getKey = function(self, member) {
     if (!isEnum(self))
@@ -358,9 +357,9 @@ var getKey = function(self, member) {
 /**
  * Get enumeration member(s) value(s)
  *
- * @param  {Object} self   Enum
- * @param  {Mixed}  member (optional) Member or member key (string)
- * @return {Mixed}         member value number, null on fail or array of values if member is not defined
+ * @param  {Enum.Enum} self   Enum.Enum
+ * @param  {Mixed}     member (optional) Enum.Member or member key (string)
+ * @return {Mixed}            member value number, null on fail or array of values if member is not defined
  */
 var getValue = function(self, member) {
     if (!isEnum(self))
@@ -395,9 +394,9 @@ var getValue = function(self, member) {
 /**
  * Get enumeration member(s) index
  *
- * @param  {Object} self   Enum
- * @param  {Mixed}  member Member, member key (string) or member value (number)
- * @return {Number}        member index
+ * @param  {Enum.Enum} self   Enum.Enum
+ * @param  {Mixed}     member Enum.Member, member key (string) or member value (number)
+ * @return {Number}           member index
  */
 var getIndex = function(self, member) {
     if (!isEnum(self))
@@ -435,8 +434,8 @@ var getIndex = function(self, member) {
 /**
  * Convert enumeration members to object
  *
- * @param  {Object} self Enum
- * @return {Object}      members value/key object
+ * @param  {Enum.Enum} self Enum.Enum
+ * @return {Object}         members value/key object
  */
 var toObject = function(self) {
     if (!isEnum(self))
@@ -453,8 +452,8 @@ var toObject = function(self) {
 /**
  * Get enumeration minimal value
  *
- * @param  {Object} self Enum
- * @return {Mixed}       member min value (number) or null on no members
+ * @param  {Enum.Enum} self Enum.Enum
+ * @return {Mixed}          member min value (number) or null on no members
  */
 var min = function(self) {
     if (!isEnum(self))
@@ -466,8 +465,8 @@ var min = function(self) {
 /**
  * Get enumeration maximal value
  *
- * @param  {Object} self Enum
- * @return {Mixed}       member max value (number) or null on no members
+ * @param  {Enum.Enum} self Enum.Enum
+ * @return {Mixed}          member max value (number) or null on no members
  */
 var max = function(self) {
     if (!isEnum(self))
@@ -479,8 +478,8 @@ var max = function(self) {
 /**
  * Get enumeration sum of values
  *
- * @param  {Object} self Enum
- * @return {Mixed}       sum of member values (number) or null on no members
+ * @param  {Enum.Enum} self Enum.Enum
+ * @return {Mixed}          sum of member values (number) or null on no members
  */
 var sum = function(self) {
     if (!isEnum(self))
@@ -504,8 +503,8 @@ var sum = function(self) {
  * value as parameters. If callback result
  * is boolean true, loop will break.
  *
- * @param  {Object}   self     Enum
- * @param  {Function} callback method
+ * @param  {Enum.Enum} self     Enum.Enum
+ * @param  {Function}  callback method
  * @return {void}
  */
 var forEach = function(self, callback) {

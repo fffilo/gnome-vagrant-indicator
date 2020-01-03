@@ -1,6 +1,7 @@
 .gnome-vagrant-indicator-menu-path .popup-menu-ornament { font-size: 1.5em; }
 .gnome-vagrant-indicator-menu-path .popup-menu-ornament { color: black; }
-.gnome-vagrant-indicator-menu-path.poweroff .popup-menu-ornament { color: inherit; }
+.gnome-vagrant-indicator-menu-path.poweroff .popup-menu-ornament,
+.gnome-vagrant-indicator-menu-path.shutoff .popup-menu-ornament { color: inherit; }
 .gnome-vagrant-indicator-menu-path.preparing .popup-menu-ornament { color: yellow; }
 .gnome-vagrant-indicator-menu-path.running .popup-menu-ornament { color: lime; }
 .gnome-vagrant-indicator-menu-path.saved .popup-menu-ornament { color: orange; }

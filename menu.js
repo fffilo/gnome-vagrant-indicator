@@ -4,8 +4,9 @@
 'use strict';
 
 // import modules
+const Mainloop = imports.mainloop;
+const {Gio, GLib, GObject, Clutter} = imports.gi;
 const PopupMenu = imports.ui.popupMenu;
-const {GLib, GObject, Clutter} = imports.gi;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
 const Enum = Me.imports.enum;
@@ -27,30 +28,25 @@ var DisplaySystem = Vagrant.CommandSystem;
  * Menu.Machine constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Machine = class Machine extends PopupMenuSection {
     /**
      * Constructor
      *
-     * @return {void}
+     * @return {Void}
      */
     constructor() {
         super();
 
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-machine');
-
-        this._shorten = false;
-        this._display_vagrant = Enum.sum(DisplayVagrant);
-        this._display_system = Enum.sum(DisplaySystem);
-
         this.clear();
     }
 
     /**
      * Empty list
      *
-     * @return {void}
+     * @return {Void}
      */
     clear() {
         this.removeAll();
@@ -63,13 +59,13 @@ var Machine = class Machine extends PopupMenuSection {
     /**
      * Display error
      *
-     * @param  {String} msg
-     * @return {void}
+     * @param  {String} message
+     * @return {Void}
      */
-    error(msg) {
+    error(message) {
         this.removeAll();
 
-        this.empty = new PopupMenuItem(msg || 'ERROR');
+        this.empty = new Item(message || 'ERROR');
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
     }
@@ -77,11 +73,11 @@ var Machine = class Machine extends PopupMenuSection {
     /**
      * Add item to list
      *
-     * @param  {String} id
-     * @param  {String} path
-     * @param  {String} state
-     * @param  {Number} index (optional)
-     * @return {void}
+     * @param  {String}    id
+     * @param  {String}    path
+     * @param  {String}    state
+     * @param  {Number}    index (optional)
+     * @return {Menu.Path}
      */
     add(id, path, state, index) {
         if (this.empty)
@@ -89,26 +85,101 @@ var Machine = class Machine extends PopupMenuSection {
         this.empty = null;
 
         let item = new Path(id, path, state);
-        item.shorten = this.shorten;
-        item.setDisplayVagrant(this.getDisplayVagrant());
-        item.setDisplaySystem(this.getDisplaySystem());
-        item.connect('system', this._handle_system.bind(this));
-        item.connect('vagrant', this._handle_vagrant.bind(this));
-        this.addMenuItem(item, index);
+        item.connect('error', this._handleError.bind(this));
+        item.connect('system', this._handleSystem.bind(this));
+        item.connect('vagrant', this._handleVagrant.bind(this));
+
+        this.addMenuItem(item, index > -1 ? index : undefined);
+
+        return item;
     }
 
     /**
      * Remove item from list
      *
-     * @return {void}
+     * @return {Void}
      */
     remove(id) {
-        this._get_item(id).forEach(function(actor) {
+        this._getItem(id).forEach(function(actor) {
             actor.destroy();
         });
 
-        if (!this._get_item().length)
+        if (!this._getItem().length)
             this.clear();
+    }
+
+    /**
+     * Get item index
+     *
+     * @param  {String} id
+     * @return {Number}
+     */
+    getItemIndex(id) {
+        let result = -1;
+        this.box.get_children()
+            .map(function(actor) {
+                return actor._delegate;
+            })
+            .filter(function(actor) {
+                return actor instanceof Path;
+            })
+            .forEach(function(actor, index) {
+                if (id ? actor.id === id : true)
+                    result = index;
+            });
+
+        return result;
+    }
+
+    /**
+     * Set item index
+     *
+     * @param  {String} id
+     * @param  {Number} index
+     * @return {Void}
+     */
+    setItemIndex(id, index) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return;
+        item = item[0];
+
+        if (index < 0 || index >= this._getItem().length || this.getItemIndex(id) === index)
+            return;
+
+        // this.moveMenuItem not working
+        // (it moves menuItem, but not it's subMenu)
+        //this.moveMenuItem(item, index);
+
+        // ...let's remove old and add new item
+        let path = item.path;
+        let state = item.state;
+        let title = item.title;
+        let shorten = item.shorten;
+        let displayVagrant = item.displayVagrant;
+        let displaySystem = item.displaySystem;
+
+        this.remove(id);
+        item = this.add(id, path, state, index);
+        item.title = title;
+        item.shorten = shorten;
+        item.displayVagrant = displayVagrant;
+        item.displaySystem = displaySystem;
+    }
+
+    /**
+     * Get item state
+     *
+     * @param  {String} id
+     * @return {String}
+     */
+    getState(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+        item = item[0];
+
+        return item.state;
     }
 
     /**
@@ -116,13 +187,69 @@ var Machine = class Machine extends PopupMenuSection {
      *
      * @param  {String} id
      * @param  {String} value
-     * @return {void}
+     * @return {Void}
      */
-    state(id, value) {
-        this._get_item(id).forEach(function(actor) {
+    setState(id, value) {
+        this._getItem(id).forEach(function(actor) {
             actor.actor.remove_style_class_name(actor.state);
             actor.actor.add_style_class_name(value);
             actor.state = value;
+        });
+    }
+
+    /**
+     * Get item shorten property
+     *
+     * @param  {String}  id
+     * @return {Boolean}
+     */
+    getShorten(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+        item = item[0];
+
+        return item.shorten;
+    }
+
+    /**
+     * Set item shorten property
+     *
+     * @param  {String}  id
+     * @param  {Boolean} value
+     * @return {Void}
+     */
+    setShorten(id, value) {
+        this._getItem(id).forEach(function(actor) {
+            actor.shorten = value;
+        });
+    }
+
+    /**
+     * Get item title
+     *
+     * @param  {String} id
+     * @return {Mixed}
+     */
+    getTitle(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+        item = item[0];
+
+        return item.title;
+    }
+
+    /**
+     * Set item title
+     *
+     * @param  {String} id
+     * @param  {Mixed}  value
+     * @return {Void}
+     */
+    setTitle(id, value) {
+        this._getItem(id).forEach(function(actor) {
+            actor.title = value;
         });
     }
 
@@ -131,28 +258,33 @@ var Machine = class Machine extends PopupMenuSection {
      * display vagrant menu subitems
      * from DisplayVagrant enum
      *
+     * @param  {String} id
      * @return {Number}
      */
-    getDisplayVagrant() {
-        return this._display_vagrant;
+    getDisplayVagrant(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+        item = item[0];
+
+        return item.displayVagrant;
     }
 
     /**
      * Set DisplayVagrant
      *
+     * @param  {String} id
      * @param  {Number} value
-     * @return {void}
+     * @return {Void}
      */
-    setDisplayVagrant(value) {
+    setDisplayVagrant(id, value) {
         if (value < Enum.min(DisplayVagrant))
             value = Enum.min(DisplayVagrant);
         else if (value > Enum.sum(DisplayVagrant))
             value = Enum.sum(DisplayVagrant);
 
-        this._display_vagrant = value;
-
-        this._get_item().forEach(function(actor) {
-            actor.setDisplayVagrant(value);
+        this._getItem(id).forEach(function(actor) {
+            actor.displayVagrant = value;
         });
     }
 
@@ -161,51 +293,33 @@ var Machine = class Machine extends PopupMenuSection {
      * display system menu subitems
      * from DisplaySystem enum
      *
+     * @param  {String} id
      * @return {Number}
      */
-    getDisplaySystem() {
-        return this._display_system;
+    getDisplaySystem(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+        item = item[0];
+
+        return item.displaySystem;
     }
 
     /**
      * Set DisplaySystem
      *
+     * @param  {String} id
      * @param  {Number} value
-     * @return {void}
+     * @return {Void}
      */
-    setDisplaySystem(value) {
+    setDisplaySystem(id, value) {
         if (value < Enum.min(DisplaySystem))
             value = Enum.min(DisplaySystem);
         else if (value > Enum.sum(DisplaySystem))
             value = Enum.sum(DisplaySystem);
 
-        this._display_system = value;
-
-        this._get_item().forEach(function(actor) {
-            actor.setDisplaySystem(value);
-        });
-    }
-
-    /**
-     * Property shorten getter
-     *
-     * @return {Boolean}
-     */
-    get shorten() {
-        return this._shorten;
-    }
-
-    /**
-     * Property shorten setter
-     *
-     * @param  {Boolean} value
-     * @return {void}
-     */
-    set shorten(value) {
-        this._shorten = !!value;
-
-        this._get_item().forEach(function(actor) {
-            actor.shorten = value;
+        this._getItem(id).forEach(function(actor) {
+            actor.displaySystem = value;
         });
     }
 
@@ -213,9 +327,9 @@ var Machine = class Machine extends PopupMenuSection {
      * Get submenu item from menu list
      *
      * @param  {String} id (optional)
-     * @return {Object}
+     * @return {Array}
      */
-    _get_item(id) {
+    _getItem(id) {
         return this.box.get_children()
             .map(function(actor) {
                 return actor._delegate;
@@ -226,29 +340,44 @@ var Machine = class Machine extends PopupMenuSection {
     }
 
     /**
+     * Error handler
+     *
+     * @param  {Menu.Path} widget
+     * @param  {Object}    event
+     * @return {Void}
+     */
+    _handleError(widget, event) {
+        this.emit('error', event);
+    }
+
+    /**
      * Menu subitem (system command)
      * execute event handler
      *
-     * @param  {Object} widget
-     * @param  {GLib.Variant} object
-     * @return {void}
+     * @param  {Menu.Path} widget
+     * @param  {Object}    event
+     * @return {Void}
      */
-    _handle_system(widget, object) {
-        let unpack = object.recursiveUnpack();
-        this.emit('system', unpack);
+    _handleSystem(widget, event) {
+        this.emit('system', {
+            id: event.id,
+            command: event.command,
+        });
     }
 
     /**
      * Menu subitem (vagrant command)
      * execute event handler
      *
-     * @param  {Object} widget
-     * @param  {GLib.Variant} object
-     * @return {void}
+     * @param  {Menu.Path} widget
+     * @param  {Object}    event
+     * @return {Void}
      */
-    _handle_vagrant(widget, object) {
-        let unpack = object.recursiveUnpack();
-        this.emit('vagrant', unpack);
+    _handleVagrant(widget, event) {
+        this.emit('vagrant', {
+            id: event.id,
+            command: event.command,
+        });
     }
 
     /* --- */
@@ -259,7 +388,7 @@ var Machine = class Machine extends PopupMenuSection {
  * Menu.Path constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Path = GObject.registerClass({
     Signals: {
@@ -273,48 +402,48 @@ var Path = GObject.registerClass({
      * @param  {String} id
      * @param  {String} path
      * @param  {String} state
-     * @return {void}
+     * @return {Void}
      */
     _init(id, path, state) {
         super._init('unknown');
 
         this._id = id;
         this._path = path;
+        this._title = null;
         this._state = 'unknown';
         this._shorten = true;
-        this._display_system = null;
+        this._displayVagrant = Enum.sum(DisplayVagrant);
+        this._displaySystem = Enum.sum(DisplaySystem);
 
         this._ui();
         this._bind();
 
-        this.setDisplayVagrant(DisplayVagrant.NONE);
-        this.setDisplaySystem(DisplaySystem.NONE);
-
+        // with setter we're making sure className
+        // (machine state) is set
         this.state = state;
-        this.shorten = false;
     }
 
     /**
      * Create user interface
      *
-     * @return {void}
+     * @return {Void}
      */
     _ui() {
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-path');
         this.menu.actor.add_style_class_name('gnome-vagrant-indicator-menu-submenu');
         this.setOrnament(PopupMenu.Ornament.DOT);
 
-        this._ui_vagrant();
-        this._ui_system();
+        this._uiVagrant();
+        this._uiSystem();
     }
 
     /**
      * Create user interface for
      * vagrant commands menu
      *
-     * @return {void}
+     * @return {Void}
      */
-    _ui_vagrant() {
+    _uiVagrant() {
         this.vagrant = {};
 
         let item = new Header(_("VAGRANT COMMANDS"));
@@ -322,17 +451,17 @@ var Path = GObject.registerClass({
         this.vagrant.header = item;
 
         let menu = [
-            'up', Vagrant.CommandVagrant.UP, _("Up"),
-            'up_provision', Vagrant.CommandVagrant.UP_PROVISION, _("Up and Provision"),
-            'up_ssh', Vagrant.CommandVagrant.UP_SSH, _("Up and SSH"),
-            'up_rdp', Vagrant.CommandVagrant.UP_RDP, _("Up and RDP"),
-            'provision', Vagrant.CommandVagrant.PROVISION, _("Provision"),
-            'ssh', Vagrant.CommandVagrant.SSH, _("SSH"),
-            'rdp', Vagrant.CommandVagrant.RDP, _("RDP"),
-            'resume', Vagrant.CommandVagrant.RESUME, _("Resume"),
-            'suspend', Vagrant.CommandVagrant.SUSPEND, _("Suspend"),
-            'halt', Vagrant.CommandVagrant.HALT, _("Halt"),
-            'destroy', Vagrant.CommandVagrant.DESTROY, _("Destroy"),
+            'up', DisplayVagrant.UP, _("Up"),
+            'up_provision', DisplayVagrant.UP_PROVISION, _("Up and Provision"),
+            'up_ssh', DisplayVagrant.UP_SSH, _("Up and SSH"),
+            'up_rdp', DisplayVagrant.UP_RDP, _("Up and RDP"),
+            'provision', DisplayVagrant.PROVISION, _("Provision"),
+            'ssh', DisplayVagrant.SSH, _("SSH"),
+            'rdp', DisplayVagrant.RDP, _("RDP"),
+            'resume', DisplayVagrant.RESUME, _("Resume"),
+            'suspend', DisplayVagrant.SUSPEND, _("Suspend"),
+            'halt', DisplayVagrant.HALT, _("Halt"),
+            'destroy', DisplayVagrant.DESTROY, _("Destroy"),
         ];
 
         for (let i = 0; i < menu.length; i += 3) {
@@ -342,7 +471,7 @@ var Path = GObject.registerClass({
 
             let item = new Command(label);
             item.command = cmd;
-            item.connect('execute', this._handle_vagrant.bind(this));
+            item.connect('execute', this._handleVagrant.bind(this));
             this.menu.addMenuItem(item);
             this.vagrant[id] = item;
         }
@@ -352,9 +481,9 @@ var Path = GObject.registerClass({
      * Create user interface for
      * system commands menu
      *
-     * @return {void}
+     * @return {Void}
      */
-    _ui_system() {
+    _uiSystem() {
         this.system = {};
 
         let item = new Header(_("SYSTEM COMMANDS"));
@@ -362,9 +491,10 @@ var Path = GObject.registerClass({
         this.system.header = item;
 
         let menu = [
-            'terminal', Vagrant.CommandSystem.TERMINAL, _("Open in Terminal"),
-            'file_manager', Vagrant.CommandSystem.FILE_MANAGER, _("Open in File Manager"),
-            'vagrantfile', Vagrant.CommandSystem.VAGRANTFILE, _("Edit Vagrantfile"),
+            'terminal', DisplaySystem.TERMINAL, _("Open in Terminal"),
+            'file_manager', DisplaySystem.FILE_MANAGER, _("Open in File Manager"),
+            'vagrantfile', DisplaySystem.VAGRANTFILE, _("Edit Vagrantfile"),
+            'machine_config', DisplaySystem.MACHINE_CONFIG, _("Machine Configuration"),
         ];
 
         for (let i = 0; i < menu.length; i += 3) {
@@ -374,7 +504,7 @@ var Path = GObject.registerClass({
 
             let item = new Command(label);
             item.command = cmd;
-            item.connect('execute', this._handle_system.bind(this));
+            item.connect('execute', this._handleSystem.bind(this));
             this.menu.addMenuItem(item);
             this.system[id] = item;
         }
@@ -383,74 +513,18 @@ var Path = GObject.registerClass({
     /**
      * Bind events
      *
-     * @return {void}
+     * @return {Void}
      */
     _bind() {
-        this.connect('activate', this._handle_activate.bind(this));
-    }
-
-    /**
-     * Get DisplayVagrant:
-     * display vagrant menu subitems
-     * from DisplayVagrant enum
-     *
-     * @return {Number}
-     */
-    getDisplayVagrant() {
-        return this._display_vagrant;
-    }
-
-    /**
-     * Set DisplayVagrant
-     *
-     * @param  {Number} value
-     * @return {void}
-     */
-    setDisplayVagrant(value) {
-        if (value < Enum.min(DisplayVagrant))
-            value = Enum.min(DisplayVagrant);
-        else if (value > Enum.sum(DisplayVagrant))
-            value = Enum.sum(DisplayVagrant);
-
-        this._display_vagrant = value;
-
-        this._refresh_menu();
-    }
-
-    /**
-     * Get DisplaySystem:
-     * display system menu subitems
-     * from DisplaySystem enum
-     *
-     * @return {Number}
-     */
-    getDisplaySystem() {
-        return this._display_system;
-    }
-
-    /**
-     * Set DisplaySystem
-     *
-     * @param  {Number} value
-     * @return {void}
-     */
-    setDisplaySystem(value) {
-        if (value < Enum.min(DisplaySystem))
-            value = Enum.min(DisplaySystem);
-        else if (value > Enum.sum(DisplaySystem))
-            value = Enum.sum(DisplaySystem);
-
-        this._display_system = value;
-
-        this._refresh_menu();
+        this.connect('activate', this._handleActivate.bind());
     }
 
     /**
      * Act like PopupMenu.PopupMenuItem
      * when submenu is empty
      *
-     * @param  {Booelan} open
-     * @return {void}
+     * @param  {Boolean} open
+     * @return {Void}
      */
     setSubmenuShown(open) {
         super.setSubmenuShown(open);
@@ -462,7 +536,7 @@ var Path = GObject.registerClass({
     /**
      * Property shorten getter
      *
-     * @return {Boolean}
+     * @return {boolean}
      */
     get shorten() {
         return this._shorten;
@@ -477,11 +551,7 @@ var Path = GObject.registerClass({
     set shorten(value) {
         this._shorten = !!value;
 
-        let path = this.path;
-        if (this.shorten)
-            path = GLib.basename(path);
-
-        this.label.text = path;
+        this._refreshMenu();
     }
 
     /**
@@ -523,32 +593,134 @@ var Path = GObject.registerClass({
 
         this._state = value;
 
-        this._refresh_menu();
+        this._refreshMenu();
     }
 
     /**
+     * Property title getter
      *
+     * @return {Mixed}
+     */
+    get title() {
+        return this._title;
+    }
+
+    /**
+     * Property title setter
+     *
+     * @param  {Mixed} value
+     * @return {Void}
+     */
+    set title(value) {
+        try {
+            if (value)
+                value = value.toString();
+        }
+        catch(e) {
+            value = null;
+        }
+
+        this._title = value || null;
+
+        this._refreshMenu();
+    }
+
+    /**
+     * Get DisplayVagrant:
+     * display vagrant menu subitems
+     * from DisplayVagrant enum
+     *
+     * @return {Number}
+     */
+    get displayVagrant() {
+        return this._displayVagrant;
+    }
+
+    /**
+     * Set DisplayVagrant
+     *
+     * @param  {Number} value
+     * @return {Void}
+     */
+    set displayVagrant(value) {
+        if (value < Enum.min(DisplayVagrant))
+            value = Enum.min(DisplayVagrant);
+        else if (value > Enum.sum(DisplayVagrant))
+            value = Enum.sum(DisplayVagrant);
+
+        this._displayVagrant = value;
+
+        this._refreshMenu();
+    }
+
+    /**
+     * Get DisplaySystem:
+     * display system menu subitems
+     * from DisplaySystem enum
+     *
+     * @return {Number}
+     */
+    get displaySystem() {
+        return this._displaySystem;
+    }
+
+    /**
+     * Set DisplaySystem
+     *
+     * @param  {Number} value
+     * @return {Void}
+     */
+    set displaySystem(value) {
+        if (value < Enum.min(DisplaySystem))
+            value = Enum.min(DisplaySystem);
+        else if (value > Enum.sum(DisplaySystem))
+            value = Enum.sum(DisplaySystem);
+
+        this._displaySystem = value;
+
+        this._refreshMenu();
+    }
+
+    /**
      * Show/hide system/vagrant menu
      * items
      *
-     * @return {void}
+     * @return {Void}
      */
-    _refresh_menu() {
-        this._refresh_menu_by_display();
-        this._refresh_menu_by_state();
-        this._refresh_menu_dropdown();
-        this._refresh_menu_headers();
+    _refreshMenu() {
+        this._refreshMenuByTitle();
+        this._refreshMenuByDisplayVagrant();
+        this._refreshMenuByDisplaySystem();
+        this._refreshMenuByState();
+        this._refreshMenuDropdown();
+        this._refreshMenuHeaders();
     }
 
     /**
-     * Show/hide system/vagrant menu
-     * items based on user display
-     * property
+     * Set menu label based on shorten
+     * property or title
      *
-     * @return {void}
+     * @return {Void}
      */
-    _refresh_menu_by_display() {
-        let value = this.getDisplayVagrant();
+    _refreshMenuByTitle() {
+        let title = this.title;
+        if (!title) {
+            title = this.path;
+            if (this.shorten)
+                title = GLib.basename(title);
+        }
+
+        this.label.text = title;
+    }
+
+    /**
+     * Show/hide vagrant menu items
+     * based on user display property
+     *
+     * @return {Void}
+     */
+    _refreshMenuByDisplayVagrant() {
+        let value = this.displayVagrant;
         for (let key in this.vagrant) {
             if (key === 'header')
                 continue;
@@ -559,8 +731,16 @@ var Path = GObject.registerClass({
 
             menu.actor.visible = visible;
         }
+    }
 
-        value = this.getDisplaySystem();
+    /**
+     * Show/hide system menu items
+     * based on user display property
+     *
+     * @return {Void}
+     */
+    _refreshMenuByDisplaySystem() {
+        let value = this.displaySystem;
         for (let key in this.system) {
             if (key === 'header')
                 continue;
@@ -577,12 +757,16 @@ var Path = GObject.registerClass({
      * Hide vagrant menu items based
      * on virtual machine state
      *
-     * @return {void}
+     * @return {Void}
      */
-    _refresh_menu_by_state() {
+    _refreshMenuByState() {
         this.setSensitive(true);
 
-        if (this.state === 'poweroff') {
+        let state = this.state;
+        if (state === 'shutoff')
+            state = 'poweroff';
+
+        if (state === 'poweroff') {
             this.vagrant.provision.actor.visible = false;
             this.vagrant.ssh.actor.visible = false;
             this.vagrant.rdp.actor.visible = false;
@@ -590,7 +774,7 @@ var Path = GObject.registerClass({
             this.vagrant.suspend.actor.visible = false;
             this.vagrant.halt.actor.visible = false;
         }
-        else if (this.state === 'preparing') {
+        else if (state === 'preparing') {
             this.vagrant.up.actor.visible = false;
             this.vagrant.up_provision.actor.visible = false;
             this.vagrant.up_ssh.actor.visible = false;
@@ -602,7 +786,7 @@ var Path = GObject.registerClass({
             this.vagrant.suspend.actor.visible = false;
             this.vagrant.destroy.actor.visible = false;
         }
-        else if (this.state === 'running') {
+        else if (state === 'running') {
             this.vagrant.up.actor.visible = false;
             this.vagrant.up_provision.actor.visible = false;
             this.vagrant.up_ssh.actor.visible = false;
@@ -611,7 +795,7 @@ var Path = GObject.registerClass({
             this.vagrant.suspend.actor.visible = false;
             this.vagrant.destroy.actor.visible = false;
         }
-        else if (this.state === 'saved') {
+        else if (state === 'saved') {
             this.vagrant.up.actor.visible = false;
             this.vagrant.up_provision.actor.visible = false;
             this.vagrant.up_ssh.actor.visible = false;
@@ -623,7 +807,8 @@ var Path = GObject.registerClass({
             this.vagrant.halt.actor.visible = false;
             this.vagrant.destroy.actor.visible = false;
         }
-            //else if (this.state === 'aborted') {
+        //else if (state === 'aborted') {
+        //    @todo - what to do here?
         //}
         else {
             // disable menu on aborted or unknown state
@@ -634,9 +819,9 @@ var Path = GObject.registerClass({
     /**
      * Show/hide dropdown arrow
      *
-     * @return {void}
+     * @return {Void}
      */
-    _refresh_menu_dropdown() {
+    _refreshMenuDropdown() {
         this._triangleBin.visible = false
             || this.system.terminal.actor.visible
             || this.system.file_manager.actor.visible
@@ -658,9 +843,9 @@ var Path = GObject.registerClass({
      * Show/hide system/vagrant menu
      * headers
      *
-     * @return {void}
+     * @return {Void}
      */
-    _refresh_menu_headers() {
+    _refreshMenuHeaders() {
         this.vagrant.header.actor.visible = false
             || this.vagrant.up.actor.visible
             || this.vagrant.up_provision.actor.visible
@@ -684,9 +869,9 @@ var Path = GObject.registerClass({
      * Get submenu item from menu list
      *
      * @param  {String} method (optional)
-     * @return {Object}
+     * @return {Array}
      */
-    _get_item(method) {
+    _getItem(method) {
         return this.get_children()
             .map(function(actor) {
                 return actor._delegate;
@@ -700,14 +885,14 @@ var Path = GObject.registerClass({
      * Menu item activate event handler
      * (called only if submenu is empty)
      *
-     * @param  {Object} widget
+     * @param  {Menu.Path}     widget
      * @param  {Clutter.Event.$gtype} event
-     * @return {void}
+     * @return {Void}
      */
-    _handle_activate(widget, event) {
+    _handleActivate(widget, event) {
         let data = new GLib.Variant('a{sv}', {
             'id': new GLib.Variant('s', this.id),
-            'command': new GLib.Variant('i', Vagrant.CommandSystem.TERMINAL),
+            'command': new GLib.Variant('i', DisplaySystem.TERMINAL),
         });
         this.emit('system', data);
     }
@@ -716,10 +901,11 @@ var Path = GObject.registerClass({
      * Menu subitem (system command)
      * execute event handler
      *
-     * @param  {Object} widget
-     * @return {void}
+     * @param  {Menu.Command} widget
+     * @param  {Object}       event
+     * @return {Void}
      */
-    _handle_system(widget) {
+    _handleSystem(widget) {
         let data = new GLib.Variant('a{sv}', {
             'id': new GLib.Variant('s', this.id),
             'command': new GLib.Variant('i', widget.command),
@@ -731,10 +917,11 @@ var Path = GObject.registerClass({
      * Menu subitem (vagrant command)
      * execute event handler
      *
-     * @param  {Object} widget
-     * @return {void}
+     * @param  {Menu.Command} widget
+     * @param  {Object}       event
+     * @return {Void}
      */
-    _handle_vagrant(widget) {
+    _handleVagrant(widget, event) {
         let data = new GLib.Variant('a{sv}', {
             'id': new GLib.Variant('s', this.id),
             'command': new GLib.Variant('i', widget.command),
@@ -750,7 +937,7 @@ var Path = GObject.registerClass({
  * Menu.Command constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Command = GObject.registerClass({
     Signals: {
@@ -796,17 +983,17 @@ var Command = GObject.registerClass({
      * @return {void}
      */
     _bind() {
-        this.connect('activate', this._handle_activate.bind(this));
+        this.connect('activate', this._handleActivate.bind(this));
     }
 
     /**
      * Activate event handler
      *
-     * @param  {Object} widget
-     * @param  {Object} event
-     * @return {void}
+     * @param  {Menu.Command}  widget
+     * @param  {Clutter.Event} event
+     * @return {Void}
      */
-    _handle_activate(widget, event) {
+    _handleActivate(widget, event) {
         this.emit('execute');
     }
 
@@ -837,7 +1024,7 @@ var Command = GObject.registerClass({
  * Menu.Header constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Header = GObject.registerClass(class Header extends PopupMenuItem {
     /**

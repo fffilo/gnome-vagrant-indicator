@@ -1,7 +1,23 @@
 # Changelog
 
-## [Unreleased]
-- (none)
+## Version 8 - 2019-12-09
+### Added
+- Vagrant multi-machine environment support
+
+## Version 7 - 2019-12-03
+### Added
+- Preferences: refresh machine status
+### Changed
+- Monitor optimization
+- Minor bug fixes
+
+## Version 6 - 2019-11-25
+### Added
+- Machine destroyed notification
+- Machine specific settings
+### Changed
+- Monitor optimization
+- Minor bug fixes
 
 ## Version 5 - 2018-01-08
 ### Changed

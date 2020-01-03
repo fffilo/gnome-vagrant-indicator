@@ -14,7 +14,7 @@ const Icons = Me.imports.icons;
  * Notification.Base constructor
  *
  * @param  {Object}
- * @return {Object}
+ * @return {Class}
  */
 var Base = class Base {
 
@@ -23,7 +23,7 @@ var Base = class Base {
      *
      * @param  {String} title
      * @param  {String} icon
-     * @return {void}
+     * @return {Void}
      */
     constructor(title, icon) {
         this._title = title || Me.metadata.name;
@@ -33,16 +33,44 @@ var Base = class Base {
     }
 
     /**
+     * Destructor
+     *
+     * @return {Void}
+     */
+    destroy() {
+        if (this._source !== null)
+            this._source.destroy();
+    }
+
+    /**
+     * Title getter
+     *
+     * @return {String}
+     */
+    get title() {
+        return this._title;
+    }
+
+    /**
+     * Icon getter
+     *
+     * @return {String}
+     */
+    get icon() {
+        return this._icon;
+    }
+
+    /**
      * Prepare source
      *
-     * @return {void}
+     * @return {Void}
      */
     _prepare() {
         if (this._source !== null)
             return;
 
-        this._source = new MessageTray.Source(this._title, this._icon);
-        this._source.connect('destroy', this._handle_destroy.bind(this));
+        this._source = new MessageTray.Source(this.title, this.icon);
+        this._source.connect('destroy', this._handleDestroy.bind(this));
 
         Main.messageTray.add(this._source);
     }
@@ -51,9 +79,9 @@ var Base = class Base {
      * Get existing notification from
      * source or create new one
      *
-     * @param  {String} title
-     * @param  {String} message
-     * @return {Object}
+     * @param  {String}       title
+     * @param  {String}       message
+     * @return {Notification}
      */
     _notification(title, message) {
         let result = null;
@@ -76,9 +104,9 @@ var Base = class Base {
      * Source destroy event handler:
      * clear source
      *
-     * @return {void}
+     * @return {Void}
      */
-    _handle_destroy() {
+    _handleDestroy() {
         this._source = null;
     }
 
@@ -87,14 +115,13 @@ var Base = class Base {
      *
      * @param  {String} title
      * @param  {String} message
-     * @return {void}
+     * @return {Void}
      */
     show(title, message) {
         this._prepare();
 
         let notify = this._notification(title, message);
         this._source.notify(notify);
-
     }
 
     /* --- */
