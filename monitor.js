@@ -21,6 +21,7 @@ const PROPERTIES = [
     'label',
     'notifications',
     'machineFullPath',
+    'machineName',
     'postTerminalAction',
     'displaySystemNone',
     'displaySystemTerminal',

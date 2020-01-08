@@ -81,16 +81,17 @@ var Machine = new Lang.Class({
      *
      * @param  {String}    id
      * @param  {String}    path
+     * @param  {String}    name
      * @param  {String}    state
      * @param  {Number}    index (optional)
      * @return {Menu.Path}
      */
-    add: function(id, path, state, index) {
+    add: function(id, path, name, state, index) {
         if (this.empty)
             this.empty.destroy();
         this.empty = null;
 
-        let item = new Path(id, path, state);
+        let item = new Path(id, path, name, state);
         item.connect('error', Lang.bind(this, this._handleError));
         item.connect('system', Lang.bind(this, this._handleSystem));
         item.connect('vagrant', Lang.bind(this, this._handleVagrant));
@@ -159,6 +160,7 @@ var Machine = new Lang.Class({
 
         // ...let's remove old and add new item
         let path = item.path;
+        let name = item.name;
         let state = item.state;
         let title = item.title;
         let shorten = item.shorten;
@@ -166,7 +168,7 @@ var Machine = new Lang.Class({
         let displaySystem = item.displaySystem;
 
         this.remove(id);
-        item = this.add(id, path, state, index);
+        item = this.add(id, path, name, state, index);
         item.title = title;
         item.shorten = shorten;
         item.displayVagrant = displayVagrant;
@@ -406,14 +408,16 @@ var Path = new Lang.Class({
      *
      * @param  {String} id
      * @param  {String} path
+     * @param  {String} name
      * @param  {String} state
      * @return {Void}
      */
-    _init: function(id, path, state) {
+    _init: function(id, path, name, state) {
         this.parent('unknown');
 
         this._id = id;
         this._path = path;
+        this._name = name;
         this._title = null;
         this._state = 'unknown';
         this._shorten = true;
@@ -578,6 +582,15 @@ var Path = new Lang.Class({
     },
 
     /**
+     * Property name getter
+     *
+     * @return {String}
+     */
+    get name() {
+        return this._name;
+    },
+
+    /**
      * Property state getter
      *
      * @return {String}
@@ -713,6 +726,9 @@ var Path = new Lang.Class({
             title = this.path;
             if (this.shorten)
                 title = GLib.basename(title);
+            // @todo
+            //if (this.displayName)
+            //    title = (title + ' ' + this.name).trim();
         }
 
         this.label.text = title;

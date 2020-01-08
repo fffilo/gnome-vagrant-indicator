@@ -11,6 +11,11 @@
             <summary>Show machine full path</summary>
             <description>Show machine full path as instance name</description>
         </key>
+        <key name="machine-name" type="b">
+            <default>false</default>
+            <summary>Show machine name</summary>
+            <description>Show machine name next to instance name</description>
+        </key>
         <key name="post-terminal-action" type="s">
             <default>'NONE'</default>
             <summary>Post terminal action</summary>

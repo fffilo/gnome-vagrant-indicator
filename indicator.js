@@ -146,13 +146,14 @@ var Base = new Lang.Class({
         for (let i = 0; i < machines.length; i++) {
             let id = machines[i];
             let path = this.monitor.getMachineDetail(id, 'vagrantfile_path');
+            let name = this.monitor.getMachineDetail(id, 'name');
             let state = this.monitor.getMachineDetail(id, 'state');
             let title = this.monitor.getValue(id, 'label');
             let shorten = !this.monitor.getValue(id, 'machineFullPath');
             let displayVagrant = this._getDisplayVagrant(id);
             let displaySystem = this._getDisplaySystem(id);
 
-            let item = this.machine.add(id, path, state);
+            let item = this.machine.add(id, path, name, state);
             item.title = title;
             item.shorten = shorten;
             item.displayVagrant = displayVagrant;
@@ -205,6 +206,29 @@ var Base = new Lang.Class({
     },
 
     /**
+     * Get machine label by schema
+     * machine-full-path and
+     * machine-name settings
+     *
+     * @param  {String} id
+     * @return {String}
+     */
+    _getMachineLabel: function(id) {
+        let result = this.monitor.getValue(id, 'label');
+
+        if (!result) {
+            result = this.monitor.getMachineDetail(id, 'vagrantfile_path');
+
+            if (!this.monitor.getValue(id, 'machine-full-path'))
+                result = result.replace(/\/+$/, '').split('/').pop();
+            if (this.monitor.getValue(id, 'machine-name'))
+                result = (result + ' ' + this.monitor.getMachineDetail(id, 'name')).trim();
+        }
+
+        return result;
+    },
+
+    /**
      * Monitor change event handler
      *
      * @param  {Monitor.Monitor} widget
@@ -217,6 +241,7 @@ var Base = new Lang.Class({
             let order = props.indexOf('order') === -1 ? 0 : 1;
             let label = props.indexOf('label') === -1 ? 0 : 1;
             let machineFullPath = props.indexOf('machineFullPath') === -1 ? 0 : 1;
+            // @todo - machine-name setting
             let displaySystem = props.filter(function(item) { return item.startsWith('displaySystem'); }).length;
             let displayVagrant = props.filter(function(item) { return item.startsWith('displayVagrant'); }).length;
 
@@ -226,6 +251,7 @@ var Base = new Lang.Class({
                 this.machine.setTitle(id, this.monitor.getValue(id, 'label'));
             if (machineFullPath)
                 this.machine.setShorten(id, !this.monitor.getValue(id, 'machineFullPath'));
+            // @todo - machine-name setting
             if (displayVagrant)
                 this.machine.setDisplayVagrant(id, this._getDisplayVagrant(id));
             if (displaySystem)
@@ -243,6 +269,7 @@ var Base = new Lang.Class({
     _handleMonitorAdd: function(widget, event) {
         let id = event.id;
         let path = event.path;
+        let name = event.name;
         let state = event.state;
         let title = this.monitor.getValue(id, 'label');
         let shorten = !this.monitor.getValue(id, 'machineFullPath');
@@ -250,7 +277,7 @@ var Base = new Lang.Class({
         let displaySystem = this._getDisplaySystem(id);
         let index = Object.keys(this.monitor.getMachineList()).indexOf(id);
 
-        let item = this.machine.add(id, path, state, index);
+        let item = this.machine.add(id, path, name, state, index);
         item.title = title;
         item.shorten = shorten;
         item.displayVagrant = displayVagrant;
@@ -266,13 +293,15 @@ var Base = new Lang.Class({
      */
     _handleMonitorRemove: function(widget, event) {
         let id = event.id;
-        let path = event.path;
-
         this.machine.remove(id);
 
         let notify = this.monitor.getValue(id, 'notifications');
-        if (notify)
-            this.notification.show('Machine destroyed', path);
+        if (!notify)
+            return;
+
+        let title = this._getMachineLabel(id);
+        let message = 'Machine destroyed';
+        this.notification.show(title, message);
     },
 
     /**
@@ -285,13 +314,15 @@ var Base = new Lang.Class({
     _handleMonitorState: function(widget, event) {
         let id = event.id;
         let state = event.state;
-        let path = event.path;
-
         this.machine.setState(id, state);
 
         let notify = this.monitor.getValue(id, 'notifications');
-        if (notify)
-            this.notification.show('Machine went %s'.format(state), path);
+        if (!notify)
+            return;
+
+        let title = this._getMachineLabel(id);
+        let message = 'Machine went %s'.format(state);
+        this.notification.show(title, message);
     },
 
     /**
