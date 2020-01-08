@@ -12,7 +12,7 @@
 
 ## Version 7 - 2019-12-03
 ### Added
-- Preferences: refresh machine status
+- Preferences _Refresh machine status_
 ### Changed
 - Monitor optimization
 - Minor bug fixes
