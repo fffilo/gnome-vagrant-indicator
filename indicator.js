@@ -149,13 +149,15 @@ var Base = new Lang.Class({
             let name = this.monitor.getMachineDetail(id, 'name');
             let state = this.monitor.getMachineDetail(id, 'state');
             let title = this.monitor.getValue(id, 'label');
-            let shorten = !this.monitor.getValue(id, 'machineFullPath');
+            let displayMachineFullPath = this.monitor.getValue(id, 'machineFullPath');
+            let displayMachineName = this.monitor.getValue(id, 'machineName');
             let displayVagrant = this._getDisplayVagrant(id);
             let displaySystem = this._getDisplaySystem(id);
 
             let item = this.machine.add(id, path, name, state);
             item.title = title;
-            item.shorten = shorten;
+            item.displayMachineFullPath = displayMachineFullPath;
+            item.displayMachineName = displayMachineName;
             item.displayVagrant = displayVagrant;
             item.displaySystem = displaySystem;
         }
@@ -241,7 +243,7 @@ var Base = new Lang.Class({
             let order = props.indexOf('order') === -1 ? 0 : 1;
             let label = props.indexOf('label') === -1 ? 0 : 1;
             let machineFullPath = props.indexOf('machineFullPath') === -1 ? 0 : 1;
-            // @todo - machine-name setting
+            let machineName = props.indexOf('machineName') === -1 ? 0 : 1;
             let displaySystem = props.filter(function(item) { return item.startsWith('displaySystem'); }).length;
             let displayVagrant = props.filter(function(item) { return item.startsWith('displayVagrant'); }).length;
 
@@ -250,8 +252,9 @@ var Base = new Lang.Class({
             if (label)
                 this.machine.setTitle(id, this.monitor.getValue(id, 'label'));
             if (machineFullPath)
-                this.machine.setShorten(id, !this.monitor.getValue(id, 'machineFullPath'));
-            // @todo - machine-name setting
+                this.machine.setDisplayMachineFullPath(id, this.monitor.getValue(id, 'machineFullPath'));
+            if (machineName)
+                this.machine.setDisplayMachineName(id, this.monitor.getValue(id, 'machineName'));
             if (displayVagrant)
                 this.machine.setDisplayVagrant(id, this._getDisplayVagrant(id));
             if (displaySystem)
@@ -272,14 +275,16 @@ var Base = new Lang.Class({
         let name = event.name;
         let state = event.state;
         let title = this.monitor.getValue(id, 'label');
-        let shorten = !this.monitor.getValue(id, 'machineFullPath');
+        let displayMachineFullPath = this.monitor.getValue(id, 'machineFullPath');
+        let displayMachineName = this.monitor.getValue(id, 'machineName');
         let displayVagrant = this._getDisplayVagrant(id);
         let displaySystem = this._getDisplaySystem(id);
         let index = Object.keys(this.monitor.getMachineList()).indexOf(id);
 
         let item = this.machine.add(id, path, name, state, index);
         item.title = title;
-        item.shorten = shorten;
+        item.displayMachineFullPath = displayMachineFullPath;
+        item.displayMachineName = displayMachineName;
         item.displayVagrant = displayVagrant;
         item.displaySystem = displaySystem;
     },

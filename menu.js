@@ -163,14 +163,16 @@ var Machine = new Lang.Class({
         let name = item.name;
         let state = item.state;
         let title = item.title;
-        let shorten = item.shorten;
+        let displayMachineFullPath = item.displayMachineFullPath;
+        let displayMachineName = item.displayMachineName;
         let displayVagrant = item.displayVagrant;
         let displaySystem = item.displaySystem;
 
         this.remove(id);
         item = this.add(id, path, name, state, index);
         item.title = title;
-        item.shorten = shorten;
+        item.displayMachineFullPath = displayMachineFullPath;
+        item.displayMachineName = displayMachineName;
         item.displayVagrant = displayVagrant;
         item.displaySystem = displaySystem;
     },
@@ -206,30 +208,58 @@ var Machine = new Lang.Class({
     },
 
     /**
-     * Get item shorten property
+     * Get item displayMachineFullPath property
      *
      * @param  {String}  id
      * @return {Boolean}
      */
-    getShorten: function(id) {
+    getDisplayMachineFullPath: function(id) {
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
         item = item[0];
 
-        return item.shorten;
+        return item.displayMachineFullPath;
     },
 
     /**
-     * Set item shorten property
+     * Set item displayMachineFullPath property
      *
      * @param  {String}  id
      * @param  {Boolean} value
      * @return {Void}
      */
-    setShorten: function(id, value) {
+    setDisplayMachineFullPath: function(id, value) {
         this._getItem(id).forEach(function(actor) {
-            actor.shorten = value;
+            actor.displayMachineFullPath = value;
+        });
+    },
+
+    /**
+     * Get item displayMachineName property
+     *
+     * @param  {String}  id
+     * @return {Boolean}
+     */
+    getDisplayMachineName: function(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+        item = item[0];
+
+        return item.displayMachineName;
+    },
+
+    /**
+     * Set item displayMachineName property
+     *
+     * @param  {String}  id
+     * @param  {Boolean} value
+     * @return {Void}
+     */
+    setDisplayMachineName: function(id, value) {
+        this._getItem(id).forEach(function(actor) {
+            actor.displayMachineName = value;
         });
     },
 
@@ -420,7 +450,8 @@ var Path = new Lang.Class({
         this._name = name;
         this._title = null;
         this._state = 'unknown';
-        this._shorten = true;
+        this._displayMachineFullPath = false;
+        this._displayMachineName = false;
         this._displayVagrant = Enum.sum(DisplayVagrant);
         this._displaySystem = Enum.sum(DisplaySystem);
 
@@ -543,22 +574,43 @@ var Path = new Lang.Class({
     },
 
     /**
-     * Property shorten getter
+     * Property displayMachineFullPath getter
      *
      * @return {Boolean}
      */
-    get shorten() {
-        return this._shorten;
+    get displayMachineFullPath() {
+        return this._displayMachineFullPath;
     },
 
     /**
-     * Property shorten setter
+     * Property displayMachineFullPath setter
      *
      * @param  {Boolean} value
      * @return {Void}
      */
-    set shorten(value) {
-        this._shorten = !!value;
+    set displayMachineFullPath(value) {
+        this._displayMachineFullPath = !!value;
+
+        this._refreshMenu();
+    },
+
+    /**
+     * Property displayMachineName getter
+     *
+     * @return {Boolean}
+     */
+    get displayMachineName() {
+        return this._displayMachineName;
+    },
+
+    /**
+     * Property displayMachineName setter
+     *
+     * @param  {Boolean} value
+     * @return {Void}
+     */
+    set displayMachineName(value) {
+        this._displayMachineName = !!value;
 
         this._refreshMenu();
     },
@@ -715,7 +767,10 @@ var Path = new Lang.Class({
     },
 
     /**
-     * Set menu label based on shorten
+     * Set menu label based on title or based
+     * on displayMachineFullPath and
+     * displayMachineName
+     *
      * property or title
      *
      * @return {Void}
@@ -724,11 +779,10 @@ var Path = new Lang.Class({
         let title = this.title;
         if (!title) {
             title = this.path;
-            if (this.shorten)
+            if (!this.displayMachineFullPath)
                 title = GLib.basename(title);
-            // @todo
-            //if (this.displayName)
-            //    title = (title + ' ' + this.name).trim();
+            if (this.displayMachineName)
+                title = (title + ' ' + this.name).trim();
         }
 
         this.label.text = title;
