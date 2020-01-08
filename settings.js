@@ -16,4 +16,4 @@ const Convenience = Me.imports.convenience;
  * @param  {String} schema (optional)
  * @return {Object}
  */
-const settings = Convenience.getSettings;
+var settings = Convenience.getSettings;

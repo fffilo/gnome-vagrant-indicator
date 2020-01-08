@@ -59,7 +59,7 @@ var getType = function(src) {
     result = result.charAt(0).toUpperCase() + result.slice(1);
 
     return result;
-}
+};
 
 /**
  * Is empty object
@@ -73,7 +73,7 @@ var isEmptyObject = function(src) {
     }
 
     return true;
-}
+};
 
 /**
  * Is plain object
@@ -83,7 +83,7 @@ var isEmptyObject = function(src) {
  */
 var isPlainObject = function(src) {
     return src && '__proto__' in src && src.__proto__ === Object.prototype;
-}
+};
 
 /**
  * Is element array object
@@ -93,7 +93,7 @@ var isPlainObject = function(src) {
  */
 var isArray = function(src) {
     return Array.isArray(src);
-}
+};
 
 /**
  * Is element array-like object
@@ -108,7 +108,7 @@ var isArrayLike = function(src) {
         || src instanceof Array
         || len === 0
         || typeof len === 'number' && len > 0 && --len in src;
-}
+};
 
 /**
  * Json decode
@@ -119,7 +119,7 @@ var isArrayLike = function(src) {
  */
 var jsonDecode = function(src) {
     return JSON.parse(src);
-}
+};
 
 /**
  * Json encode
@@ -131,7 +131,7 @@ var jsonDecode = function(src) {
  */
 var jsonEncode = function(src, pretty) {
     return JSON.stringify(src, null, pretty ? 4 : null);
-}
+};
 
 /**
  * Clone object
@@ -149,7 +149,7 @@ var clone = function(src) {
         return src;
 
     throw 'Can not clone object (only Object/Array/String/Number/Boolean/Null types supported)';
-}
+};
 
 /**
  * Deep clone object
@@ -182,7 +182,7 @@ var deepClone = function(src) {
         throw 'Can not deep clone object (only Object/Array/String/Number/Boolean/Null types supported)';
 
     return result;
-}
+};
 
 /**
  * Compare objects by it values
@@ -223,4 +223,4 @@ var isEqual = function(src, dst) {
         throw 'Can not compare objects (only Object/Array/String/Number/Boolean/Null types supported)';
 
     return true;
-}
+};

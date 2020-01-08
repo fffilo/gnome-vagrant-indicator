@@ -4,8 +4,7 @@
 'use strict';
 
 // import modules
-const Lang = imports.lang;
-const St = imports.gi.St;
+const { St, Gio, GObject } = imports.gi;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const Util = imports.misc.util;
@@ -26,18 +25,15 @@ const _ = Translation.translate;
  * @param  {Object}
  * @return {Class}
  */
-var Base = new Lang.Class({
-
-    Name: 'Indicator.Base',
-    Extends: PanelMenu.Button,
+var Base = GObject.registerClass(class Base extends PanelMenu.Button {
 
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function() {
-        this.parent(null, Me.metadata.name);
+    _init() {
+        super._init(null, Me.metadata.name);
 
         this._notification = new Notification.Base();
         this._vagrant = new Vagrant.Emulator();
@@ -46,24 +42,24 @@ var Base = new Lang.Class({
         if (this.monitor.getValue(null, "autoGlobalStatusPrune"))
             this.vagrant.globalStatusAsync(true);
 
-        this.vagrant.connect('error', Lang.bind(this, this._handleVagrantError));
-        this.monitor.connect('state', Lang.bind(this, this._handleMonitorState));
-        this.monitor.connect('add', Lang.bind(this, this._handleMonitorAdd));
-        this.monitor.connect('remove', Lang.bind(this, this._handleMonitorRemove));
-        this.monitor.connect('change', Lang.bind(this, this._handleMonitorChange));
+        this.vagrant.connect('error', this._handleVagrantError.bind(this));
+        this.monitor.connect('state', this._handleMonitorState.bind(this));
+        this.monitor.connect('add', this._handleMonitorAdd.bind(this));
+        this.monitor.connect('remove', this._handleMonitorRemove.bind(this));
+        this.monitor.connect('change', this._handleMonitorChange.bind(this));
         this.monitor.start();
 
         this._render();
 
         Main.panel.addToStatusArea(Me.metadata.uuid, this);
-    },
+    }
 
     /**
      * Destructor
      *
      * @return {Void}
      */
-    destroy: function() {
+    destroy() {
         if (this.monitor)
             this.monitor.destroy();
         if (this.vagrant)
@@ -75,8 +71,8 @@ var Base = new Lang.Class({
         this._vagrant = null;
         this._notification = null;
 
-        this.parent();
-    },
+        super.destroy();
+    }
 
     /**
      * Notification getter
@@ -85,7 +81,7 @@ var Base = new Lang.Class({
      */
     get notification() {
         return this._notification;
-    },
+    }
 
     /**
      * Vagrant getter
@@ -94,7 +90,7 @@ var Base = new Lang.Class({
      */
     get vagrant() {
         return this._vagrant;
-    },
+    }
 
     /**
      * Monitor getter
@@ -103,43 +99,44 @@ var Base = new Lang.Class({
      */
     get monitor() {
         return this._monitor;
-    },
+    }
 
     /**
      * Render menu
      *
      * @return {Void}
      */
-    _render: function() {
-        this.actor.add_style_class_name('panel-status-button');
-        this.actor.add_style_class_name('gnome-vagrant-indicator');
+    _render() {
+        this.add_style_class_name('panel-status-button');
+        this.add_style_class_name('gnome-vagrant-indicator');
 
         this.icon = new St.Icon({
             icon_name: Icons.DEFAULT,
             style_class: 'system-status-icon',
         });
-        this.actor.add_actor(this.icon);
+        this.icon.set_gicon(Gio.icon_new_for_string(Me.path + '/assets/' + Icons.DEFAULT + ".svg"));
+        this.add_actor(this.icon);
 
         this.machine = new Menu.Machine(this);
-        this.machine.connect('error', Lang.bind(this, this._handleMachineError));
-        this.machine.connect('system', Lang.bind(this, this._handleMachineSystem));
-        this.machine.connect('vagrant', Lang.bind(this, this._handleMachineVagrant));
+        this.machine.connect('error', this._handleMachineError.bind(this));
+        this.machine.connect('system', this._handleMachineSystem.bind(this));
+        this.machine.connect('vagrant', this._handleMachineVagrant.bind(this));
         this.menu.addMenuItem(this.machine);
-        this.menu.addMenuItem(new Menu.Separator());
+        this.menu.addMenuItem(new Menu.PopupSeparatorMenuItem());
 
-        this.preferences = new Menu.Item(_("Preferences"));
-        this.preferences.connect('activate', Lang.bind(this, this._handlePreferences));
+        this.preferences = new Menu.PopupMenuItem(_("Preferences"));
+        this.preferences.connect('activate', this._handlePreferences.bind(this));
         this.menu.addMenuItem(this.preferences);
 
         this.refresh();
-    },
+    }
 
     /**
      * Refresh machine menu
      *
      * @return {Void}
      */
-    refresh: function() {
+    refresh() {
         this.machine.clear();
 
         let machines = this.monitor.getMachineList();
@@ -161,7 +158,7 @@ var Base = new Lang.Class({
             item.displayVagrant = displayVagrant;
             item.displaySystem = displaySystem;
         }
-    },
+    }
 
     /**
      * Convert boolean display-vagrant values
@@ -170,7 +167,7 @@ var Base = new Lang.Class({
      * @param  {String} id
      * @return {Number}
      */
-    _getDisplayVagrant: function(id) {
+    _getDisplayVagrant(id) {
         let display = Enum.toObject(Menu.DisplayVagrant);
         let result = 0;
 
@@ -183,7 +180,7 @@ var Base = new Lang.Class({
         }
 
         return result;
-    },
+    }
 
     /**
      * Convert boolean display-system values
@@ -192,7 +189,7 @@ var Base = new Lang.Class({
      * @param  {String} id
      * @return {Number}
      */
-    _getDisplaySystem: function(id) {
+    _getDisplaySystem(id) {
         let display = Enum.toObject(Menu.DisplaySystem);
         let result = 0;
 
@@ -205,7 +202,7 @@ var Base = new Lang.Class({
         }
 
         return result;
-    },
+    }
 
     /**
      * Monitor change event handler
@@ -214,7 +211,7 @@ var Base = new Lang.Class({
      * @param  {Object}          event
      * @return {Void}
      */
-    _handleMonitorChange: function(widget, event) {
+    _handleMonitorChange(widget, event) {
         for (let id in event) {
             let props = event[id];
             let order = props.indexOf('order') === -1 ? 0 : 1;
@@ -237,7 +234,7 @@ var Base = new Lang.Class({
             if (displaySystem)
                 this.machine.setDisplaySystem(id, this._getDisplaySystem(id));
         }
-    },
+    }
 
     /**
      * Monitor machine add event handler
@@ -246,7 +243,7 @@ var Base = new Lang.Class({
      * @param  {Object}          event
      * @return {Void}
      */
-    _handleMonitorAdd: function(widget, event) {
+    _handleMonitorAdd(widget, event) {
         let id = event.id;
         let path = event.path;
         let name = event.name;
@@ -264,7 +261,7 @@ var Base = new Lang.Class({
         item.displayMachineName = displayMachineName;
         item.displayVagrant = displayVagrant;
         item.displaySystem = displaySystem;
-    },
+    }
 
     /**
      * Monitor machine remove event handler
@@ -273,7 +270,7 @@ var Base = new Lang.Class({
      * @param  {Object}          event
      * @return {Void}
      */
-    _handleMonitorRemove: function(widget, event) {
+    _handleMonitorRemove(widget, event) {
         let id = event.id;
         let label = this.machine.getCurrentLabel(id);
         this.machine.remove(id);
@@ -285,7 +282,7 @@ var Base = new Lang.Class({
         let title = label;
         let message = 'Machine destroyed';
         this.notification.show(title, message);
-    },
+    }
 
     /**
      * Monitor machine state change event handler
@@ -294,7 +291,7 @@ var Base = new Lang.Class({
      * @param  {Object}          event
      * @return {Void}
      */
-    _handleMonitorState: function(widget, event) {
+    _handleMonitorState(widget, event) {
         let id = event.id;
         let state = event.state;
         this.machine.setState(id, state);
@@ -306,7 +303,7 @@ var Base = new Lang.Class({
         let title = this.machine.getCurrentLabel(id);
         let message = 'Machine went %s'.format(state);
         this.notification.show(title, message);
-    },
+    }
 
     /**
      * Default error event handler
@@ -314,7 +311,7 @@ var Base = new Lang.Class({
      * @param  {String} error
      * @return {Void}
      */
-    _notifyError: function(error) {
+    _notifyError(error) {
         let notify = this.monitor.getValue(null, 'notifications');
         if (!notify)
             return;
@@ -329,7 +326,7 @@ var Base = new Lang.Class({
         }
 
         this.notification.show(title, message);
-    },
+    }
 
     /**
      * Monitor error event handler
@@ -338,9 +335,9 @@ var Base = new Lang.Class({
      * @param  {Object}           event
      * @return {Void}
      */
-    _handleVagrantError: function(widget, event) {
+    _handleVagrantError(widget, event) {
         this._notifyError(event.error);
-    },
+    }
 
     /**
      * Machine error event handler
@@ -349,9 +346,9 @@ var Base = new Lang.Class({
      * @param  {Object}       event
      * @return {Void}
      */
-    _handleMachineError: function(widget, event) {
+    _handleMachineError(widget, event) {
         this._notifyError(event.error);
-    },
+    }
 
     /**
      * Machines item (system command)
@@ -361,7 +358,7 @@ var Base = new Lang.Class({
      * @param  {Object}       event
      * @return {Void}
      */
-    _handleMachineSystem: function(widget, event) {
+    _handleMachineSystem(widget, event) {
         try {
             let id = event.id;
             let command = event.command;
@@ -374,7 +371,7 @@ var Base = new Lang.Class({
                 error: e,
             });
         }
-    },
+    }
 
     /**
      * Machines item (vagrant command)
@@ -384,7 +381,7 @@ var Base = new Lang.Class({
      * @param  {Object}       event
      * @return {Void}
      */
-    _handleMachineVagrant: function(widget, event) {
+    _handleMachineVagrant(widget, event) {
         try {
             let id = event.id;
             let command = event.command;
@@ -399,7 +396,7 @@ var Base = new Lang.Class({
                 error: e,
             });
         }
-    },
+    }
 
     /**
      * Preferences activate event handler
@@ -408,9 +405,9 @@ var Base = new Lang.Class({
      * @param  {Clutter.Event} event
      * @return {Void}
      */
-    _handlePreferences: function(widget, event) {
+    _handlePreferences(widget, event) {
         Util.spawn(['gnome-shell-extension-prefs', Me.metadata.uuid]);
-    },
+    }
 
     /* --- */
 

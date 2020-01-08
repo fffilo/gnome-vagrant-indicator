@@ -29,28 +29,23 @@
 // strict mode
 'use strict';
 
-// import modules
-const Lang = imports.lang;
-
 /**
  * Enum.Exception constructor
  *
  * @param  {Object}
  * @return {Class}
  */
-var Exception = new Lang.Class({
-
-    Name: 'Enum.Exception',
+var Exception = class Exception {
 
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function(message, title) {
+    constructor(message, title) {
         this._message = message;
         this._title = title;
-    },
+    }
 
     /**
      * Property message getter
@@ -59,7 +54,7 @@ var Exception = new Lang.Class({
      */
     get message() {
         return this._message;
-    },
+    }
 
     /**
      * Property title getter
@@ -68,23 +63,23 @@ var Exception = new Lang.Class({
      */
     get title() {
         return this._title;
-    },
+    }
 
     /**
      * Exception as string
      *
      * @return {String}
      */
-    toString: function() {
+    toString() {
         return ''
             + (this.title || '')
             + (this.title && this.message ? ': ' : '')
             + (this.message || '');
-    },
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Enum.Member constructor
@@ -92,9 +87,7 @@ var Exception = new Lang.Class({
  * @param  {Object}
  * @return {Class}
  */
-var Member = new Lang.Class({
-
-    Name: 'Enum.Member',
+var Member = class Member {
 
     /**
      * Constructor
@@ -103,7 +96,7 @@ var Member = new Lang.Class({
      * @param  {Number} value
      * @return {Void}
      */
-    _init: function(key, value) {
+    constructor(key, value) {
         if (typeof key !== 'string')
             throw new Exception('Argument key must be of type String', 'Enum.Member');
         if (typeof value !== 'number')
@@ -111,7 +104,7 @@ var Member = new Lang.Class({
 
         this._key = key;
         this._value = value;
-    },
+    }
 
     /**
      * Property key getter
@@ -120,7 +113,7 @@ var Member = new Lang.Class({
      */
     get key() {
         return this._key;
-    },
+    }
 
     /**
      * Property value getter
@@ -129,11 +122,11 @@ var Member = new Lang.Class({
      */
     get value() {
         return this._value;
-    },
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Enum.Enum constructor
@@ -192,9 +185,7 @@ var Member = new Lang.Class({
  * @param  {Object}
  * @return {Class}
  */
-var Enum = new Lang.Class({
-
-    Name: 'Enum.Enum',
+var Enum = class Enum {
 
     /**
      * Constructor
@@ -202,7 +193,7 @@ var Enum = new Lang.Class({
      * @param  {Mixed} params
      * @return {Void}
      */
-    _init: function(params) {
+    constructor(params) {
         this._members = [];
 
         let ptype = typeof params;
@@ -228,11 +219,11 @@ var Enum = new Lang.Class({
             if (props.hasOwnProperty(i))
                 addMember(this, i, props[i]);
         }
-    },
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Check if item is instance of Enum
@@ -242,7 +233,7 @@ var Enum = new Lang.Class({
  */
 var isEnum = function(item) {
     return item instanceof Enum;
-}
+};
 
 /**
  * Check if item is instance of Member
@@ -252,7 +243,7 @@ var isEnum = function(item) {
  */
 var isMember = function(item) {
     return item instanceof Member;
-}
+};
 
 /**
  * Add member to enumeration.
@@ -300,7 +291,7 @@ var addMember = function(self, key, value) {
     });
 
     return true;
-}
+};
 
 /**
  * Remove member from enumeration
@@ -321,7 +312,7 @@ var removeMember = function(self, member) {
     self._members.splice(index, 1);
 
     return true;
-}
+};
 
 /**
  * Get enumeration member(s) key(s)
@@ -358,7 +349,7 @@ var getKey = function(self, member) {
     }
 
     throw new Exception('Argument member must be of type Enum.Member or Number', 'Enum.getKey');
-}
+};
 
 /**
  * Get enumeration member(s) value(s)
@@ -395,7 +386,7 @@ var getValue = function(self, member) {
     }
 
     throw new Exception('Argument member must be of type Enum.Member or String', 'Enum.getValue');
-}
+};
 
 /**
  * Get enumeration member(s) index
@@ -435,7 +426,7 @@ var getIndex = function(self, member) {
         throw new Exception('Argument member is not member of Enum.Enum', 'Enum.getIndex');
 
     return result * 1;
-}
+};
 
 /**
  * Convert enumeration members to object
@@ -453,7 +444,7 @@ var toObject = function(self) {
     });
 
     return result;
-}
+};
 
 /**
  * Get enumeration minimal value
@@ -466,7 +457,7 @@ var min = function(self) {
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.min');
 
     return self._members.length ? self._members[0].value : null;
-}
+};
 
 /**
  * Get enumeration maximal value
@@ -479,7 +470,7 @@ var max = function(self) {
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.max');
 
     return self._members.length ? self._members[self._members.length - 1].value : null;
-}
+};
 
 /**
  * Get enumeration sum of values
@@ -500,7 +491,7 @@ var sum = function(self) {
     });
 
     return result;
-}
+};
 
 /**
  * Enumeration members iterator.
@@ -523,4 +514,4 @@ var forEach = function(self, callback) {
         if (callback.call(this, self._members[i].key, self._members[i].value))
             break;
     }
-}
+};

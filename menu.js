@@ -4,10 +4,7 @@
 'use strict';
 
 // import modules
-const Lang = imports.lang;
-const Mainloop = imports.mainloop;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
+const {GLib, GObject, Clutter} = imports.gi;
 const PopupMenu = imports.ui.popupMenu;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -17,10 +14,10 @@ const Translation = Me.imports.translation;
 const _ = Translation.translate;
 
 // PopupMenu proxies
-const Separator = PopupMenu.PopupSeparatorMenuItem;
-const Item = PopupMenu.PopupMenuItem;
-const SubMenu = PopupMenu.PopupSubMenuMenuItem;
-const Section = PopupMenu.PopupMenuSection;
+var PopupSeparatorMenuItem = PopupMenu.PopupSeparatorMenuItem;
+var PopupMenuItem = PopupMenu.PopupMenuItem;
+var PopupSubMenuMenuItem = PopupMenu.PopupSubMenuMenuItem;
+var PopupMenuSection = PopupMenu.PopupMenuSection;
 
 // Display enums
 var DisplayVagrant = Vagrant.CommandVagrant;
@@ -32,35 +29,31 @@ var DisplaySystem = Vagrant.CommandSystem;
  * @param  {Object}
  * @return {Class}
  */
-var Machine = new Lang.Class({
-
-    Name: 'Menu.Machine',
-    Extends: Section,
-
+var Machine = class Machine extends PopupMenuSection {
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function() {
-        this.parent();
+    constructor() {
+        super();
 
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-machine');
         this.clear();
-    },
+    }
 
     /**
      * Empty list
      *
      * @return {Void}
      */
-    clear: function() {
+    clear() {
         this.removeAll();
 
-        this.empty = new Item(_("No Vagrant machines found"));
+        this.empty = new PopupMenuItem(_("No Vagrant machines found"));
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
-    },
+    }
 
     /**
      * Display error
@@ -68,13 +61,13 @@ var Machine = new Lang.Class({
      * @param  {String} message
      * @return {Void}
      */
-    error: function(message) {
+    error(message) {
         this.removeAll();
 
         this.empty = new Item(message || 'ERROR');
         this.empty.setSensitive(false);
         this.addMenuItem(this.empty);
-    },
+    }
 
     /**
      * Add item to list
@@ -86,34 +79,34 @@ var Machine = new Lang.Class({
      * @param  {Number}    index (optional)
      * @return {Menu.Path}
      */
-    add: function(id, path, name, state, index) {
+    add(id, path, name, state, index) {
         if (this.empty)
             this.empty.destroy();
         this.empty = null;
 
         let item = new Path(id, path, name, state);
-        item.connect('error', Lang.bind(this, this._handleError));
-        item.connect('system', Lang.bind(this, this._handleSystem));
-        item.connect('vagrant', Lang.bind(this, this._handleVagrant));
+        //item.connect('error', this._handleError.bind(this));
+        item.connect('system', this._handleSystem.bind(this));
+        item.connect('vagrant', this._handleVagrant.bind(this));
 
         this.addMenuItem(item, index > -1 ? index : undefined);
 
         return item;
-    },
+    }
 
     /**
      * Remove item from list
      *
      * @return {Void}
      */
-    remove: function(id) {
+    remove(id) {
         this._getItem(id).forEach(function(actor) {
             actor.destroy();
         });
 
         if (!this._getItem().length)
             this.clear();
-    },
+    }
 
     /**
      * Get item index
@@ -121,7 +114,7 @@ var Machine = new Lang.Class({
      * @param  {String} id
      * @return {Number}
      */
-    getItemIndex: function(id) {
+    getItemIndex(id) {
         let result = -1;
         this.box.get_children()
             .map(function(actor) {
@@ -136,7 +129,7 @@ var Machine = new Lang.Class({
             });
 
         return result;
-    },
+    }
 
     /**
      * Set item index
@@ -145,7 +138,7 @@ var Machine = new Lang.Class({
      * @param  {Number} index
      * @return {Void}
      */
-    setItemIndex: function(id, index) {
+    setItemIndex(id, index) {
         let item = this._getItem(id);
         if (item.length !== 1)
             return;
@@ -175,7 +168,7 @@ var Machine = new Lang.Class({
         item.displayMachineName = displayMachineName;
         item.displayVagrant = displayVagrant;
         item.displaySystem = displaySystem;
-    },
+    }
 
     /**
      * Get item state
@@ -183,14 +176,14 @@ var Machine = new Lang.Class({
      * @param  {String} id
      * @return {String}
      */
-    getState: function(id) {
+    getState(id) {
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
         item = item[0];
 
         return item.state;
-    },
+    }
 
     /**
      * Set item state
@@ -199,13 +192,13 @@ var Machine = new Lang.Class({
      * @param  {String} value
      * @return {Void}
      */
-    setState: function(id, value) {
+    setState(id, value) {
         this._getItem(id).forEach(function(actor) {
             actor.actor.remove_style_class_name(actor.state);
             actor.actor.add_style_class_name(value);
             actor.state = value;
         });
-    },
+    }
 
     /**
      * Get item displayMachineFullPath property
@@ -213,14 +206,14 @@ var Machine = new Lang.Class({
      * @param  {String}  id
      * @return {Boolean}
      */
-    getDisplayMachineFullPath: function(id) {
+    getDisplayMachineFullPath(id) {
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
         item = item[0];
 
         return item.displayMachineFullPath;
-    },
+    }
 
     /**
      * Set item displayMachineFullPath property
@@ -229,11 +222,11 @@ var Machine = new Lang.Class({
      * @param  {Boolean} value
      * @return {Void}
      */
-    setDisplayMachineFullPath: function(id, value) {
+    setDisplayMachineFullPath(id, value) {
         this._getItem(id).forEach(function(actor) {
             actor.displayMachineFullPath = value;
         });
-    },
+    }
 
     /**
      * Get item displayMachineName property
@@ -241,14 +234,14 @@ var Machine = new Lang.Class({
      * @param  {String}  id
      * @return {Boolean}
      */
-    getDisplayMachineName: function(id) {
+    getDisplayMachineName(id) {
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
         item = item[0];
 
         return item.displayMachineName;
-    },
+    }
 
     /**
      * Set item displayMachineName property
@@ -257,11 +250,11 @@ var Machine = new Lang.Class({
      * @param  {Boolean} value
      * @return {Void}
      */
-    setDisplayMachineName: function(id, value) {
+    setDisplayMachineName(id, value) {
         this._getItem(id).forEach(function(actor) {
             actor.displayMachineName = value;
         });
-    },
+    }
 
     /**
      * Get item title
@@ -269,14 +262,14 @@ var Machine = new Lang.Class({
      * @param  {String} id
      * @return {Mixed}
      */
-    getTitle: function(id) {
+    getTitle(id) {
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
         item = item[0];
 
         return item.title;
-    },
+    }
 
     /**
      * Set item title
@@ -285,11 +278,11 @@ var Machine = new Lang.Class({
      * @param  {Mixed}  value
      * @return {Void}
      */
-    setTitle: function(id, value) {
+    setTitle(id, value) {
         this._getItem(id).forEach(function(actor) {
             actor.title = value;
         });
-    },
+    }
 
     /**
      * Get item current label
@@ -297,14 +290,14 @@ var Machine = new Lang.Class({
      * @param  {String} id
      * @return {String}
      */
-    getCurrentLabel: function(id) {
+    getCurrentLabel(id) {
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
         item = item[0];
 
         return item.label.text;
-    },
+    }
 
     /**
      * Get DisplayVagrant:
@@ -314,14 +307,14 @@ var Machine = new Lang.Class({
      * @param  {String} id
      * @return {Number}
      */
-    getDisplayVagrant: function(id) {
+    getDisplayVagrant(id) {
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
         item = item[0];
 
         return item.displayVagrant;
-    },
+    }
 
     /**
      * Set DisplayVagrant
@@ -330,7 +323,7 @@ var Machine = new Lang.Class({
      * @param  {Number} value
      * @return {Void}
      */
-    setDisplayVagrant: function(id, value) {
+    setDisplayVagrant(id, value) {
         if (value < Enum.min(DisplayVagrant))
             value = Enum.min(DisplayVagrant);
         else if (value > Enum.sum(DisplayVagrant))
@@ -339,7 +332,7 @@ var Machine = new Lang.Class({
         this._getItem(id).forEach(function(actor) {
             actor.displayVagrant = value;
         });
-    },
+    }
 
     /**
      * Get DisplaySystem:
@@ -349,14 +342,14 @@ var Machine = new Lang.Class({
      * @param  {String} id
      * @return {Number}
      */
-    getDisplaySystem: function(id) {
+    getDisplaySystem(id) {
         let item = this._getItem(id);
         if (item.length !== 1)
             return null;
         item = item[0];
 
         return item.displaySystem;
-    },
+    }
 
     /**
      * Set DisplaySystem
@@ -365,7 +358,7 @@ var Machine = new Lang.Class({
      * @param  {Number} value
      * @return {Void}
      */
-    setDisplaySystem: function(id, value) {
+    setDisplaySystem(id, value) {
         if (value < Enum.min(DisplaySystem))
             value = Enum.min(DisplaySystem);
         else if (value > Enum.sum(DisplaySystem))
@@ -374,7 +367,7 @@ var Machine = new Lang.Class({
         this._getItem(id).forEach(function(actor) {
             actor.displaySystem = value;
         });
-    },
+    }
 
     /**
      * Get submenu item from menu list
@@ -382,7 +375,7 @@ var Machine = new Lang.Class({
      * @param  {String} id (optional)
      * @return {Array}
      */
-    _getItem: function(id) {
+    _getItem(id) {
         return this.box.get_children()
             .map(function(actor) {
                 return actor._delegate;
@@ -390,52 +383,46 @@ var Machine = new Lang.Class({
             .filter(function(actor) {
                 return actor instanceof Path && (id ? actor.id === id : true);
             });
-    },
+    }
 
     /**
      * Error handler
      *
      * @param  {Menu.Path} widget
-     * @param  {Object}    event
+     * @param  {GObject.Object}    event
      * @return {Void}
      */
-    _handleError: function(widget, event) {
+    _handleError(widget, event) {
         this.emit('error', event);
-    },
+    }
 
     /**
      * Menu subitem (system command)
      * execute event handler
      *
      * @param  {Menu.Path} widget
-     * @param  {Object}    event
+     * @param  {GObject.Object}   object
      * @return {Void}
      */
-    _handleSystem: function(widget, event) {
-        this.emit('system', {
-            id: event.id,
-            command: event.command,
-        });
-    },
+    _handleSystem(widget, object) {
+        this.emit('system', object);
+    }
 
     /**
      * Menu subitem (vagrant command)
      * execute event handler
      *
      * @param  {Menu.Path} widget
-     * @param  {Object}    event
+     * @param  {GObject.Object}   object
      * @return {Void}
      */
-    _handleVagrant: function(widget, event) {
-        this.emit('vagrant', {
-            id: event.id,
-            command: event.command,
-        });
-    },
+    _handleVagrant(widget, object) {
+        this.emit('vagrant', object);
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Menu.Path constructor
@@ -443,11 +430,13 @@ var Machine = new Lang.Class({
  * @param  {Object}
  * @return {Class}
  */
-var Path = new Lang.Class({
-
-    Name: 'Menu.Path',
-    Extends: SubMenu,
-
+var Path = GObject.registerClass({
+    Signals: {
+        'system': { param_types: [ GObject.TYPE_OBJECT ] },
+        'vagrant': { param_types: [ GObject.TYPE_OBJECT ] },
+        'error': { param_types: [ GObject.TYPE_NONE ]},
+    }
+}, class Path extends Machine {
     /**
      * Constructor
      *
@@ -457,8 +446,8 @@ var Path = new Lang.Class({
      * @param  {String} state
      * @return {Void}
      */
-    _init: function(id, path, name, state) {
-        this.parent('unknown');
+    _init(id, path, name, state) {
+        super._init('unknown');
 
         this._id = id;
         this._path = path;
@@ -476,21 +465,21 @@ var Path = new Lang.Class({
         // with setter we're making sure className
         // (machine state) is set
         this.state = state;
-    },
+    }
 
     /**
      * Create user interface
      *
      * @return {Void}
      */
-    _ui: function() {
+    _ui() {
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-path');
         this.menu.actor.add_style_class_name('gnome-vagrant-indicator-menu-submenu');
         this.setOrnament(PopupMenu.Ornament.DOT);
 
         this._uiVagrant();
         this._uiSystem();
-    },
+    }
 
     /**
      * Create user interface for
@@ -498,7 +487,7 @@ var Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _uiVagrant: function() {
+    _uiVagrant() {
         this.vagrant = {};
 
         let item = new Header(_("VAGRANT COMMANDS"));
@@ -526,11 +515,11 @@ var Path = new Lang.Class({
 
             let item = new Command(label);
             item.command = cmd;
-            item.connect('execute', Lang.bind(this, this._handleVagrant));
+            item.connect('execute', this._handleVagrant.bind(this));
             this.menu.addMenuItem(item);
             this.vagrant[id] = item;
         }
-    },
+    }
 
     /**
      * Create user interface for
@@ -538,7 +527,7 @@ var Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _uiSystem: function() {
+    _uiSystem() {
         this.system = {};
 
         let item = new Header(_("SYSTEM COMMANDS"));
@@ -559,34 +548,34 @@ var Path = new Lang.Class({
 
             let item = new Command(label);
             item.command = cmd;
-            item.connect('execute', Lang.bind(this, this._handleSystem));
+            item.connect('execute', this._handleSystem.bind(this));
             this.menu.addMenuItem(item);
             this.system[id] = item;
         }
-    },
+    }
 
     /**
      * Bind events
      *
      * @return {Void}
      */
-    _bind: function() {
-        this.connect('activate', Lang.bind(this, this._handleActivate));
-    },
+    _bind() {
+        this.connect('activate', this._handleActivate.bind(this));
+    }
 
     /**
      * Act like PopupMenu.PopupMenuItem
      * when submenu is empty
      *
-     * @param  {Booelan} open
+     * @param  {Boolean} open
      * @return {Void}
      */
-    setSubmenuShown: function(open) {
-        this.parent(open);
+    setSubmenuShown(open) {
+        super.setSubmenuShown(open);
 
         if (!this.system.header.actor.visible && !this.vagrant.header.actor.visible)
             this.emit('activate');
-    },
+    }
 
     /**
      * Property displayMachineFullPath getter
@@ -595,7 +584,7 @@ var Path = new Lang.Class({
      */
     get displayMachineFullPath() {
         return this._displayMachineFullPath;
-    },
+    }
 
     /**
      * Property displayMachineFullPath setter
@@ -607,7 +596,7 @@ var Path = new Lang.Class({
         this._displayMachineFullPath = !!value;
 
         this._refreshMenu();
-    },
+    }
 
     /**
      * Property displayMachineName getter
@@ -616,7 +605,7 @@ var Path = new Lang.Class({
      */
     get displayMachineName() {
         return this._displayMachineName;
-    },
+    }
 
     /**
      * Property displayMachineName setter
@@ -628,7 +617,7 @@ var Path = new Lang.Class({
         this._displayMachineName = !!value;
 
         this._refreshMenu();
-    },
+    }
 
     /**
      * Property id getter
@@ -637,7 +626,7 @@ var Path = new Lang.Class({
      */
     get id() {
         return this._id;
-    },
+    }
 
     /**
      * Property path getter
@@ -646,7 +635,7 @@ var Path = new Lang.Class({
      */
     get path() {
         return this._path;
-    },
+    }
 
     /**
      * Property name getter
@@ -655,7 +644,7 @@ var Path = new Lang.Class({
      */
     get name() {
         return this._name;
-    },
+    }
 
     /**
      * Property state getter
@@ -664,7 +653,7 @@ var Path = new Lang.Class({
      */
     get state() {
         return this._state;
-    },
+    }
 
     /**
      * Property state setter
@@ -679,7 +668,7 @@ var Path = new Lang.Class({
         this._state = value;
 
         this._refreshMenu();
-    },
+    }
 
     /**
      * Property title getter
@@ -688,7 +677,7 @@ var Path = new Lang.Class({
      */
     get title() {
         return this._title;
-    },
+    }
 
     /**
      * Property title setter
@@ -708,7 +697,7 @@ var Path = new Lang.Class({
         this._title = value || null;
 
         this._refreshMenu();
-    },
+    }
 
     /**
      * Get DisplayVagrant:
@@ -719,7 +708,7 @@ var Path = new Lang.Class({
      */
     get displayVagrant() {
         return this._displayVagrant;
-    },
+    }
 
     /**
      * Set DisplayVagrant
@@ -736,7 +725,7 @@ var Path = new Lang.Class({
         this._displayVagrant = value;
 
         this._refreshMenu();
-    },
+    }
 
     /**
      * Get DisplaySystem:
@@ -747,7 +736,7 @@ var Path = new Lang.Class({
      */
     get displaySystem() {
         return this._displaySystem;
-    },
+    }
 
     /**
      * Set DisplaySystem
@@ -764,7 +753,7 @@ var Path = new Lang.Class({
         this._displaySystem = value;
 
         this._refreshMenu();
-    },
+    }
 
     /**
      * Show/hide system/vagrant menu
@@ -772,14 +761,14 @@ var Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refreshMenu: function() {
+    _refreshMenu() {
         this._refreshMenuByTitle();
         this._refreshMenuByDisplayVagrant();
         this._refreshMenuByDisplaySystem();
         this._refreshMenuByState();
         this._refreshMenuDropdown();
         this._refreshMenuHeaders();
-    },
+    }
 
     /**
      * Set menu label based on title or based
@@ -790,7 +779,7 @@ var Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refreshMenuByTitle: function() {
+    _refreshMenuByTitle() {
         let title = this.title;
         if (!title) {
             title = this.path;
@@ -801,7 +790,7 @@ var Path = new Lang.Class({
         }
 
         this.label.text = title;
-    },
+    }
 
     /**
      * Show/hide vagrant menu items
@@ -809,7 +798,7 @@ var Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refreshMenuByDisplayVagrant: function() {
+    _refreshMenuByDisplayVagrant() {
         let value = this.displayVagrant;
         for (let key in this.vagrant) {
             if (key === 'header')
@@ -821,7 +810,7 @@ var Path = new Lang.Class({
 
             menu.actor.visible = visible;
         }
-    },
+    }
 
     /**
      * Show/hide system menu items
@@ -829,7 +818,7 @@ var Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refreshMenuByDisplaySystem: function() {
+    _refreshMenuByDisplaySystem() {
         let value = this.displaySystem;
         for (let key in this.system) {
             if (key === 'header')
@@ -841,7 +830,7 @@ var Path = new Lang.Class({
 
             menu.actor.visible = visible;
         }
-    },
+    }
 
     /**
      * Hide vagrant menu items based
@@ -849,7 +838,7 @@ var Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refreshMenuByState: function() {
+    _refreshMenuByState() {
         this.setSensitive(true);
 
         let state = this.state;
@@ -904,14 +893,14 @@ var Path = new Lang.Class({
             // disable menu on aborted or unknown state
             this.setSensitive(false);
         }
-    },
+    }
 
     /**
      * Show/hide dropdown arrow
      *
      * @return {Void}
      */
-    _refreshMenuDropdown: function() {
+    _refreshMenuDropdown() {
         this._triangleBin.visible = false
             || this.system.terminal.actor.visible
             || this.system.file_manager.actor.visible
@@ -927,7 +916,7 @@ var Path = new Lang.Class({
             || this.vagrant.suspend.actor.visible
             || this.vagrant.halt.actor.visible
             || this.vagrant.destroy.actor.visible;
-    },
+    }
 
     /**
      * Show/hide system/vagrant menu
@@ -935,7 +924,7 @@ var Path = new Lang.Class({
      *
      * @return {Void}
      */
-    _refreshMenuHeaders: function() {
+    _refreshMenuHeaders() {
         this.vagrant.header.actor.visible = false
             || this.vagrant.up.actor.visible
             || this.vagrant.up_provision.actor.visible
@@ -953,7 +942,7 @@ var Path = new Lang.Class({
             || this.system.terminal.actor.visible
             || this.system.file_manager.actor.visible
             || this.system.vagrantfile.actor.visible;
-    },
+    }
 
     /**
      * Get submenu item from menu list
@@ -961,7 +950,7 @@ var Path = new Lang.Class({
      * @param  {String} method (optional)
      * @return {Array}
      */
-    _getItem: function(method) {
+    _getItem(method) {
         return this.get_children()
             .map(function(actor) {
                 return actor._delegate;
@@ -969,37 +958,36 @@ var Path = new Lang.Class({
             .filter(function(actor) {
                 return actor instanceof Path && (method ? actor.method === method : true);
             });
-    },
+    }
 
     /**
      * Menu item activate event handler
      * (called only if submenu is empty)
      *
      * @param  {Menu.Path}     widget
-     * @param  {Clutter.Event} event
+     * @param  {Clutter.Event.$gtype} event
      * @return {Void}
      */
-    _handleActivate: function(widget, event) {
-        this.emit('system', {
-            id: this.id,
-            command: DisplaySystem.TERMINAL,
-        });
-    },
+    _handleActivate(widget, event) {
+        let emit = new GObject.Object();
+        emit.id = this.id;
+        emit.command = DisplaySystem.TERMINAL;
+        this.emit('system', emit);
+    }
 
     /**
      * Menu subitem (system command)
      * execute event handler
      *
      * @param  {Menu.Command} widget
-     * @param  {Object}       event
      * @return {Void}
      */
-    _handleSystem: function(widget, event) {
-        this.emit('system', {
-            id: this.id,
-            command: widget.command,
-        });
-    },
+    _handleSystem(widget) {
+        let emit = new GObject.Object();
+        emit.id = this.id;
+        emit.command = widget.command;
+        this.emit('system', emit);
+    }
 
     /**
      * Menu subitem (vagrant command)
@@ -1009,12 +997,12 @@ var Path = new Lang.Class({
      * @param  {Object}       event
      * @return {Void}
      */
-    _handleVagrant: function(widget, event) {
-        this.emit('vagrant', {
-            id: this.id,
-            command: widget.command,
-        });
-    },
+    _handleVagrant(widget, event) {
+        let emit = new GObject.Object();
+        emit.id = this.id;
+        emit.command = widget.command;
+        this.emit('vagrant', emit);
+    }
 
     /* --- */
 
@@ -1026,52 +1014,52 @@ var Path = new Lang.Class({
  * @param  {Object}
  * @return {Class}
  */
-var Command = new Lang.Class({
-
-    Name: 'Menu.Command',
-    Extends: Item,
-
+var Command = GObject.registerClass({
+    Signals: {
+        'execute': { param_types: GObject.TYPE_NONE },
+    }
+}, class Command extends PopupMenuItem {
     /**
      * Constructor
      *
      * @param  {String} title
      * @return {Void}
      */
-    _init: function(title) {
-        this.parent(title);
+    _init(title) {
+        super._init(title);
 
         this._def();
         this._ui();
         this._bind();
-    },
+    }
 
     /**
      * Initialize object properties
      *
      * @return {Void}
      */
-    _def: function() {
+    _def() {
         this._method = 'unknown';
-    },
+    }
 
     /**
      * Create user interface
      *
      * @return {Void}
      */
-    _ui: function() {
+    _ui() {
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-command');
         this.actor.add_style_class_name(this.method);
-    },
+    }
 
     /**
      * Bind events
      *
      * @return {Void}
      */
-    _bind: function() {
-        this.connect('activate', Lang.bind(this, this._handleActivate));
-    },
+    _bind() {
+        this.connect('activate', this._handleActivate.bind(this));
+    }
 
     /**
      * Activate event handler
@@ -1080,9 +1068,9 @@ var Command = new Lang.Class({
      * @param  {Clutter.Event} event
      * @return {Void}
      */
-    _handleActivate: function(widget, event) {
-        this.emit('execute', {});
-    },
+    _handleActivate(widget, event) {
+        this.emit('execute');
+    }
 
     /**
      * Property method getter
@@ -1091,7 +1079,7 @@ var Command = new Lang.Class({
      */
     get method() {
         return this._method;
-    },
+    }
 
     /**
      * Property method getter
@@ -1101,7 +1089,7 @@ var Command = new Lang.Class({
      */
     set method(value) {
         this._method = value;
-    },
+    }
 
     /* --- */
 
@@ -1113,23 +1101,19 @@ var Command = new Lang.Class({
  * @param  {Object}
  * @return {Class}
  */
-var Header = new Lang.Class({
-
-    Name: 'Menu.Header',
-    Extends: Item,
-
+var Header = GObject.registerClass(class Header extends PopupMenuItem {
     /**
      * Constructor
      *
      * @param  {String} title
      * @return {Void}
      */
-    _init: function(title) {
-        this.parent(title);
+    _init(title) {
+        super._init(title);
 
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-header');
         this.setSensitive(false);
-    },
+    }
 
     /* --- */
 
