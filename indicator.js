@@ -208,29 +208,6 @@ var Base = new Lang.Class({
     },
 
     /**
-     * Get machine label by schema
-     * machine-full-path and
-     * machine-name settings
-     *
-     * @param  {String} id
-     * @return {String}
-     */
-    _getMachineLabel: function(id) {
-        let result = this.monitor.getValue(id, 'label');
-
-        if (!result) {
-            result = this.monitor.getMachineDetail(id, 'vagrantfile_path');
-
-            if (!this.monitor.getValue(id, 'machine-full-path'))
-                result = result.replace(/\/+$/, '').split('/').pop();
-            if (this.monitor.getValue(id, 'machine-name'))
-                result = (result + ' ' + this.monitor.getMachineDetail(id, 'name')).trim();
-        }
-
-        return result;
-    },
-
-    /**
      * Monitor change event handler
      *
      * @param  {Monitor.Monitor} widget
@@ -298,13 +275,14 @@ var Base = new Lang.Class({
      */
     _handleMonitorRemove: function(widget, event) {
         let id = event.id;
+        let label = this.machine.getCurrentLabel(id);
         this.machine.remove(id);
 
         let notify = this.monitor.getValue(id, 'notifications');
         if (!notify)
             return;
 
-        let title = this._getMachineLabel(id);
+        let title = label;
         let message = 'Machine destroyed';
         this.notification.show(title, message);
     },
@@ -325,7 +303,7 @@ var Base = new Lang.Class({
         if (!notify)
             return;
 
-        let title = this._getMachineLabel(id);
+        let title = this.machine.getCurrentLabel(id);
         let message = 'Machine went %s'.format(state);
         this.notification.show(title, message);
     },

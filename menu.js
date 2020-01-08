@@ -292,6 +292,21 @@ var Machine = new Lang.Class({
     },
 
     /**
+     * Get item current label
+     *
+     * @param  {String} id
+     * @return {String}
+     */
+    getCurrentLabel: function(id) {
+        let item = this._getItem(id);
+        if (item.length !== 1)
+            return null;
+        item = item[0];
+
+        return item.label.text;
+    },
+
+    /**
      * Get DisplayVagrant:
      * display vagrant menu subitems
      * from DisplayVagrant enum
