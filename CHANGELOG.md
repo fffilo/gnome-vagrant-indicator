@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 9 - 2020-01-08
+### Added
+- Preferences _Show machine name_ option
+### Changed
+- Swapped notification title and message (title is label, message is action)
+
 ## Version 8 - 2019-12-09
 ### Added
 - Vagrant multi-machine environment support
