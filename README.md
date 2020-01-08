@@ -79,10 +79,11 @@ which you can paste in `config.json`.
 
 | Key | Type | Description |
 | --- | --- | --- |
-| `label` | `string` | The machine label displayed in indicator. If omitted it will show machine path. |
+| `label` | `string` | The machine label displayed in indicator. If omitted it will show machine path/name. |
 | `order` | `number` | Machine order. By default machines are ordered chronologically, but you can set your own order with this number. |
 | `notifications` | `boolean` | Display notifications for current machine. |
 | `machineFullPath` | `boolean` | Display machine full path or just it's basename. Note that this will be ignored if `label` is set. |
+| `machineName` | `boolean` | Display machine name next to instance name (path). Note that this will be ignored if `label` is set. |
 | `postTerminalAction` | `string` | What to do with terminal emulator when vagrant command finishes. Possible values are `NONE` (leave opened),  `EXIT` (close), or `BOTH` (wait for keypress and close). |
 | `displaySystemTerminal` | `boolean` | Display _Open in Terminal_ in _System Commands_ section. This will open default terminal in vagrant machine's path. |
 | `displaySystemFileManager` | `boolean` | Display _Open in File Manager_ in _System Commands_ section. This will open default file manager in vagrant machine's path. |
