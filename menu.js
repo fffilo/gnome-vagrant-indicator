@@ -436,7 +436,7 @@ var Path = GObject.registerClass({
         'vagrant': { param_types: [ GObject.TYPE_OBJECT ] },
         'error': { param_types: [ GObject.TYPE_NONE ]},
     }
-}, class Path extends Machine {
+}, class Path extends PopupSubMenuMenuItem {
     /**
      * Constructor
      *
