@@ -36,13 +36,14 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     _init() {
         super._init(null, Me.metadata.name);
 
-        this._notification = new Notification.Base();
+        this._notifier = new Notification.Notifier();
         this._vagrant = new Vagrant.Emulator();
         this._monitor = new Monitor.Monitor(this.vagrant.monitor);
 
         if (this.monitor.getValue(null, "autoGlobalStatusPrune"))
             this.vagrant.globalStatusAsync(true);
 
+        this.notifier.icon = new Icons.Icon(Icons.DEFAULT);
         this.vagrant.connect('error', this._handleVagrantError.bind(this));
         this.monitor.connect('state', this._handleMonitorState.bind(this));
         this.monitor.connect('add', this._handleMonitorAdd.bind(this));
@@ -67,21 +68,21 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
             this.monitor.destroy();
         if (this.vagrant)
             this.vagrant.destroy();
-        if (this.notification)
-            this.notification.destroy();
+        if (this.notifier)
+            this.notifier.destroy();
 
         this._monitor = null;
         this._vagrant = null;
-        this._notification = null;
+        this._notifier = null;
     }
 
     /**
-     * Notification getter
+     * Notifier getter
      *
-     * @return {Notification.Base}
+     * @return {Notification.Notifier}
      */
-    get notification() {
-        return this._notification;
+    get notifier() {
+        return this._notifier;
     }
 
     /**
@@ -282,7 +283,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
 
         let title = label;
         let message = 'Machine destroyed';
-        this.notification.show(title, message);
+        this.notifier.notify(title, message);
     }
 
     /**
@@ -303,7 +304,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
 
         let title = this.machine.getCurrentLabel(id);
         let message = 'Machine went %s'.format(state);
-        this.notification.show(title, message);
+        this.notifier.notify(title, message);
     }
 
     /**
@@ -326,7 +327,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
             title = 'Vagrant.Unknown';
         }
 
-        this.notification.show(title, message);
+        this.notifier.notify(title, message);
     }
 
     /**

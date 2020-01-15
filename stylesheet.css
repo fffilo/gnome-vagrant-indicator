@@ -8,3 +8,4 @@
 .gnome-vagrant-indicator-menu-path.aborted .popup-menu-ornament { color: red; }
 .gnome-vagrant-indicator-menu-submenu { padding-bottom: 1em; }
 .gnome-vagrant-indicator-menu-header { margin-top: 1.5em; padding-left: 0.5em; font-size: 0.7em; }
+.gnome-vagrant-indicator-notification-banner .message-title { font-weight: bold; }
