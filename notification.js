@@ -4,7 +4,6 @@
 'use strict';
 
 // import modules
-const Lang = imports.lang;
 const Main = imports.ui.main;
 const MessageTray = imports.ui.messageTray;
 const ExtensionUtils = imports.misc.extensionUtils;
@@ -17,9 +16,7 @@ const Icons = Me.imports.icons;
  * @param  {Object}
  * @return {Class}
  */
-var Base = new Lang.Class({
-
-    Name: 'Notification.Base',
+var Base = class Base {
 
     /**
      * Constructor
@@ -28,22 +25,22 @@ var Base = new Lang.Class({
      * @param  {String} icon
      * @return {Void}
      */
-    _init: function(title, icon) {
+    constructor(title, icon) {
         this._title = title || Me.metadata.name;
         this._icon = icon || Icons.DEFAULT;
 
         this._source = null;
-    },
+    }
 
     /**
      * Destructor
      *
      * @return {Void}
      */
-    destroy: function() {
+    destroy() {
         if (this._source !== null)
             this._source.destroy();
-    },
+    }
 
     /**
      * Title getter
@@ -52,7 +49,7 @@ var Base = new Lang.Class({
      */
     get title() {
         return this._title;
-    },
+    }
 
     /**
      * Icon getter
@@ -61,22 +58,22 @@ var Base = new Lang.Class({
      */
     get icon() {
         return this._icon;
-    },
+    }
 
     /**
      * Prepare source
      *
      * @return {Void}
      */
-    _prepare: function() {
+    _prepare() {
         if (this._source !== null)
             return;
 
         this._source = new MessageTray.Source(this.title, this.icon);
-        this._source.connect('destroy', Lang.bind(this, this._handleDestroy));
+        this._source.connect('destroy', this._handleDestroy.bind(this));
 
         Main.messageTray.add(this._source);
-    },
+    }
 
     /**
      * Get existing notification from
@@ -86,7 +83,7 @@ var Base = new Lang.Class({
      * @param  {String}       message
      * @return {Notification}
      */
-    _notification: function(title, message) {
+    _notification(title, message) {
         let result = null;
         if (this._source.notifications.length) {
             result = this._source.notifications[0];
@@ -101,7 +98,7 @@ var Base = new Lang.Class({
         }
 
         return result;
-    },
+    }
 
     /**
      * Source destroy event handler:
@@ -109,9 +106,9 @@ var Base = new Lang.Class({
      *
      * @return {Void}
      */
-    _handleDestroy: function() {
+    _handleDestroy() {
         this._source = null;
-    },
+    }
 
     /**
      * Show notification
@@ -120,13 +117,13 @@ var Base = new Lang.Class({
      * @param  {String} message
      * @return {Void}
      */
-    show: function(title, message) {
+    show(title, message) {
         this._prepare();
 
         let notify = this._notification(title, message);
         this._source.notify(notify);
-    },
+    }
 
     /* --- */
 
-});
+};

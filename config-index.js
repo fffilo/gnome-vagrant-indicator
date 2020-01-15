@@ -38,8 +38,12 @@ const PROPERTIES = [
 let read = function(path) {
     try {
         let [ok, content] = GLib.file_get_contents(path);
-        let data = JSON.parse(content);
+        if (!ok || !content)
+            throw '';
+        else if (content instanceof Uint8Array)
+            content = String.fromCharCode.apply(null, content);
 
+        let data = JSON.parse(content);
         if (typeof data !== 'object')
             throw 'Not an object';
 
