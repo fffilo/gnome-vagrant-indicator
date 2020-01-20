@@ -4,7 +4,6 @@
 'use strict';
 
 // import modules
-const Lang = imports.lang;
 const Mainloop = imports.mainloop;
 const Signals = imports.signals;
 const Gio = imports.gi.Gio;
@@ -48,66 +47,58 @@ const PROPERTIES = [
  * @param  {Object}
  * @return {Class}
  */
-var Schema = new Lang.Class({
-
-    Name: 'Monitor.Schema',
-
-    /**
-     * Gio.Settings value getter for
-     * each setting type
-     *
-     * @type {Object}
-     */
-    _getMethod: {
-        b: 'get_boolean',
-        i: 'get_int',
-        s: 'get_string',
-    },
+var Schema = class Schema {
 
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function() {
+    constructor() {
+        this._getMethod = {
+            b: 'get_boolean',
+            i: 'get_int',
+            s: 'get_string',
+        };
+
         this._settings = Settings.settings();
         this._signal = null;
-    },
+    }
 
     /**
      * Destructor
      *
      * @return {Void}
      */
-    destroy: function() {
+    destroy() {
         this.stop();
         this._settings.run_dispose();
-    },
+    }
 
     /**
      * Start monitoring
      *
      * @return {Void}
      */
-    start: function() {
+    start() {
         if (this._signal)
             return;
 
-        this._signal = this._settings.connect('changed', Lang.bind(this, this._handleChange));
-    },
+        this._signal = this._settings.connect('changed', this._handleChange.bind(this));
+    }
 
     /**
      * Stop monitoring
      *
      * @return {Void}
      */
-    stop: function() {
+    stop() {
         if (!this._signal)
             return;
 
         this._settings.disconnect(this._signal);
         this._signal = null;
-    },
+    }
 
     /**
      * Get value by key
@@ -115,7 +106,7 @@ var Schema = new Lang.Class({
      * @param  {String} key
      * @return {Mixed}
      */
-    getValue: function(key) {
+    getValue(key) {
         // PROPERTIES is list of camel-case properties
         key = key.replace(/\-([a-z])/g, function(match, group) {
             return group.toUpperCase();
@@ -139,7 +130,7 @@ var Schema = new Lang.Class({
         let result = this._settings[method](key);
 
         return result;
-    },
+    }
 
     /**
      * Gio.Settings changed event handler
@@ -148,15 +139,15 @@ var Schema = new Lang.Class({
      * @param  {String} key
      * @return {Void}
      */
-    _handleChange: function(widget, key) {
+    _handleChange(widget, key) {
         this.emit('change', {
             id: key,
         });
-    },
+    }
 
     /* --- */
 
-});
+};
 
 Signals.addSignalMethods(Schema.prototype);
 
@@ -166,16 +157,14 @@ Signals.addSignalMethods(Schema.prototype);
  * @param  {Object}
  * @return {Class}
  */
-var Config = new Lang.Class({
-
-    Name: 'Monitor.Config',
+var Config = class Config {
 
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function() {
+    constructor() {
         try {
             let dir = GLib.path_get_dirname(this.path);
             if (!GLib.file_test(dir, GLib.FileTest.IS_DIR))
@@ -191,21 +180,21 @@ var Config = new Lang.Class({
         this._monitor = null;
         this._interval = null;
         this._config = this._read() || {};
-    },
+    }
 
     /**
      * Destructor
      *
      * @return {Void}
      */
-    destroy: function() {
+    destroy() {
         this.stop();
 
         this._config = null;
         this._interval = null;
         this._monitor = null;
         this._file = null;
-    },
+    }
 
     /**
      * Path getter
@@ -214,7 +203,7 @@ var Config = new Lang.Class({
      */
     get path() {
         return GLib.get_user_config_dir() + '/' + Me.metadata.uuid + '/config.json';
-    },
+    }
 
     /**
      * Delay (in miliseconds) for event
@@ -226,33 +215,33 @@ var Config = new Lang.Class({
      */
     get delay() {
         return 1000;
-    },
+    }
 
     /**
      * Start monitoring
      *
      * @return {Void}
      */
-    start: function() {
+    start() {
         if (this._monitor)
             return;
 
         this._monitor = this._file.monitor(Gio.FileMonitorFlags.NONE, null);
-        this._monitor.connect('changed', Lang.bind(this, this._handleChange));
-    },
+        this._monitor.connect('changed', this._handleChange.bind(this));
+    }
 
     /**
      * Stop monitoring
      *
      * @return {Void}
      */
-    stop: function() {
+    stop() {
         if (!this._monitor)
             return;
 
         this._monitor.cancel();
         this._monitor = null;
-    },
+    }
 
     /**
      * Get machine value by key
@@ -261,7 +250,7 @@ var Config = new Lang.Class({
      * @param  {String} key
      * @return {Mixed}
      */
-    getValue: function(machine, key) {
+    getValue(machine, key) {
         if (key)
             key = key.replace(/\-([a-z])/g, function(match, group) {
                 return group.toUpperCase();
@@ -278,14 +267,39 @@ var Config = new Lang.Class({
             return this._config[machine][key];
 
         return null;
-    },
+    }
+
+    /**
+     * Get output of shell command (sync)
+     * without throwing exception (instead
+     * exception result is null)
+     *
+     * @param  {String} command command to execute
+     * @return {String}         output string or null on fail
+     */
+    _shellOutput(command) {
+        try {
+            let [ ok, output, error, status ] = GLib.spawn_command_line_sync(command);
+            if (!status) {
+                if (output instanceof Uint8Array)
+                    output = String.fromCharCode.apply(null, output);
+
+                return output.toString().trim();
+            }
+        }
+        catch(e) {
+            // pass
+        }
+
+        return null;
+    }
 
     /**
      * Read json file
      *
      * @return {Object}
      */
-    _read: function() {
+    _read() {
         let result = null;
 
         try {
@@ -304,7 +318,7 @@ var Config = new Lang.Class({
         }
 
         return result;
-    },
+    }
 
     /**
      * Parse content of file, store it to
@@ -313,7 +327,7 @@ var Config = new Lang.Class({
      *
      * @return {Mixed}
      */
-    _parse: function() {
+    _parse() {
         let config = Object.assign({}, this._config);
         this._config = this._read() || {};
 
@@ -338,7 +352,7 @@ var Config = new Lang.Class({
 
         // return changes
         return result;
-    },
+    }
 
     /**
      * File monitor change event handler
@@ -347,10 +361,10 @@ var Config = new Lang.Class({
      * @param  {GLocalFile}          file
      * @return {Void}
      */
-    _handleChange: function(monitor, file) {
+    _handleChange(monitor, file) {
         Mainloop.source_remove(this._interval);
-        this._interval = Mainloop.timeout_add(this.delay, Lang.bind(this, this._handleChangeDelayed), null);
-    },
+        this._interval = Mainloop.timeout_add(this.delay, this._handleChangeDelayed.bind(this), null);
+    }
 
     /**
      * File monitor change event handler
@@ -358,7 +372,7 @@ var Config = new Lang.Class({
      *
      * @return {Void}
      */
-    _handleChangeDelayed: function() {
+    _handleChangeDelayed() {
         this._interval = null;
 
         let changes = this._parse();
@@ -369,11 +383,11 @@ var Config = new Lang.Class({
 
         // stop repeating
         return false;
-    },
+    }
 
     /* --- */
 
-});
+};
 
 Signals.addSignalMethods(Config.prototype);
 
@@ -383,9 +397,7 @@ Signals.addSignalMethods(Config.prototype);
  * @param  {Object}
  * @return {Class}
  */
-var Monitor = new Lang.Class({
-
-    Name: 'Monitor.Monitor',
+var Monitor = class Monitor {
 
     /**
      * Constructor
@@ -395,7 +407,7 @@ var Monitor = new Lang.Class({
      * @param  {Monitor.Schema}  schemaMonitor  (optional)
      * @return {Void}
      */
-    _init: function(vagrantMonitor, configMonitor, schemaMonitor) {
+    constructor(vagrantMonitor, configMonitor, schemaMonitor) {
         this._destroy = [];
         this._signal = {};
         this._data = null;
@@ -420,19 +432,19 @@ var Monitor = new Lang.Class({
         this._schema = schemaMonitor;
 
         // connect signals
-        this._signal.vagrantState = this._vagrant.connect('state', Lang.bind(this, this._handleVagrantState));
-        this._signal.vagrantAdd = this._vagrant.connect('add', Lang.bind(this, this._handleVagrantAdd));
-        this._signal.vagrantRemove = this._vagrant.connect('remove', Lang.bind(this, this._handleVagrantRemove));
-        this._signal.configChange = this._config.connect('change', Lang.bind(this, this._handleConfigChange));
-        this._signal.schemaChange = this._schema.connect('change', Lang.bind(this, this._handleSchemaChange));
-    },
+        this._signal.vagrantState = this._vagrant.connect('state', this._handleVagrantState.bind(this));
+        this._signal.vagrantAdd = this._vagrant.connect('add', this._handleVagrantAdd.bind(this));
+        this._signal.vagrantRemove = this._vagrant.connect('remove', this._handleVagrantRemove.bind(this));
+        this._signal.configChange = this._config.connect('change', this._handleConfigChange.bind(this));
+        this._signal.schemaChange = this._schema.connect('change', this._handleSchemaChange.bind(this));
+    }
 
     /**
      * Destructor
      *
      * @return {Void}
      */
-    destroy: function() {
+    destroy() {
         if (this.vagrant) {
             this.vagrant.disconnect(this._signal.vagrantState);
             this.vagrant.disconnect(this._signal.vagrantAdd);
@@ -453,43 +465,43 @@ var Monitor = new Lang.Class({
         this._data = null;
         this._signal = null;
         this._destroy = null;
-    },
+    }
 
     /**
      * Start monitoring
      *
      * @return {Void}
      */
-    start: function() {
+    start() {
         this._update();
 
         this._vagrant.start();
         this._config.start();
         this._schema.start();
-    },
+    }
 
     /**
      * Stop monitoring
      *
      * @return {Void}
      */
-    stop: function() {
+    stop() {
         this._vagrant.stop();
         this._config.stop();
         this._schema.stop();
 
         this._update();
-    },
+    }
 
     /**
      * Get sorted machine list
      *
      * @return {Array} null on fail
      */
-    getMachineList: function() {
+    getMachineList() {
         var machines = this._vagrant && this._vagrant.index ? Object.keys(this._vagrant.index.machines) : null;
         if (machines)
-            machines.sort(Lang.bind(this, function(id1, id2) {
+            machines.sort(function(id1, id2) {
                 // sort by order
                 let compare1 = this.getValue(id1, 'order') || 9999;
                 let compare2 = this.getValue(id2, 'order') || 9999;
@@ -507,10 +519,10 @@ var Monitor = new Lang.Class({
                     return 1;
 
                 return 0;
-            }));
+            }.bind(this));
 
         return machines;
-    },
+    }
 
     /**
      * Get machine detail (from vagrant
@@ -520,7 +532,7 @@ var Monitor = new Lang.Class({
      * @param  {String} key     (optional)
      * @return {Object}         null on fail
      */
-    getMachineDetail: function(machine, key) {
+    getMachineDetail(machine, key) {
         let index = this._vagrant ? this._vagrant.index : null;
         if (index && index.machines && (machine in index.machines) && (typeof key === 'undefined'))
             return index.machines[machine];
@@ -528,7 +540,7 @@ var Monitor = new Lang.Class({
             return index.machines[machine][key];
 
         return null;
-    },
+    }
 
     /**
      * Get value by key (from Schema object)
@@ -536,9 +548,9 @@ var Monitor = new Lang.Class({
      * @param  {String} key
      * @return {Mixed}
      */
-    getSchemaValue: function(key) {
+    getSchemaValue(key) {
         return this._schema.getValue(key);
-    },
+    }
 
     /**
      * Get machine value by key (for
@@ -548,9 +560,9 @@ var Monitor = new Lang.Class({
      * @param  {String} key
      * @return {Mixed}
      */
-    getConfigValue: function(machine, key) {
+    getConfigValue(machine, key) {
         return this._config.getValue(machine, key);
-    },
+    }
 
     /**
      * Get machine value by key (get config
@@ -561,7 +573,7 @@ var Monitor = new Lang.Class({
      * @param  {String} key
      * @return {Mixed}
      */
-    getValue: function(machine, key) {
+    getValue(machine, key) {
         let result = null;
         if (result === null)
             result = this.getConfigValue(machine, key);
@@ -569,21 +581,21 @@ var Monitor = new Lang.Class({
             result = this.getSchemaValue(key);
 
         return result;
-    },
+    }
 
     /**
      * Update data
      *
      * @return {Void}
      */
-    _update: function() {
+    _update() {
         this._data = {};
 
         let machines = this.getMachineList() || [];
         for (let i = 0; i < machines.length; i++) {
             this._updateMachine(machines[i]);
         }
-    },
+    }
 
     /**
      * Update data for specific machine
@@ -591,7 +603,7 @@ var Monitor = new Lang.Class({
      * @param  {String} machine
      * @return {Void}
      */
-    _updateMachine: function(machine) {
+    _updateMachine(machine) {
         let machines = this.getMachineList() || [];
         let index = machines.indexOf(machine);
         if (index !== -1) {
@@ -603,7 +615,7 @@ var Monitor = new Lang.Class({
         }
         else if (index === -1 && machine in this._data)
             delete this._data[machine];
-    },
+    }
 
     /**
      * Update data for specific machine
@@ -613,7 +625,7 @@ var Monitor = new Lang.Class({
      * @param  {String} key
      * @return {Void}
      */
-    _updateMachineKey: function(machine, key) {
+    _updateMachineKey(machine, key) {
         let machines = this.getMachineList() || [];
         let index = machines.indexOf(machine);
         if (index === -1)
@@ -628,7 +640,7 @@ var Monitor = new Lang.Class({
             return;
 
         this._data[machine][key] = this.getValue(machine, key);
-    },
+    }
 
     /**
      * Vagrant state event handler
@@ -637,9 +649,9 @@ var Monitor = new Lang.Class({
      * @param  {Object}          event
      * @return {Object}
      */
-    _handleVagrantState: function(widget, event) {
+    _handleVagrantState(widget, event) {
         this.emit('state', event);
-    },
+    }
 
     /**
      * Vagrant add event handler
@@ -648,11 +660,11 @@ var Monitor = new Lang.Class({
      * @param  {Object}          event
      * @return {Object}
      */
-    _handleVagrantAdd: function(widget, event) {
+    _handleVagrantAdd(widget, event) {
         this._updateMachine(event.id);
 
         this.emit('add', event);
-    },
+    }
 
     /**
      * Vagrant remove event handler
@@ -661,11 +673,11 @@ var Monitor = new Lang.Class({
      * @param  {Object}          event
      * @return {Object}
      */
-    _handleVagrantRemove: function(widget, event) {
+    _handleVagrantRemove(widget, event) {
         this._updateMachine(event.id);
 
         this.emit('remove', event);
-    },
+    }
 
     /**
      * Config change event handler
@@ -674,7 +686,7 @@ var Monitor = new Lang.Class({
      * @param  {Object}         event
      * @return {Object}
      */
-    _handleConfigChange: function(widget, event) {
+    _handleConfigChange(widget, event) {
         // get machine list
         let machines = this.getMachineList() || [];
         let changes = event.id.filter(function(item) {
@@ -715,7 +727,7 @@ var Monitor = new Lang.Class({
         // is there anything to emit?
         if (Object.keys(emit).length)
             this.emit('change', emit);
-    },
+    }
 
     /**
      * Schema change event handler
@@ -724,7 +736,7 @@ var Monitor = new Lang.Class({
      * @param  {Object}         event
      * @return {Void}
      */
-    _handleSchemaChange: function(widget, event) {
+    _handleSchemaChange(widget, event) {
         // get and update this._data
         let key = event.id;
         key = key.replace(/\-([a-z])/g, function(match, group) {
@@ -754,10 +766,10 @@ var Monitor = new Lang.Class({
         // is there anything to emit?
         if (Object.keys(emit).length)
             this.emit('change', emit);
-    },
+    }
 
     /* --- */
 
-});
+};
 
 Signals.addSignalMethods(Monitor.prototype);

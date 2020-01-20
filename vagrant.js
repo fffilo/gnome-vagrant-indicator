@@ -30,7 +30,6 @@
 'use strict';
 
 // import modules
-const Lang = imports.lang;
 const Mainloop = imports.mainloop;
 const Signals = imports.signals;
 const GLib = imports.gi.GLib;
@@ -107,19 +106,17 @@ Enum.addMember(PostTerminalAction, 'BOTH', Enum.sum(PostTerminalAction));
  * @param  {Object}
  * @return {Class}
  */
-var Exception = new Lang.Class({
-
-    Name: 'Vagrant.Exception',
+var Exception = class Exception {
 
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function(message, title) {
+    constructor(message, title) {
         this._message = message;
         this._title = title;
-    },
+    }
 
     /**
      * Property message getter
@@ -128,7 +125,7 @@ var Exception = new Lang.Class({
      */
     get message() {
         return this._message;
-    },
+    }
 
     /**
      * Property title getter
@@ -137,23 +134,23 @@ var Exception = new Lang.Class({
      */
     get title() {
         return this._title;
-    },
+    }
 
     /**
      * Exception as string
      *
      * @return {String}
      */
-    toString: function() {
+    toString() {
         return ''
             + (this.title || '')
             + (this.title && this.message ? ': ' : '')
             + (this.message || '');
-    },
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Vagrant.Index constructor:
@@ -163,27 +160,25 @@ var Exception = new Lang.Class({
  * @param  {Object}
  * @return {Class}
  */
-var Index = new Lang.Class({
-
-    Name: 'Vagrant.Index',
+var Index = class Index {
 
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function() {
+    constructor() {
         this._path = VAGRANT_INDEX;
-    },
+    }
 
     /**
      * Destructor
      *
      * @return {Void}
      */
-    destroy: function() {
+    destroy() {
         // pass
-    },
+    }
 
     /**
      * Property path getter:
@@ -193,16 +188,16 @@ var Index = new Lang.Class({
      */
     get path() {
         return this._path;
-    },
+    }
 
     /**
      * Parse vagrant machine index file content
      *
      * @return {Object}
      */
-    parse: function() {
+    parse() {
         try {
-            let [ok, content] = GLib.file_get_contents(this.path);
+            let [ ok, content ] = GLib.file_get_contents(this.path);
             if (!ok || !content)
                 throw '';
             else if (content instanceof Uint8Array)
@@ -225,11 +220,11 @@ var Index = new Lang.Class({
             version: 0,
             machines: {},
         }
-    },
+    }
 
     /* --- */
 
-});
+};
 
 /**
  * Vagrant.Monitor constructor:
@@ -239,16 +234,14 @@ var Index = new Lang.Class({
  * @param  {Object}
  * @return {Class}
  */
-var Monitor = new Lang.Class({
-
-    Name: 'Vagrant.Monitor',
+var Monitor = class Monitor {
 
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function() {
+    constructor() {
         this._index = null;
         this._file = null;
         this._monitor = null;
@@ -256,21 +249,21 @@ var Monitor = new Lang.Class({
 
         let path = this.refresh();
         this._file = Gio.File.new_for_path(path);
-    },
+    }
 
     /**
      * Destructor
      *
      * @return {Void}
      */
-    destroy: function() {
+    destroy() {
         this.stop();
 
         this._interval = null;
         this._monitor = null;
         this._file = null;
         this._index = null;
-    },
+    }
 
     /**
      * Monitor vagrant machine index file
@@ -278,13 +271,13 @@ var Monitor = new Lang.Class({
      *
      * @return {Void}
      */
-    start: function() {
+    start() {
         if (this._monitor)
             return;
 
         this._monitor = this._file.monitor(Gio.FileMonitorFlags.NONE, null);
-        this._monitor.connect('changed', Lang.bind(this, this._handleMonitorChanged));
-    },
+        this._monitor.connect('changed', this._handleMonitorChanged.bind(this));
+    }
 
     /**
      * Unmonitor vagrant machine index file
@@ -292,7 +285,7 @@ var Monitor = new Lang.Class({
      *
      * @return {Void}
      */
-    stop: function() {
+    stop() {
         if (!this._monitor)
             return;
 
@@ -301,7 +294,7 @@ var Monitor = new Lang.Class({
         this._monitor.cancel();
         this._monitor = null;
         this._interval = null;
-    },
+    }
 
     /**
      * Parse vagrant machine index file content,
@@ -310,7 +303,7 @@ var Monitor = new Lang.Class({
      *
      * @return {String}
      */
-    refresh: function() {
+    refresh() {
         let index = new Index();
         let result = index.path;
 
@@ -319,7 +312,7 @@ var Monitor = new Lang.Class({
         index.destroy();
 
         return result;
-    },
+    }
 
     /**
      * Property index getter:
@@ -330,7 +323,7 @@ var Monitor = new Lang.Class({
      */
     get index() {
         return this._index;
-    },
+    }
 
     /**
      * Delay (in miliseconds) for event
@@ -342,7 +335,7 @@ var Monitor = new Lang.Class({
      */
     get delay() {
         return 1000;
-    },
+    }
 
     /**
      * Vagrant machine index file content
@@ -352,10 +345,10 @@ var Monitor = new Lang.Class({
      * @param  {GLocalFile}          file
      * @return {Void}
      */
-    _handleMonitorChanged: function(monitor, file) {
+    _handleMonitorChanged(monitor, file) {
         Mainloop.source_remove(this._interval);
-        this._interval = Mainloop.timeout_add(this.delay, Lang.bind(this, this._handleMonitorChangedDelayed), null);
-    },
+        this._interval = Mainloop.timeout_add(this.delay, this._handleMonitorChangedDelayed.bind(this), null);
+    }
 
     /**
      * Adding delay after vagrant machine
@@ -366,7 +359,7 @@ var Monitor = new Lang.Class({
      *
      * @return {Boolean}
      */
-    _handleMonitorChangedDelayed: function() {
+    _handleMonitorChangedDelayed() {
         this._interval = null;
 
         let emit = [];
@@ -431,11 +424,11 @@ var Monitor = new Lang.Class({
 
         // stop repeating
         return false;
-    },
+    }
 
     /* --- */
 
-});
+};
 
 Signals.addSignalMethods(Monitor.prototype);
 
@@ -446,16 +439,14 @@ Signals.addSignalMethods(Monitor.prototype);
  * @param  {Object}
  * @return {Object}
  */
-var Emulator = new Lang.Class({
-
-    Name: 'Vagrant.Emulator',
+var Emulator = class Emulator {
 
     /**
      * Constructor
      *
      * @return {Void}
      */
-    _init: function() {
+    constructor() {
         this._monitor = null;
         this._terminal = null;
         this._command = null;
@@ -465,14 +456,14 @@ var Emulator = new Lang.Class({
         this._monitor.start();
 
         this._terminal = new Terminal.Emulator();
-    },
+    }
 
     /**
      * Destructor
      *
      * @return {Void}
      */
-    destroy: function() {
+    destroy() {
         if (this.terminal)
             this.terminal.destroy();
         if (this.monitor)
@@ -482,7 +473,7 @@ var Emulator = new Lang.Class({
         this._command = null;
         this._terminal = null;
         this._monitor = null;
-    },
+    }
 
     /**
      * Validate vagrant command and vagrant machine id
@@ -490,7 +481,7 @@ var Emulator = new Lang.Class({
      * @param  {String}  id machine id
      * @return {Boolean}
      */
-    _validate: function(id) {
+    _validate(id) {
         let index = this.monitor.index;
         let machine = index.machines[id] || null;
 
@@ -504,7 +495,7 @@ var Emulator = new Lang.Class({
             throw new Exception(MESSAGE_INVALID_PATH, 'Vagrant.Emulator');
         else if (!GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.EXISTS) || !GLib.file_test(machine.vagrantfile_path + '/Vagrantfile', GLib.FileTest.IS_REGULAR))
             throw new Exception(MESSAGE_MISSING_VAGRANTFILE, 'Vagrant.Emulator');
-    },
+    }
 
     /**
      * Open terminal and execute vagrant command
@@ -514,7 +505,7 @@ var Emulator = new Lang.Class({
      * @param  {Number} action (optional) PostTerminalAction
      * @return {Void}
      */
-    _exec: function(id, cmd, action) {
+    _exec(id, cmd, action) {
         this._validate(id);
 
         let index = this.monitor.index;
@@ -539,7 +530,7 @@ var Emulator = new Lang.Class({
         }
 
         this.terminal.popup(cwd, exe);
-    },
+    }
 
     /**
      * Property monitor getter
@@ -548,7 +539,7 @@ var Emulator = new Lang.Class({
      */
     get monitor() {
         return this._monitor;
-    },
+    }
 
     /**
      * Property terminal getter:
@@ -558,7 +549,7 @@ var Emulator = new Lang.Class({
      */
     get terminal() {
         return this._terminal;
-    },
+    }
 
     /**
      * Property command getter:
@@ -583,7 +574,7 @@ var Emulator = new Lang.Class({
         }
 
         return this._command;
-    },
+    }
 
     /**
      * Property version getter:
@@ -608,7 +599,7 @@ var Emulator = new Lang.Class({
         }
 
         return this._version;
-    },
+    }
 
     /**
      * Execute system command
@@ -617,7 +608,7 @@ var Emulator = new Lang.Class({
      * @param  {Number} cmd CommandSystem enum
      * @return {Void}
      */
-    open: function(id, cmd) {
+    open(id, cmd) {
         this._validate(id);
 
         let index = this.monitor.index;
@@ -636,7 +627,7 @@ var Emulator = new Lang.Class({
             let uri = GLib.filename_to_uri(index.machines[id].vagrantfile_path + '/.' + Me.metadata.uuid, null);
             Gio.AppInfo.launch_default_for_uri(uri, null);
         }
-    },
+    }
 
     /**
      * Execute vagrant command
@@ -646,7 +637,7 @@ var Emulator = new Lang.Class({
      * @param  {Number} action (optional) PostTerminalAction enum
      * @return {Void}
      */
-    execute: function(id, cmd, action) {
+    execute(id, cmd, action) {
         this._validate(id);
 
         if ((cmd | CommandVagrant.UP) === cmd)
@@ -673,7 +664,7 @@ var Emulator = new Lang.Class({
             this._exec(id, 'destroy', action);
         if ((cmd | CommandVagrant.DESTROY_FORCE) === cmd)
             this._exec(id, 'destroy --force', action);
-    },
+    }
 
     /**
      * Open terminal emulator and execute
@@ -682,7 +673,7 @@ var Emulator = new Lang.Class({
      * @param  {Boolean} prune (optional)
      * @return {Void}
      */
-    globalStatus: function(prune) {
+    globalStatus(prune) {
         let cwd = GLib.getenv('HOME');
         let exe = ''
             + this.command
@@ -690,7 +681,7 @@ var Emulator = new Lang.Class({
             + (prune ? ' --prune' : '');
 
         this.terminal.popup(cwd, exe);
-    },
+    }
 
     /**
      * Execute vagrant global-status {--prune}
@@ -700,7 +691,7 @@ var Emulator = new Lang.Class({
      * @param  {Function} callback (optional)
      * @return {Void}
      */
-    globalStatusAsync: function(prune, callback) {
+    globalStatusAsync(prune, callback) {
         let exe = ''
             + this.command
             + ' global-status'
@@ -713,7 +704,7 @@ var Emulator = new Lang.Class({
             });
 
             subprocess.init(null);
-            subprocess.communicate_utf8_async(null, null, Lang.bind(this, this._handleGlobalStatus, exe, callback));
+            subprocess.communicate_utf8_async(null, null, this._handleGlobalStatus.bind(this, exe, callback));
         }
         catch(e) {
             if (typeof callback === 'function')
@@ -724,7 +715,7 @@ var Emulator = new Lang.Class({
                     stderr: e.toString(),
                 });
         }
-    },
+    }
 
     /**
      * Async shell exec event handler
@@ -735,7 +726,7 @@ var Emulator = new Lang.Class({
      * @param  {Function}       callback (optional)
      * @return {Void}
      */
-    _handleGlobalStatus: function(source, resource, stdin, callback) {
+    _handleGlobalStatus(source, resource, stdin, callback) {
         let status = source.get_exit_status();
         let [, stdout, stderr] = source.communicate_utf8_finish(resource);
 
@@ -746,10 +737,10 @@ var Emulator = new Lang.Class({
                 stdout: stdout,
                 stderr: stderr,
             });
-    },
+    }
 
     /* --- */
 
-});
+};
 
 Signals.addSignalMethods(Emulator.prototype);

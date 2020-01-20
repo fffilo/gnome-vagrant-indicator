@@ -30,7 +30,6 @@
 'use strict';
 
 // import modules
-const Lang = imports.lang;
 const GLib = imports.gi.GLib;
 const Gio = imports.gi.Gio;
 
@@ -119,18 +118,25 @@ const UNSUPPORTED = [
  * @param  {Object}
  * @return {Class}
  */
-var Emulator = new Lang.Class({
+var Emulator = class Emulator {
 
-    Name: 'Terminal.Emulator',
+    /**
+     * Constructor
+     *
+     * @return {Void}
+     */
+    constructor() {
+        // pass
+    }
 
     /**
      * Destructor
      *
      * @return {Void}
      */
-    destroy: function() {
+    destroy() {
         // pass
-    },
+    }
 
     /**
      * Get output of shell command (sync)
@@ -140,7 +146,7 @@ var Emulator = new Lang.Class({
      * @param  {String} command command to execute
      * @return {String}         output string or null on fail
      */
-    _shellOutput: function(command) {
+    _shellOutput(command) {
         try {
             let [ ok, output, error, status ] = GLib.spawn_command_line_sync(command);
             if (!status) {
@@ -155,7 +161,7 @@ var Emulator = new Lang.Class({
         }
 
         return null;
-    },
+    }
 
     /**
      * Open new terminal window
@@ -165,7 +171,7 @@ var Emulator = new Lang.Class({
      * @param  {String} terminal (optional) terminal emulator
      * @return {Void}
      */
-    popup: function(cwd, command, terminal) {
+    popup(cwd, command, terminal) {
         cwd = cwd || '~';
         command = command || ':';
         command = command.replace(/;+$/, '');
@@ -229,7 +235,7 @@ var Emulator = new Lang.Class({
             flags: Gio.SubprocessFlags.STDOUT_PIPE,
         });
         subprocess.init(null);
-    },
+    }
 
     /**
      * Property path getter:
@@ -265,8 +271,8 @@ var Emulator = new Lang.Class({
             }.bind(this));
 
         return result;
-    },
+    }
 
     /* --- */
 
-});
+};
