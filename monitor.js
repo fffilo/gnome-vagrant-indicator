@@ -289,11 +289,13 @@ var Config = new Lang.Class({
         let result = null;
 
         try {
-            let [ ok, contents ] = GLib.file_get_contents(this._file.get_path());
-            if (!ok)
+            let [ ok, content ] = GLib.file_get_contents(this._file.get_path());
+            if (!ok || !content)
                 throw '';
+            else if (content instanceof Uint8Array)
+                content = String.fromCharCode.apply(null, content);
 
-            result = Dict.jsonDecode(contents);
+            result = Dict.jsonDecode(content);
             if (!result || typeof result !== 'object' || result === null || result instanceof Array)
                 throw '';
         }

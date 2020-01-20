@@ -143,8 +143,12 @@ var Emulator = new Lang.Class({
     _shellOutput: function(command) {
         try {
             let [ ok, output, error, status ] = GLib.spawn_command_line_sync(command);
-            if (!status)
+            if (!status) {
+                if (output instanceof Uint8Array)
+                    output = String.fromCharCode.apply(null, output);
+
                 return output.toString().trim();
+            }
         }
         catch(e) {
             // pass

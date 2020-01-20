@@ -203,10 +203,16 @@ var Index = new Lang.Class({
     parse: function() {
         try {
             let [ok, content] = GLib.file_get_contents(this.path);
-            let data = Dict.jsonDecode(content);
+            if (!ok || !content)
+                throw '';
+            else if (content instanceof Uint8Array)
+                content = String.fromCharCode.apply(null, content);
 
-            if (typeof data !== 'object') throw '';
-            if (typeof data.machines !== 'object') throw '';
+            let data = Dict.jsonDecode(content);
+            if (typeof data !== 'object')
+                throw '';
+            if (typeof data.machines !== 'object')
+                throw '';
 
             return data;
         }
@@ -564,8 +570,12 @@ var Emulator = new Lang.Class({
         if (!this._command) {
             try {
                 let [ok, output, error, status] = GLib.spawn_sync(null, ['which', VAGRANT_EXE], null, GLib.SpawnFlags.SEARCH_PATH, null);
-                if (!status && output)
+                if (!status && output) {
+                    if (output instanceof Uint8Array)
+                        output = String.fromCharCode.apply(null, output);
+
                     this._command = output.toString().trim();
+                }
             }
             catch(e) {
                 // pass
@@ -585,8 +595,12 @@ var Emulator = new Lang.Class({
         if (!this._version && this._command) {
             try {
                 let [ok, output, error, status] = GLib.spawn_sync(null, [this.command, '--version'], null, GLib.SpawnFlags.SEARCH_PATH, null);
-                if (!status && output)
+                if (!status && output) {
+                    if (output instanceof Uint8Array)
+                        output = String.fromCharCode.apply(null, output);
+
                     this._version = output.toString().trim();
+                }
             }
             catch(e) {
                 // pass
