@@ -36,6 +36,13 @@ the state in indicator won't change.
 - bash one-liner
 	- `wget https://raw.githubusercontent.com/fffilo/gnome-vagrant-indicator/master/install.sh -O - | bash`
 
+#### Gnome shell versions
+
+Indicator should work with the newest gnome shell. The older version won't be supported.
+But that doesn't mean you can not install older working indicator. The easiest way to
+install indicator is to use [GNOME Shell extension website](https://extensions.gnome.org/extension/1269/gnome-vagrant-indicator/).
+Just pick your gnome shell version next to download label and install it.
+
 **Important** : To have working indicator, [vagrant](https://www.vagrantup.com/)
 must be installed on your system.
 
