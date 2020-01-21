@@ -131,7 +131,7 @@ var Widget = GObject.registerClass(class Widget extends Gtk.Box {
         this.ui.settings.page.actor.add(this.ui.settings.machinefullpath);
 
         this.ui.settings.machinename = new InputSwitch('machine-name', this.settings.get_boolean('machine-name'), _("Show machine name"), _("Show machine name next to instance name"));
-        this.ui.settings.machinename.connect('changed', Lang.bind(this, this._handleWidget));
+        this.ui.settings.machinename.connect('changed', this._handleWidget.bind(this));
         this.ui.settings.page.actor.add(this.ui.settings.machinename);
 
         this.ui.settings.postterminalaction = new InputComboBox('post-terminal-action', this.settings.get_string('post-terminal-action'), _("Post terminal action"), _("Terminal action after vagrant command execution"), { 'NONE': _("Leave opened"), /*'PAUSE': _("Wait for keypress"),*/ 'EXIT': _("Close"), 'BOTH': _("Wait for keypress and close") });
