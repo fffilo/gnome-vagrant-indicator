@@ -466,579 +466,594 @@ var Machine = class Machine extends Section {
  * @param  {Object}
  * @return {Class}
  */
-var Path = class Path extends SubMenu {
+var Path = GObject.registerClass(
+    {
+        Signals: {
+            system: {
+                param_types: [ GObject.TYPE_OBJECT ],
+            },
+            vagrant: {
+                param_types: [ GObject.TYPE_OBJECT ],
+            },
+            //error: {
+            //    param_types: [ GObject.TYPE_OBJECT ],
+            //},
+        }
+    },
+    class Path extends SubMenu {
 
-    /**
-     * Constructor
-     *
-     * @param  {String} id
-     * @param  {String} path
-     * @param  {String} name
-     * @param  {String} state
-     * @return {Void}
-     */
-    constructor(id, path, name, state) {
-        super('unknown');
+        /**
+         * Constructor
+         *
+         * @param  {String} id
+         * @param  {String} path
+         * @param  {String} name
+         * @param  {String} state
+         * @return {Void}
+         */
+        _init(id, path, name, state) {
+            super._init('unknown');
 
-        this._id = id;
-        this._path = path;
-        this._name = name;
-        this._title = null;
-        this._state = 'unknown';
-        this._displayMachineFullPath = false;
-        this._displayMachineName = false;
-        this._displayVagrant = Enum.sum(DisplayVagrant);
-        this._displaySystem = Enum.sum(DisplaySystem);
+            this._id = id;
+            this._path = path;
+            this._name = name;
+            this._title = null;
+            this._state = 'unknown';
+            this._displayMachineFullPath = false;
+            this._displayMachineName = false;
+            this._displayVagrant = Enum.sum(DisplayVagrant);
+            this._displaySystem = Enum.sum(DisplaySystem);
 
-        this._ui();
-        this._bind();
+            this._ui();
+            this._bind();
 
-        // with setter we're making sure className
-        // (machine state) is set
-        this.state = state;
-    }
+            // with setter we're making sure className
+            // (machine state) is set
+            this.state = state;
+        }
 
-    /**
-     * Create user interface
-     *
-     * @return {Void}
-     */
-    _ui() {
-        this.actor.add_style_class_name('gnome-vagrant-indicator-menu-path');
-        this.menu.actor.add_style_class_name('gnome-vagrant-indicator-menu-submenu');
-        this.setOrnament(PopupMenu.Ornament.DOT);
+        /**
+         * Create user interface
+         *
+         * @return {Void}
+         */
+        _ui() {
+            this.actor.add_style_class_name('gnome-vagrant-indicator-menu-path');
+            this.menu.actor.add_style_class_name('gnome-vagrant-indicator-menu-submenu');
+            this.setOrnament(PopupMenu.Ornament.DOT);
 
-        this._uiVagrant();
-        this._uiSystem();
-    }
+            this._uiVagrant();
+            this._uiSystem();
+        }
 
-    /**
-     * Create user interface for
-     * vagrant commands menu
-     *
-     * @return {Void}
-     */
-    _uiVagrant() {
-        this.vagrant = {};
+        /**
+         * Create user interface for
+         * vagrant commands menu
+         *
+         * @return {Void}
+         */
+        _uiVagrant() {
+            this.vagrant = {};
 
-        let item = new Header(_("VAGRANT COMMANDS"));
-        this.menu.addMenuItem(item);
-        this.vagrant.header = item;
-
-        let menu = [
-            'up', DisplayVagrant.UP, _("Up"),
-            'up_provision', DisplayVagrant.UP_PROVISION, _("Up and Provision"),
-            'up_ssh', DisplayVagrant.UP_SSH, _("Up and SSH"),
-            'up_rdp', DisplayVagrant.UP_RDP, _("Up and RDP"),
-            'provision', DisplayVagrant.PROVISION, _("Provision"),
-            'ssh', DisplayVagrant.SSH, _("SSH"),
-            'rdp', DisplayVagrant.RDP, _("RDP"),
-            'resume', DisplayVagrant.RESUME, _("Resume"),
-            'suspend', DisplayVagrant.SUSPEND, _("Suspend"),
-            'halt', DisplayVagrant.HALT, _("Halt"),
-            'destroy', DisplayVagrant.DESTROY, _("Destroy"),
-        ];
-
-        for (let i = 0; i < menu.length; i += 3) {
-            let id = menu[i];
-            let cmd = menu[i + 1];
-            let label = menu[i + 2];
-
-            let item = new Command(label);
-            item.command = cmd;
-            item.connect('execute', this._handleVagrant.bind(this));
+            let item = new Header(_("VAGRANT COMMANDS"));
             this.menu.addMenuItem(item);
-            this.vagrant[id] = item;
+            this.vagrant.header = item;
+
+            let menu = [
+                'up', DisplayVagrant.UP, _("Up"),
+                'up_provision', DisplayVagrant.UP_PROVISION, _("Up and Provision"),
+                'up_ssh', DisplayVagrant.UP_SSH, _("Up and SSH"),
+                'up_rdp', DisplayVagrant.UP_RDP, _("Up and RDP"),
+                'provision', DisplayVagrant.PROVISION, _("Provision"),
+                'ssh', DisplayVagrant.SSH, _("SSH"),
+                'rdp', DisplayVagrant.RDP, _("RDP"),
+                'resume', DisplayVagrant.RESUME, _("Resume"),
+                'suspend', DisplayVagrant.SUSPEND, _("Suspend"),
+                'halt', DisplayVagrant.HALT, _("Halt"),
+                'destroy', DisplayVagrant.DESTROY, _("Destroy"),
+            ];
+
+            for (let i = 0; i < menu.length; i += 3) {
+                let id = menu[i];
+                let cmd = menu[i + 1];
+                let label = menu[i + 2];
+
+                let item = new Command(label);
+                item.command = cmd;
+                item.connect('execute', this._handleVagrant.bind(this));
+                this.menu.addMenuItem(item);
+                this.vagrant[id] = item;
+            }
         }
-    }
 
-    /**
-     * Create user interface for
-     * system commands menu
-     *
-     * @return {Void}
-     */
-    _uiSystem() {
-        this.system = {};
+        /**
+         * Create user interface for
+         * system commands menu
+         *
+         * @return {Void}
+         */
+        _uiSystem() {
+            this.system = {};
 
-        let item = new Header(_("SYSTEM COMMANDS"));
-        this.menu.addMenuItem(item);
-        this.system.header = item;
-
-        let menu = [
-            'terminal', DisplaySystem.TERMINAL, _("Open in Terminal"),
-            'file_manager', DisplaySystem.FILE_MANAGER, _("Open in File Manager"),
-            'vagrantfile', DisplaySystem.VAGRANTFILE, _("Edit Vagrantfile"),
-            'machine_config', DisplaySystem.MACHINE_CONFIG, _("Machine Configuration"),
-        ];
-
-        for (let i = 0; i < menu.length; i += 3) {
-            let id = menu[i];
-            let cmd = menu[i + 1];
-            let label = menu[i + 2];
-
-            let item = new Command(label);
-            item.command = cmd;
-            item.connect('execute', this._handleSystem.bind(this));
+            let item = new Header(_("SYSTEM COMMANDS"));
             this.menu.addMenuItem(item);
-            this.system[id] = item;
-        }
-    }
+            this.system.header = item;
 
-    /**
-     * Bind events
-     *
-     * @return {Void}
-     */
-    _bind() {
-        this.connect('activate', this._handleActivate.bind(this));
-    }
+            let menu = [
+                'terminal', DisplaySystem.TERMINAL, _("Open in Terminal"),
+                'file_manager', DisplaySystem.FILE_MANAGER, _("Open in File Manager"),
+                'vagrantfile', DisplaySystem.VAGRANTFILE, _("Edit Vagrantfile"),
+                'machine_config', DisplaySystem.MACHINE_CONFIG, _("Machine Configuration"),
+            ];
 
-    /**
-     * Act like PopupMenu.PopupMenuItem
-     * when submenu is empty
-     *
-     * @param  {Booelan} open
-     * @return {Void}
-     */
-    setSubmenuShown(open) {
-        super.setSubmenuShown(open);
+            for (let i = 0; i < menu.length; i += 3) {
+                let id = menu[i];
+                let cmd = menu[i + 1];
+                let label = menu[i + 2];
 
-        if (!this.system.header.actor.visible && !this.vagrant.header.actor.visible)
-            this.emit('activate');
-    }
-
-    /**
-     * Property displayMachineFullPath getter
-     *
-     * @return {Boolean}
-     */
-    get displayMachineFullPath() {
-        return this._displayMachineFullPath;
-    }
-
-    /**
-     * Property displayMachineFullPath setter
-     *
-     * @param  {Boolean} value
-     * @return {Void}
-     */
-    set displayMachineFullPath(value) {
-        this._displayMachineFullPath = !!value;
-
-        this._refreshMenu();
-    }
-
-    /**
-     * Property displayMachineName getter
-     *
-     * @return {Boolean}
-     */
-    get displayMachineName() {
-        return this._displayMachineName;
-    }
-
-    /**
-     * Property displayMachineName setter
-     *
-     * @param  {Boolean} value
-     * @return {Void}
-     */
-    set displayMachineName(value) {
-        this._displayMachineName = !!value;
-
-        this._refreshMenu();
-    }
-
-    /**
-     * Property id getter
-     *
-     * @return {String}
-     */
-    get id() {
-        return this._id;
-    }
-
-    /**
-     * Property path getter
-     *
-     * @return {String}
-     */
-    get path() {
-        return this._path;
-    }
-
-    /**
-     * Property name getter
-     *
-     * @return {String}
-     */
-    get name() {
-        return this._name;
-    }
-
-    /**
-     * Property state getter
-     *
-     * @return {String}
-     */
-    get state() {
-        return this._state;
-    }
-
-    /**
-     * Property state setter
-     *
-     * @param  {String} value
-     * @return {Void}
-     */
-    set state(value) {
-        this.actor.remove_style_class_name(this.state);
-        this.actor.add_style_class_name(value);
-
-        this._state = value;
-
-        this._refreshMenu();
-    }
-
-    /**
-     * Property title getter
-     *
-     * @return {Mixed}
-     */
-    get title() {
-        return this._title;
-    }
-
-    /**
-     * Property title setter
-     *
-     * @param  {Mixed} value
-     * @return {Void}
-     */
-    set title(value) {
-        try {
-            if (value)
-                value = value.toString();
-        }
-        catch(e) {
-            value = null;
+                let item = new Command(label);
+                item.command = cmd;
+                item.connect('execute', this._handleSystem.bind(this));
+                this.menu.addMenuItem(item);
+                this.system[id] = item;
+            }
         }
 
-        this._title = value || null;
-
-        this._refreshMenu();
-    }
-
-    /**
-     * Get DisplayVagrant:
-     * display vagrant menu subitems
-     * from DisplayVagrant enum
-     *
-     * @return {Number}
-     */
-    get displayVagrant() {
-        return this._displayVagrant;
-    }
-
-    /**
-     * Set DisplayVagrant
-     *
-     * @param  {Number} value
-     * @return {Void}
-     */
-    set displayVagrant(value) {
-        if (value < Enum.min(DisplayVagrant))
-            value = Enum.min(DisplayVagrant);
-        else if (value > Enum.sum(DisplayVagrant))
-            value = Enum.sum(DisplayVagrant);
-
-        this._displayVagrant = value;
-
-        this._refreshMenu();
-    }
-
-    /**
-     * Get DisplaySystem:
-     * display system menu subitems
-     * from DisplaySystem enum
-     *
-     * @return {Number}
-     */
-    get displaySystem() {
-        return this._displaySystem;
-    }
-
-    /**
-     * Set DisplaySystem
-     *
-     * @param  {Number} value
-     * @return {Void}
-     */
-    set displaySystem(value) {
-        if (value < Enum.min(DisplaySystem))
-            value = Enum.min(DisplaySystem);
-        else if (value > Enum.sum(DisplaySystem))
-            value = Enum.sum(DisplaySystem);
-
-        this._displaySystem = value;
-
-        this._refreshMenu();
-    }
-
-    /**
-     * Show/hide system/vagrant menu
-     * items
-     *
-     * @return {Void}
-     */
-    _refreshMenu() {
-        this._refreshMenuByTitle();
-        this._refreshMenuByDisplayVagrant();
-        this._refreshMenuByDisplaySystem();
-        this._refreshMenuByState();
-        this._refreshMenuDropdown();
-        this._refreshMenuHeaders();
-    }
-
-    /**
-     * Set menu label based on title or based
-     * on displayMachineFullPath and
-     * displayMachineName
-     *
-     * property or title
-     *
-     * @return {Void}
-     */
-    _refreshMenuByTitle() {
-        let title = this.title;
-        if (!title) {
-            title = this.path;
-            if (!this.displayMachineFullPath)
-                title = GLib.basename(title);
-            if (this.displayMachineName)
-                title = (title + ' ' + this.name).trim();
+        /**
+         * Bind events
+         *
+         * @return {Void}
+         */
+        _bind() {
+            this.connect('activate', this._handleActivate.bind(this));
         }
 
-        this.label.text = title;
-    }
+        /**
+         * Act like PopupMenu.PopupMenuItem
+         * when submenu is empty
+         *
+         * @param  {Booelan} open
+         * @return {Void}
+         */
+        setSubmenuShown(open) {
+            super.setSubmenuShown(open);
 
-    /**
-     * Show/hide vagrant menu items
-     * based on user display property
-     *
-     * @return {Void}
-     */
-    _refreshMenuByDisplayVagrant() {
-        let value = this.displayVagrant;
-        for (let key in this.vagrant) {
-            if (key === 'header')
-                continue;
-
-            let menu = this.vagrant[key];
-            let display = Enum.getValue(DisplayVagrant, key.toUpperCase());
-            let visible = (value | display) === value;
-
-            menu.actor.visible = visible;
+            if (!this.system.header.actor.visible && !this.vagrant.header.actor.visible)
+                this.emit('activate');
         }
-    }
 
-    /**
-     * Show/hide system menu items
-     * based on user display property
-     *
-     * @return {Void}
-     */
-    _refreshMenuByDisplaySystem() {
-        let value = this.displaySystem;
-        for (let key in this.system) {
-            if (key === 'header')
-                continue;
-
-            let menu = this.system[key];
-            let display = Enum.getValue(DisplaySystem, key.toUpperCase());
-            let visible = (value | display) === value;
-
-            menu.actor.visible = visible;
+        /**
+         * Property displayMachineFullPath getter
+         *
+         * @return {Boolean}
+         */
+        get displayMachineFullPath() {
+            return this._displayMachineFullPath;
         }
-    }
 
-    /**
-     * Hide vagrant menu items based
-     * on virtual machine state
-     *
-     * @return {Void}
-     */
-    _refreshMenuByState() {
-        this.setSensitive(true);
+        /**
+         * Property displayMachineFullPath setter
+         *
+         * @param  {Boolean} value
+         * @return {Void}
+         */
+        set displayMachineFullPath(value) {
+            this._displayMachineFullPath = !!value;
 
-        let state = this.state;
-        if (state === 'shutoff')
-            state = 'poweroff';
-
-        if (state === 'poweroff') {
-            this.vagrant.provision.actor.visible = false;
-            this.vagrant.ssh.actor.visible = false;
-            this.vagrant.rdp.actor.visible = false;
-            this.vagrant.resume.actor.visible = false;
-            this.vagrant.suspend.actor.visible = false;
-            this.vagrant.halt.actor.visible = false;
+            this._refreshMenu();
         }
-        else if (state === 'preparing') {
-            this.vagrant.up.actor.visible = false;
-            this.vagrant.up_provision.actor.visible = false;
-            this.vagrant.up_ssh.actor.visible = false;
-            this.vagrant.up_rdp.actor.visible = false;
-            this.vagrant.provision.actor.visible = false;
-            this.vagrant.ssh.actor.visible = false;
-            this.vagrant.rdp.actor.visible = false;
-            this.vagrant.resume.actor.visible = false;
-            this.vagrant.suspend.actor.visible = false;
-            this.vagrant.destroy.actor.visible = false;
+
+        /**
+         * Property displayMachineName getter
+         *
+         * @return {Boolean}
+         */
+        get displayMachineName() {
+            return this._displayMachineName;
         }
-        else if (state === 'running') {
-            this.vagrant.up.actor.visible = false;
-            this.vagrant.up_provision.actor.visible = false;
-            this.vagrant.up_ssh.actor.visible = false;
-            this.vagrant.up_rdp.actor.visible = false;
-            this.vagrant.resume.actor.visible = false;
-            this.vagrant.suspend.actor.visible = false;
-            this.vagrant.destroy.actor.visible = false;
+
+        /**
+         * Property displayMachineName setter
+         *
+         * @param  {Boolean} value
+         * @return {Void}
+         */
+        set displayMachineName(value) {
+            this._displayMachineName = !!value;
+
+            this._refreshMenu();
         }
-        else if (state === 'saved') {
-            this.vagrant.up.actor.visible = false;
-            this.vagrant.up_provision.actor.visible = false;
-            this.vagrant.up_ssh.actor.visible = false;
-            this.vagrant.up_rdp.actor.visible = false;
-            this.vagrant.provision.actor.visible = false;
-            this.vagrant.ssh.actor.visible = false;
-            this.vagrant.rdp.actor.visible = false;
-            this.vagrant.suspend.actor.visible = false;
-            this.vagrant.halt.actor.visible = false;
-            this.vagrant.destroy.actor.visible = false;
+
+        /**
+         * Property id getter
+         *
+         * @return {String}
+         */
+        get id() {
+            return this._id;
         }
-        //else if (state === 'aborted') {
-        //    @todo - what to do here?
-        //}
-        else {
-            // disable menu on aborted or unknown state
-            this.setSensitive(false);
+
+        /**
+         * Property path getter
+         *
+         * @return {String}
+         */
+        get path() {
+            return this._path;
         }
+
+        /**
+         * Property name getter
+         *
+         * @return {String}
+         */
+        get name() {
+            return this._name;
+        }
+
+        /**
+         * Property state getter
+         *
+         * @return {String}
+         */
+        get state() {
+            return this._state;
+        }
+
+        /**
+         * Property state setter
+         *
+         * @param  {String} value
+         * @return {Void}
+         */
+        set state(value) {
+            this.actor.remove_style_class_name(this.state);
+            this.actor.add_style_class_name(value);
+
+            this._state = value;
+
+            this._refreshMenu();
+        }
+
+        /**
+         * Property title getter
+         *
+         * @return {Mixed}
+         */
+        get title() {
+            return this._title;
+        }
+
+        /**
+         * Property title setter
+         *
+         * @param  {Mixed} value
+         * @return {Void}
+         */
+        set title(value) {
+            try {
+                if (value)
+                    value = value.toString();
+            }
+            catch(e) {
+                value = null;
+            }
+
+            this._title = value || null;
+
+            this._refreshMenu();
+        }
+
+        /**
+         * Get DisplayVagrant:
+         * display vagrant menu subitems
+         * from DisplayVagrant enum
+         *
+         * @return {Number}
+         */
+        get displayVagrant() {
+            return this._displayVagrant;
+        }
+
+        /**
+         * Set DisplayVagrant
+         *
+         * @param  {Number} value
+         * @return {Void}
+         */
+        set displayVagrant(value) {
+            if (value < Enum.min(DisplayVagrant))
+                value = Enum.min(DisplayVagrant);
+            else if (value > Enum.sum(DisplayVagrant))
+                value = Enum.sum(DisplayVagrant);
+
+            this._displayVagrant = value;
+
+            this._refreshMenu();
+        }
+
+        /**
+         * Get DisplaySystem:
+         * display system menu subitems
+         * from DisplaySystem enum
+         *
+         * @return {Number}
+         */
+        get displaySystem() {
+            return this._displaySystem;
+        }
+
+        /**
+         * Set DisplaySystem
+         *
+         * @param  {Number} value
+         * @return {Void}
+         */
+        set displaySystem(value) {
+            if (value < Enum.min(DisplaySystem))
+                value = Enum.min(DisplaySystem);
+            else if (value > Enum.sum(DisplaySystem))
+                value = Enum.sum(DisplaySystem);
+
+            this._displaySystem = value;
+
+            this._refreshMenu();
+        }
+
+        /**
+         * Show/hide system/vagrant menu
+         * items
+         *
+         * @return {Void}
+         */
+        _refreshMenu() {
+            this._refreshMenuByTitle();
+            this._refreshMenuByDisplayVagrant();
+            this._refreshMenuByDisplaySystem();
+            this._refreshMenuByState();
+            this._refreshMenuDropdown();
+            this._refreshMenuHeaders();
+        }
+
+        /**
+         * Set menu label based on title or based
+         * on displayMachineFullPath and
+         * displayMachineName
+         *
+         * property or title
+         *
+         * @return {Void}
+         */
+        _refreshMenuByTitle() {
+            let title = this.title;
+            if (!title) {
+                title = this.path;
+                if (!this.displayMachineFullPath)
+                    title = GLib.basename(title);
+                if (this.displayMachineName)
+                    title = (title + ' ' + this.name).trim();
+            }
+
+            this.label.text = title;
+        }
+
+        /**
+         * Show/hide vagrant menu items
+         * based on user display property
+         *
+         * @return {Void}
+         */
+        _refreshMenuByDisplayVagrant() {
+            let value = this.displayVagrant;
+            for (let key in this.vagrant) {
+                if (key === 'header')
+                    continue;
+
+                let menu = this.vagrant[key];
+                let display = Enum.getValue(DisplayVagrant, key.toUpperCase());
+                let visible = (value | display) === value;
+
+                menu.actor.visible = visible;
+            }
+        }
+
+        /**
+         * Show/hide system menu items
+         * based on user display property
+         *
+         * @return {Void}
+         */
+        _refreshMenuByDisplaySystem() {
+            let value = this.displaySystem;
+            for (let key in this.system) {
+                if (key === 'header')
+                    continue;
+
+                let menu = this.system[key];
+                let display = Enum.getValue(DisplaySystem, key.toUpperCase());
+                let visible = (value | display) === value;
+
+                menu.actor.visible = visible;
+            }
+        }
+
+        /**
+         * Hide vagrant menu items based
+         * on virtual machine state
+         *
+         * @return {Void}
+         */
+        _refreshMenuByState() {
+            this.setSensitive(true);
+
+            let state = this.state;
+            if (state === 'shutoff')
+                state = 'poweroff';
+
+            if (state === 'poweroff') {
+                this.vagrant.provision.actor.visible = false;
+                this.vagrant.ssh.actor.visible = false;
+                this.vagrant.rdp.actor.visible = false;
+                this.vagrant.resume.actor.visible = false;
+                this.vagrant.suspend.actor.visible = false;
+                this.vagrant.halt.actor.visible = false;
+            }
+            else if (state === 'preparing') {
+                this.vagrant.up.actor.visible = false;
+                this.vagrant.up_provision.actor.visible = false;
+                this.vagrant.up_ssh.actor.visible = false;
+                this.vagrant.up_rdp.actor.visible = false;
+                this.vagrant.provision.actor.visible = false;
+                this.vagrant.ssh.actor.visible = false;
+                this.vagrant.rdp.actor.visible = false;
+                this.vagrant.resume.actor.visible = false;
+                this.vagrant.suspend.actor.visible = false;
+                this.vagrant.destroy.actor.visible = false;
+            }
+            else if (state === 'running') {
+                this.vagrant.up.actor.visible = false;
+                this.vagrant.up_provision.actor.visible = false;
+                this.vagrant.up_ssh.actor.visible = false;
+                this.vagrant.up_rdp.actor.visible = false;
+                this.vagrant.resume.actor.visible = false;
+                this.vagrant.suspend.actor.visible = false;
+                this.vagrant.destroy.actor.visible = false;
+            }
+            else if (state === 'saved') {
+                this.vagrant.up.actor.visible = false;
+                this.vagrant.up_provision.actor.visible = false;
+                this.vagrant.up_ssh.actor.visible = false;
+                this.vagrant.up_rdp.actor.visible = false;
+                this.vagrant.provision.actor.visible = false;
+                this.vagrant.ssh.actor.visible = false;
+                this.vagrant.rdp.actor.visible = false;
+                this.vagrant.suspend.actor.visible = false;
+                this.vagrant.halt.actor.visible = false;
+                this.vagrant.destroy.actor.visible = false;
+            }
+            //else if (state === 'aborted') {
+            //    @todo - what to do here?
+            //}
+            else {
+                // disable menu on aborted or unknown state
+                this.setSensitive(false);
+            }
+        }
+
+        /**
+         * Show/hide dropdown arrow
+         *
+         * @return {Void}
+         */
+        _refreshMenuDropdown() {
+            this._triangleBin.visible = false
+                || this.system.terminal.actor.visible
+                || this.system.file_manager.actor.visible
+                || this.system.vagrantfile.actor.visible
+                || this.vagrant.up.actor.visible
+                || this.vagrant.up_provision.actor.visible
+                || this.vagrant.up_ssh.actor.visible
+                || this.vagrant.up_rdp.actor.visible
+                || this.vagrant.provision.actor.visible
+                || this.vagrant.ssh.actor.visible
+                || this.vagrant.rdp.actor.visible
+                || this.vagrant.resume.actor.visible
+                || this.vagrant.suspend.actor.visible
+                || this.vagrant.halt.actor.visible
+                || this.vagrant.destroy.actor.visible;
+        }
+
+        /**
+         * Show/hide system/vagrant menu
+         * headers
+         *
+         * @return {Void}
+         */
+        _refreshMenuHeaders() {
+            this.vagrant.header.actor.visible = false
+                || this.vagrant.up.actor.visible
+                || this.vagrant.up_provision.actor.visible
+                || this.vagrant.up_ssh.actor.visible
+                || this.vagrant.up_rdp.actor.visible
+                || this.vagrant.provision.actor.visible
+                || this.vagrant.ssh.actor.visible
+                || this.vagrant.rdp.actor.visible
+                || this.vagrant.resume.actor.visible
+                || this.vagrant.suspend.actor.visible
+                || this.vagrant.halt.actor.visible
+                || this.vagrant.destroy.actor.visible;
+
+            this.system.header.actor.visible = false
+                || this.system.terminal.actor.visible
+                || this.system.file_manager.actor.visible
+                || this.system.vagrantfile.actor.visible;
+        }
+
+        /**
+         * Get submenu item from menu list
+         *
+         * @param  {String} method (optional)
+         * @return {Array}
+         */
+        _getItem(method) {
+            return this.get_children()
+                .map(function(actor) {
+                    return actor._delegate;
+                })
+                .filter(function(actor) {
+                    return actor instanceof Path && (method ? actor.method === method : true);
+                });
+        }
+
+        /**
+         * Menu item activate event handler
+         * (called only if submenu is empty)
+         *
+         * @param  {Menu.Path}     widget
+         * @param  {Clutter.Event} event
+         * @return {Void}
+         */
+        _handleActivate(widget, event) {
+            this.emit('system', new Event({
+                id: this.id,
+                command: DisplaySystem.TERMINAL,
+            }));
+        }
+
+        /**
+         * Menu subitem (system command)
+         * execute event handler
+         *
+         * @param  {Menu.Command} widget
+         * @param  {Object}       event
+         * @return {Void}
+         */
+        _handleSystem(widget, event) {
+            this.emit('system', new Event({
+                id: this.id,
+                command: widget.command,
+            }));
+        }
+
+        /**
+         * Menu subitem (vagrant command)
+         * execute event handler
+         *
+         * @param  {Menu.Command} widget
+         * @param  {Object}       event
+         * @return {Void}
+         */
+        _handleVagrant(widget, event) {
+            this.emit('vagrant', new Event({
+                id: this.id,
+                command: widget.command,
+            }));
+        }
+
+        /* --- */
+
     }
-
-    /**
-     * Show/hide dropdown arrow
-     *
-     * @return {Void}
-     */
-    _refreshMenuDropdown() {
-        this._triangleBin.visible = false
-            || this.system.terminal.actor.visible
-            || this.system.file_manager.actor.visible
-            || this.system.vagrantfile.actor.visible
-            || this.vagrant.up.actor.visible
-            || this.vagrant.up_provision.actor.visible
-            || this.vagrant.up_ssh.actor.visible
-            || this.vagrant.up_rdp.actor.visible
-            || this.vagrant.provision.actor.visible
-            || this.vagrant.ssh.actor.visible
-            || this.vagrant.rdp.actor.visible
-            || this.vagrant.resume.actor.visible
-            || this.vagrant.suspend.actor.visible
-            || this.vagrant.halt.actor.visible
-            || this.vagrant.destroy.actor.visible;
-    }
-
-    /**
-     * Show/hide system/vagrant menu
-     * headers
-     *
-     * @return {Void}
-     */
-    _refreshMenuHeaders() {
-        this.vagrant.header.actor.visible = false
-            || this.vagrant.up.actor.visible
-            || this.vagrant.up_provision.actor.visible
-            || this.vagrant.up_ssh.actor.visible
-            || this.vagrant.up_rdp.actor.visible
-            || this.vagrant.provision.actor.visible
-            || this.vagrant.ssh.actor.visible
-            || this.vagrant.rdp.actor.visible
-            || this.vagrant.resume.actor.visible
-            || this.vagrant.suspend.actor.visible
-            || this.vagrant.halt.actor.visible
-            || this.vagrant.destroy.actor.visible;
-
-        this.system.header.actor.visible = false
-            || this.system.terminal.actor.visible
-            || this.system.file_manager.actor.visible
-            || this.system.vagrantfile.actor.visible;
-    }
-
-    /**
-     * Get submenu item from menu list
-     *
-     * @param  {String} method (optional)
-     * @return {Array}
-     */
-    _getItem(method) {
-        return this.get_children()
-            .map(function(actor) {
-                return actor._delegate;
-            })
-            .filter(function(actor) {
-                return actor instanceof Path && (method ? actor.method === method : true);
-            });
-    }
-
-    /**
-     * Menu item activate event handler
-     * (called only if submenu is empty)
-     *
-     * @param  {Menu.Path}     widget
-     * @param  {Clutter.Event} event
-     * @return {Void}
-     */
-    _handleActivate(widget, event) {
-        this.emit('system', new Event({
-            id: this.id,
-            command: DisplaySystem.TERMINAL,
-        }));
-    }
-
-    /**
-     * Menu subitem (system command)
-     * execute event handler
-     *
-     * @param  {Menu.Command} widget
-     * @param  {Object}       event
-     * @return {Void}
-     */
-    _handleSystem(widget, event) {
-        this.emit('system', new Event({
-            id: this.id,
-            command: widget.command,
-        }));
-    }
-
-    /**
-     * Menu subitem (vagrant command)
-     * execute event handler
-     *
-     * @param  {Menu.Command} widget
-     * @param  {Object}       event
-     * @return {Void}
-     */
-    _handleVagrant(widget, event) {
-        this.emit('vagrant', new Event({
-            id: this.id,
-            command: widget.command,
-        }));
-    }
-
-    /* --- */
-
-}
+);
 
 /**
  * Menu.Command constructor
@@ -1046,83 +1061,92 @@ var Path = class Path extends SubMenu {
  * @param  {Object}
  * @return {Class}
  */
-var Command = class Command extends Item {
+var Command = GObject.registerClass(
+    {
+        Signals: {
+            execute: {
+                param_types: [ GObject.TYPE_OBJECT ],
+            },
+        }
+    },
+    class Command extends Item {
 
-    /**
-     * Constructor
-     *
-     * @param  {String} title
-     * @return {Void}
-     */
-    constructor(title) {
-        super(title);
+        /**
+         * Constructor
+         *
+         * @param  {String} title
+         * @return {Void}
+         */
+        _init(title) {
+            super._init(title);
 
-        this._def();
-        this._ui();
-        this._bind();
+            this._def();
+            this._ui();
+            this._bind();
+        }
+
+        /**
+         * Initialize object properties
+         *
+         * @return {Void}
+         */
+        _def() {
+            this._method = 'unknown';
+        }
+
+        /**
+         * Create user interface
+         *
+         * @return {Void}
+         */
+        _ui() {
+            this.actor.add_style_class_name('gnome-vagrant-indicator-menu-command');
+            this.actor.add_style_class_name(this.method);
+        }
+
+        /**
+         * Bind events
+         *
+         * @return {Void}
+         */
+        _bind() {
+            this.connect('activate', this._handleActivate.bind(this));
+        }
+
+        /**
+         * Activate event handler
+         *
+         * @param  {Menu.Command}  widget
+         * @param  {Clutter.Event} event
+         * @return {Void}
+         */
+        _handleActivate(widget, event) {
+            this.emit('execute', new Event());
+        }
+
+        /**
+         * Property method getter
+         *
+         * @return {String}
+         */
+        get method() {
+            return this._method;
+        }
+
+        /**
+         * Property method getter
+         *
+         * @param  {String} value
+         * @return {Void}
+         */
+        set method(value) {
+            this._method = value;
+        }
+
+        /* --- */
+
     }
-
-    /**
-     * Initialize object properties
-     *
-     * @return {Void}
-     */
-    _def() {
-        this._method = 'unknown';
-    }
-
-    /**
-     * Create user interface
-     *
-     * @return {Void}
-     */
-    _ui() {
-        this.actor.add_style_class_name('gnome-vagrant-indicator-menu-command');
-        this.actor.add_style_class_name(this.method);
-    }
-
-    /**
-     * Bind events
-     *
-     * @return {Void}
-     */
-    _bind() {
-        this.connect('activate', this._handleActivate.bind(this));
-    }
-
-    /**
-     * Activate event handler
-     *
-     * @param  {Menu.Command}  widget
-     * @param  {Clutter.Event} event
-     * @return {Void}
-     */
-    _handleActivate(widget, event) {
-        this.emit('execute', new Event());
-    }
-
-    /**
-     * Property method getter
-     *
-     * @return {String}
-     */
-    get method() {
-        return this._method;
-    }
-
-    /**
-     * Property method getter
-     *
-     * @param  {String} value
-     * @return {Void}
-     */
-    set method(value) {
-        this._method = value;
-    }
-
-    /* --- */
-
-}
+);
 
 /**
  * Menu.Header constructor
@@ -1130,7 +1154,7 @@ var Command = class Command extends Item {
  * @param  {Object}
  * @return {Class}
  */
-var Header = class Header extends Item {
+var Header = GObject.registerClass(class Header extends Item {
 
     /**
      * Constructor
@@ -1138,8 +1162,8 @@ var Header = class Header extends Item {
      * @param  {String} title
      * @return {Void}
      */
-    constructor(title) {
-        super(title);
+    _init(title) {
+        super._init(title);
 
         this.actor.add_style_class_name('gnome-vagrant-indicator-menu-header');
         this.setSensitive(false);
@@ -1147,4 +1171,4 @@ var Header = class Header extends Item {
 
     /* --- */
 
-};
+});
