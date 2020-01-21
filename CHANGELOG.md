@@ -1,5 +1,17 @@
 # Changelog
 
+## Version 12 - 2020-01-21
+### Changed
+- Gnome shell 3.34 support
+
+## Version 11 - 2020-01-20
+### Changed
+- Gnome shell 3.32 support
+
+## Version 10 - 2020-01-20
+### Changed
+- Gnome shell 3.30 support
+
 ## Version 9 - 2020-01-08
 ### Added
 - Preferences _Show machine name_ option
