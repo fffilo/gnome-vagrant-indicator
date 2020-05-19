@@ -4,6 +4,7 @@
 'use strict';
 
 // import modules
+const GObject = imports.gi.GObject;
 const Gio = imports.gi.Gio;
 const St = imports.gi.St;
 const Main = imports.ui.main;
@@ -17,15 +18,15 @@ const Me = ExtensionUtils.getCurrentExtension();
  * @param  {Object}
  * @return {Class}
  */
-var Source = class Source extends MessageTray.Source {
+var Source = GObject.registerClass(class Source extends MessageTray.Source {
 
     /**
      * Constructor
      *
      * @return {Void}
      */
-    constructor() {
-        super(Me.metadata.uuid, null);
+    _init() {
+        super._init(Me.metadata.uuid, null);
 
         this._icon = null;
     }
@@ -69,7 +70,7 @@ var Source = class Source extends MessageTray.Source {
 
     /* --- */
 
-};
+});
 
 /**
  * Notification.Notification constructor
@@ -77,7 +78,7 @@ var Source = class Source extends MessageTray.Source {
  * @param  {Object}
  * @return {Class}
  */
-var Notification = class Notification extends MessageTray.Notification {
+var Notification = GObject.registerClass(class Notification extends MessageTray.Notification {
 
     /**
      * Constructor
@@ -87,8 +88,8 @@ var Notification = class Notification extends MessageTray.Notification {
      * @param  {String} message
      * @return {Void}
      */
-    constructor(source, title, message) {
-        super(source, title, message);
+    _init(source, title, message) {
+        super._init(source, title, message);
     }
 
     /**
@@ -102,14 +103,14 @@ var Notification = class Notification extends MessageTray.Notification {
             .toLowerCase()
             .replace(/@.*/, '')
             .replace(/[^a-z0-9]+/g, '-')
-        result.actor.add_style_class_name(prefix + '-notification-banner');
+        result.add_style_class_name(prefix + '-notification-banner');
 
         return result;
     }
 
     /* --- */
 
-};
+});
 
 /**
  * Notification.Notifier constructor
@@ -223,7 +224,7 @@ var Notifier = class Notifier {
      */
     notify(title, message) {
         let notification = this._getNotification(title, message);
-        this.source.notify(notification);
+        this.source.showNotification(notification);
     }
 
     /* --- */

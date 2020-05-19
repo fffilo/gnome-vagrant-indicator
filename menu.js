@@ -30,7 +30,7 @@ var DisplaySystem = Vagrant.CommandSystem;
  * @param  {Object}
  * @return {Class}
  */
-var Event = class Event extends GObject.Object {
+var Event = GObject.registerClass(class Event extends GObject.Object {
 
     /**
      * Constructor
@@ -38,8 +38,8 @@ var Event = class Event extends GObject.Object {
      * @param  {Object} params
      * @return {Void}
      */
-    constructor(params) {
-        super();
+    _init(params) {
+        super._init();
 
         if (params && '__proto__' in params && params.__proto__ === Object.prototype)
             for (let key in params) {
@@ -50,7 +50,8 @@ var Event = class Event extends GObject.Object {
     }
 
     /* --- */
-};
+
+});
 
 /**
  * Menu.Machine constructor
