@@ -1,11 +1,10 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// strict mode
+// Strict mode.
 'use strict';
 
-// import modules
-const GObject = imports.gi.GObject;
-const St = imports.gi.St;
+// Import modules.
+const {GObject, St} = imports.gi;
 const Main = imports.ui.main;
 const PanelMenu = imports.ui.panelMenu;
 const Util = imports.misc.util;
@@ -21,15 +20,11 @@ const Translation = Me.imports.translation;
 const _ = Translation.translate;
 
 /**
- * Indicator.Base constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Indicator.Base.
  */
 var Base = GObject.registerClass(class Base extends PanelMenu.Button {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @return {Void}
      */
@@ -43,7 +38,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
         if (this.monitor.getValue(null, "autoGlobalStatusPrune"))
             this.vagrant.globalStatusAsync(true);
 
-        this.notifier.icon = new Icons.Icon(Icons.DEFAULT);
+        this.notifier.icon = new Icons.Icon();
         this.vagrant.connect('error', this._handleVagrantError.bind(this));
         this.monitor.connect('state', this._handleMonitorState.bind(this));
         this.monitor.connect('add', this._handleMonitorAdd.bind(this));
@@ -57,7 +52,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Destructor
+     * Destructor.
      *
      * @return {Void}
      */
@@ -77,7 +72,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Notifier getter
+     * Notifier property getter.
      *
      * @return {Notification.Notifier}
      */
@@ -86,7 +81,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Vagrant getter
+     * Vagrant property getter.
      *
      * @return {Vagrant.Emulator}
      */
@@ -95,7 +90,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Monitor getter
+     * Monitor property getter.
      *
      * @return {Monitor.Monitor}
      */
@@ -104,7 +99,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Render menu
+     * Render menu.
      *
      * @return {Void}
      */
@@ -114,7 +109,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
 
         this.icon = new St.Icon({
             icon_name: Icons.DEFAULT,
-            gicon: new Icons.Icon(Icons.DEFAULT),
+            gicon: new Icons.Icon(),
             style_class: 'system-status-icon',
         });
         this.add_actor(this.icon);
@@ -134,7 +129,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Refresh machine menu
+     * Refresh machine menu.
      *
      * @return {Void}
      */
@@ -143,17 +138,17 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
 
         let machines = this.monitor.getMachineList();
         for (let i = 0; i < machines.length; i++) {
-            let id = machines[i];
-            let path = this.monitor.getMachineDetail(id, 'vagrantfile_path');
-            let name = this.monitor.getMachineDetail(id, 'name');
-            let state = this.monitor.getMachineDetail(id, 'state');
-            let title = this.monitor.getValue(id, 'label');
-            let displayMachineFullPath = this.monitor.getValue(id, 'machineFullPath');
-            let displayMachineName = this.monitor.getValue(id, 'machineName');
-            let displayVagrant = this._getDisplayVagrant(id);
-            let displaySystem = this._getDisplaySystem(id);
+            let id = machines[i],
+                path = this.monitor.getMachineDetail(id, 'vagrantfile_path'),
+                name = this.monitor.getMachineDetail(id, 'name'),
+                state = this.monitor.getMachineDetail(id, 'state'),
+                title = this.monitor.getValue(id, 'label'),
+                displayMachineFullPath = this.monitor.getValue(id, 'machineFullPath'),
+                displayMachineName = this.monitor.getValue(id, 'machineName'),
+                displayVagrant = this._getDisplayVagrant(id),
+                displaySystem = this._getDisplaySystem(id),
+                item = this.machine.add(id, path, name, state);
 
-            let item = this.machine.add(id, path, name, state);
             item.title = title;
             item.displayMachineFullPath = displayMachineFullPath;
             item.displayMachineName = displayMachineName;
@@ -163,20 +158,20 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Convert boolean display-vagrant values
-     * to Menu.Path.displayVagrant value
+     * Convert boolean display-vagrant values to Menu.Path.displayVagrant
+     * value.
      *
      * @param  {String} id
      * @return {Number}
      */
     _getDisplayVagrant(id) {
-        let display = Enum.toObject(Menu.DisplayVagrant);
-        let result = 0;
+        let display = Enum.toObject(Menu.DisplayVagrant),
+            result = 0;
 
         for (let key in display) {
-            let value = display[key];
-            let prop = 'display-vagrant-' + key.toLowerCase().replace(/_/g, '-');
-            let enabled = this.monitor.getValue(id, prop);
+            let value = display[key],
+                prop = 'display-vagrant-' + key.toLowerCase().replace(/_/g, '-'),
+                enabled = this.monitor.getValue(id, prop);
 
             result += enabled ? value : 0;
         }
@@ -185,20 +180,19 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Convert boolean display-system values
-     * to Menu.Path.displaySystem value
+     * Convert boolean display-system values to Menu.Path.displaySystem value.
      *
      * @param  {String} id
      * @return {Number}
      */
     _getDisplaySystem(id) {
-        let display = Enum.toObject(Menu.DisplaySystem);
-        let result = 0;
+        let display = Enum.toObject(Menu.DisplaySystem),
+            result = 0;
 
         for (let key in display) {
-            let value = display[key];
-            let prop = 'display-system-' + key.toLowerCase().replace(/_/g, '-');
-            let enabled = this.monitor.getValue(id, prop);
+            let value = display[key],
+                prop = 'display-system-' + key.toLowerCase().replace(/_/g, '-'),
+                enabled = this.monitor.getValue(id, prop);
 
             result += enabled ? value : 0;
         }
@@ -207,7 +201,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Monitor change event handler
+     * Monitor change event handler.
      *
      * @param  {Monitor.Monitor} widget
      * @param  {Object}          event
@@ -215,13 +209,13 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      */
     _handleMonitorChange(widget, event) {
         for (let id in event) {
-            let props = event[id];
-            let order = props.indexOf('order') === -1 ? 0 : 1;
-            let label = props.indexOf('label') === -1 ? 0 : 1;
-            let machineFullPath = props.indexOf('machineFullPath') === -1 ? 0 : 1;
-            let machineName = props.indexOf('machineName') === -1 ? 0 : 1;
-            let displaySystem = props.filter(function(item) { return item.startsWith('displaySystem'); }).length;
-            let displayVagrant = props.filter(function(item) { return item.startsWith('displayVagrant'); }).length;
+            let props = event[id],
+                order = props.indexOf('order') === -1 ? 0 : 1,
+                label = props.indexOf('label') === -1 ? 0 : 1,
+                machineFullPath = props.indexOf('machineFullPath') === -1 ? 0 : 1,
+                machineName = props.indexOf('machineName') === -1 ? 0 : 1,
+                displaySystem = props.filter(item => item.startsWith('displaySystem')).length,
+                displayVagrant = props.filter(item => item.startsWith('displayVagrant')).length;
 
             if (order)
                 this.machine.setItemIndex(id, this.monitor.getMachineList().indexOf(id));
@@ -239,25 +233,25 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Monitor machine add event handler
+     * Monitor machine add event handler.
      *
      * @param  {Monitor.Monitor} widget
      * @param  {Object}          event
      * @return {Void}
      */
     _handleMonitorAdd(widget, event) {
-        let id = event.id;
-        let path = event.path;
-        let name = event.name;
-        let state = event.state;
-        let title = this.monitor.getValue(id, 'label');
-        let displayMachineFullPath = this.monitor.getValue(id, 'machineFullPath');
-        let displayMachineName = this.monitor.getValue(id, 'machineName');
-        let displayVagrant = this._getDisplayVagrant(id);
-        let displaySystem = this._getDisplaySystem(id);
-        let index = Object.keys(this.monitor.getMachineList()).indexOf(id);
+        let id = event.id,
+            path = event.path,
+            name = event.name,
+            state = event.state,
+            title = this.monitor.getValue(id, 'label'),
+            displayMachineFullPath = this.monitor.getValue(id, 'machineFullPath'),
+            displayMachineName = this.monitor.getValue(id, 'machineName'),
+            displayVagrant = this._getDisplayVagrant(id),
+            displaySystem = this._getDisplaySystem(id),
+            index = Object.keys(this.monitor.getMachineList()).indexOf(id),
+            item = this.machine.add(id, path, name, state, index);
 
-        let item = this.machine.add(id, path, name, state, index);
         item.title = title;
         item.displayMachineFullPath = displayMachineFullPath;
         item.displayMachineName = displayMachineName;
@@ -266,49 +260,49 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Monitor machine remove event handler
+     * Monitor machine remove event handler.
      *
      * @param  {Monitor.Monitor} widget
      * @param  {Object}          event
      * @return {Void}
      */
     _handleMonitorRemove(widget, event) {
-        let id = event.id;
-        let label = this.machine.getCurrentLabel(id);
+        let id = event.id,
+            label = this.machine.getCurrentLabel(id);
         this.machine.remove(id);
 
         let notify = this.monitor.getValue(id, 'notifications');
         if (!notify)
             return;
 
-        let title = label;
-        let message = 'Machine destroyed';
+        let title = label,
+            message = 'Machine destroyed';
         this.notifier.notify(title, message);
     }
 
     /**
-     * Monitor machine state change event handler
+     * Monitor machine state change event handler.
      *
      * @param  {Monitor.Monitor} widget
      * @param  {Object}          event
      * @return {Void}
      */
     _handleMonitorState(widget, event) {
-        let id = event.id;
-        let state = event.state;
+        let id = event.id,
+            state = event.state;
         this.machine.setState(id, state);
 
         let notify = this.monitor.getValue(id, 'notifications');
         if (!notify)
             return;
 
-        let title = this.machine.getCurrentLabel(id);
-        let message = 'Machine went %s'.format(state);
+        let title = this.machine.getCurrentLabel(id),
+            message = 'Machine went %s'.format(state);
         this.notifier.notify(title, message);
     }
 
     /**
-     * Default error event handler
+     * Default error event handler.
      *
      * @param  {String} error
      * @return {Void}
@@ -318,9 +312,9 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
         if (!notify)
             return;
 
-        let arr = error.toString().split(':');
-        let title = arr[0].trim();
-        let message = arr.slice(1).join(':').trim();
+        let arr = error.toString().split(':'),
+            title = arr[0].trim(),
+            message = arr.slice(1).join(':').trim();
 
         if (!message) {
             message = title;
@@ -331,7 +325,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Monitor error event handler
+     * Monitor error event handler.
      *
      * @param  {Vagrant.Emulator} widget
      * @param  {Object}           event
@@ -342,7 +336,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Machine error event handler
+     * Machine error event handler.
      *
      * @param  {Menu.Machine} widget
      * @param  {Object}       event
@@ -353,8 +347,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Machines item (system command)
-     * activate event handler
+     * Machines item (system command) activate event handler.
      *
      * @param  {Menu.Machine} widget
      * @param  {Object}       event
@@ -362,8 +355,8 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      */
     _handleMachineSystem(widget, event) {
         try {
-            let id = event.id;
-            let command = event.command;
+            let id = event.id,
+                command = event.command;
 
             this.vagrant.open(id, command);
         }
@@ -376,8 +369,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Machines item (vagrant command)
-     * activate event handler
+     * Machines item (vagrant command) activate event handler.
      *
      * @param  {Menu.Machine} widget
      * @param  {Object}       event
@@ -385,9 +377,9 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      */
     _handleMachineVagrant(widget, event) {
         try {
-            let id = event.id;
-            let command = event.command;
-            let action = this.monitor.getValue(id, 'postTerminalAction');
+            let id = event.id,
+                command = event.command,
+                action = this.monitor.getValue(id, 'postTerminalAction');
             action = Enum.getValue(Vagrant.PostTerminalAction, action);
 
             this.vagrant.execute(id, command, action);
@@ -401,16 +393,18 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
     }
 
     /**
-     * Preferences activate event handler
+     * Preferences activate event handler.
      *
      * @param  {PopupMenuItem} widget
      * @param  {Clutter.Event} event
      * @return {Void}
      */
     _handlePreferences(widget, event) {
-        Util.spawn(['gnome-shell-extension-prefs', Me.metadata.uuid]);
+        if (typeof ExtensionUtils.openPrefs === 'function')
+            ExtensionUtils.openPrefs();
+        else
+            Util.spawn(['gnome-shell-extension-prefs', Me.metadata.uuid]);
     }
 
     /* --- */
-
 });

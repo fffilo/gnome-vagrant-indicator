@@ -1,56 +1,54 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 /*
-  Copyright (c) 2017, Franjo Filo <fffilo666@gmail.com>
+ Copyright (c) 2019, Franjo Filo <fffilo666@gmail.com>
 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the GNOME nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+   * Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+   * Neither the name of the GNOME nor the
+     names of its contributors may be used to endorse or promote products
+     derived from this software without specific prior written permission.
 
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// strict mode
+// Strict mode.
 'use strict';
 
-// import modules
+// Import modules.
 const Mainloop = imports.mainloop;
 const Signals = imports.signals;
-const GLib = imports.gi.GLib;
-const Gio = imports.gi.Gio;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+const {GLib, Gio} = imports.gi;
+const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Enum = Me.imports.enum;
 const Terminal = Me.imports.terminal;
 const Dict =  Me.imports.dict;
 
-// global properties
+// Global properties.
 const VAGRANT_EXE = 'vagrant';
 const VAGRANT_HOME = GLib.getenv('VAGRANT_HOME') || GLib.getenv('HOME') + '/.vagrant.d';
 const VAGRANT_INDEX = '%s/data/machine-index/index'.format(VAGRANT_HOME);
 
-// translations
+// Translations.
 const MESSAGE_KEYPRESS = 'Press any key to close terminal...';
 const MESSAGE_VAGRANT_NOT_INSTALLED = 'Vagrant not installed on your system';
 const MESSAGE_INVALID_MACHINE = 'Invalid machine id';
 const MESSAGE_CORRUPTED_DATA = 'Corrupted data';
-const MESSAGE_INVALID_PATH= 'Path does not exist';
+const MESSAGE_INVALID_PATH = 'Path does not exist';
 const MESSAGE_MISSING_VAGRANTFILE = 'Missing Vagrantfile';
 
 /**
@@ -101,15 +99,11 @@ var PostTerminalAction = new Enum.Enum([
 Enum.addMember(PostTerminalAction, 'BOTH', Enum.sum(PostTerminalAction));
 
 /**
- * Vagrant.Exception constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Vagrant.Exception.
  */
 var Exception = class Exception {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @return {Void}
      */
@@ -119,7 +113,7 @@ var Exception = class Exception {
     }
 
     /**
-     * Property message getter
+     * Message property getter.
      *
      * @return {String}
      */
@@ -128,7 +122,7 @@ var Exception = class Exception {
     }
 
     /**
-     * Property title getter
+     * Title property getter.
      *
      * @return {String}
      */
@@ -137,7 +131,7 @@ var Exception = class Exception {
     }
 
     /**
-     * Exception as string
+     * Exception as string.
      *
      * @return {String}
      */
@@ -149,21 +143,15 @@ var Exception = class Exception {
     }
 
     /* --- */
-
 };
 
 /**
- * Vagrant.Index constructor:
- * parsing vagrant machine index file
- * content
- *
- * @param  {Object}
- * @return {Class}
+ * Vagrant.Index:
+ * parsing vagrant machine index file content.
  */
 var Index = class Index {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @return {Void}
      */
@@ -172,7 +160,7 @@ var Index = class Index {
     }
 
     /**
-     * Destructor
+     * Destructor.
      *
      * @return {Void}
      */
@@ -181,8 +169,8 @@ var Index = class Index {
     }
 
     /**
-     * Property path getter:
-     * vagrant machine index file path
+     * Path property getter:
+     * vagrant machine index file path.
      *
      * @return {String}
      */
@@ -191,7 +179,7 @@ var Index = class Index {
     }
 
     /**
-     * Parse vagrant machine index file content
+     * Parse vagrant machine index file content.
      *
      * @return {Object}
      */
@@ -215,7 +203,7 @@ var Index = class Index {
             // pass
         }
 
-        // empty result on no file found or invalid file content
+        // Empty result on no file found or invalid file content.
         return {
             version: 0,
             machines: {},
@@ -223,21 +211,15 @@ var Index = class Index {
     }
 
     /* --- */
-
 };
 
 /**
- * Vagrant.Monitor constructor:
- * monitoring changes in vagrant machine
- * index file
- *
- * @param  {Object}
- * @return {Class}
+ * Vagrant.Monitor:
+ * monitoring changes in vagrant machine index file.
  */
 var Monitor = class Monitor {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @return {Void}
      */
@@ -252,7 +234,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Destructor
+     * Destructor.
      *
      * @return {Void}
      */
@@ -266,8 +248,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Monitor vagrant machine index file
-     * content change
+     * Monitor vagrant machine index file content change.
      *
      * @return {Void}
      */
@@ -280,8 +261,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Unmonitor vagrant machine index file
-     * content change
+     * Unmonitor vagrant machine index file content change.
      *
      * @return {Void}
      */
@@ -297,15 +277,14 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Parse vagrant machine index file content,
-     * save it to this.index and return vagrant
-     * path
+     * Parse vagrant machine index file content, save it to this.index and
+     * return vagrant path.
      *
      * @return {String}
      */
     refresh() {
-        let index = new Index();
-        let result = index.path;
+        let index = new Index(),
+            result = index.path;
 
         this._index = index.parse();
 
@@ -316,8 +295,7 @@ var Monitor = class Monitor {
 
     /**
      * Property index getter:
-     * vagrant machine index file content
-     * as object
+     * vagrant machine index file content as object.
      *
      * @return {String}
      */
@@ -326,10 +304,10 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Delay (in miliseconds) for event
-     * emitting. This will prevent same
-     * event emit on continuously file
-     * save every few miliseconds.
+     * Delay property getter.
+     *
+     * Number of miliseconds for event emitting. This will prevent same event
+     * emit on continuously file save every few miliseconds.
      *
      * @return {Number}
      */
@@ -338,8 +316,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Vagrant machine index file content
-     * change event handler
+     * Vagrant machine index file content change event handler.
      *
      * @param  {GInotifyFileMonitor} monitor
      * @param  {GLocalFile}          file
@@ -351,28 +328,25 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Adding delay after vagrant machine
-     * index file content change event
-     * handler which will prevent
-     * unnecessary multiple code
-     * execution
+     * Adding delay after vagrant machine index file content change event
+     * handler which will prevent unnecessary multiple code execution.
      *
      * @return {Boolean}
      */
     _handleMonitorChangedDelayed() {
         this._interval = null;
 
-        let emit = [];
-        let _old = Dict.deepClone(this.index);
-        let _new = null;
+        let emit = [],
+            _old = Dict.deepClone(this.index),
+            _new = null;
         this.refresh();
         _new = Dict.deepClone(this.index);
 
-        // check actual changes
+        // Check actual changes.
         if (Dict.isEqual(_old, _new))
             return;
 
-        // check if machine is missing
+        // Check if machine is missing.
         for (let id in _old.machines) {
             if (!(id in _new.machines))
                 emit = emit.concat('remove', {
@@ -384,7 +358,7 @@ var Monitor = class Monitor {
                 });
         }
 
-        // check if machine is added
+        // Check if machine is added.
         for (let id in _new.machines) {
             if (!(id in _old.machines))
                 emit = emit.concat('add', {
@@ -396,7 +370,7 @@ var Monitor = class Monitor {
                 });
         }
 
-        // check if state changed
+        // Check if state changed.
         for (let id in _new.machines) {
             if (id in _old.machines && _new.machines[id].state !== _old.machines[id].state)
                 emit = emit.concat('state', {
@@ -408,41 +382,36 @@ var Monitor = class Monitor {
                 });
         }
 
-        // no changes
+        // No changes.
         if (!emit.length)
             return false;
 
-        // emit change
+        // Emit change.
         this.emit('change', {
             index: this.index,
         });
 
-        // emit remove/add/state signal(s)
+        // Emit remove/add/state signal(s).
         for (let i = 0; i < emit.length; i += 2) {
             this.emit(emit[i], emit[i + 1]);
         }
 
-        // stop repeating
+        // Stop repeating.
         return false;
     }
 
     /* --- */
-
 };
 
 Signals.addSignalMethods(Monitor.prototype);
 
 /**
- * Vagrant.Emulator constructor:
- * executing vagrant commands
- *
- * @param  {Object}
- * @return {Object}
+ * Vagrant.Emulator:
+ * executing vagrant commands.
  */
 var Emulator = class Emulator {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @return {Void}
      */
@@ -459,7 +428,7 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Destructor
+     * Destructor.
      *
      * @return {Void}
      */
@@ -476,14 +445,27 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Validate vagrant command and vagrant machine id
+     * Validate vagrant command and vagrant machine id.
      *
      * @param  {String}  id machine id
      * @return {Boolean}
      */
     _validate(id) {
-        let index = this.monitor.index;
-        let machine = index.machines[id] || null;
+        let index = this.monitor.index,
+            machine = index.machines[id] || null;
+        //global.log('vagrant::id::' + id);
+        //global.log('vagrant::index::' + JSON.stringify(index));
+        //global.log('vagrant::machine::' + JSON.stringify(machine));
+
+        if (!machine.vagrantfile_path) {
+            global.log('[vagrant] path config missing');
+        }
+        else if (!GLib.file_test(machine.vagrantfile_path, GLib.FileTest.EXISTS)) {
+            global.log('[vagrant] path does not exists ' + machine.vagrantfile_path);
+        }
+        else if (!GLib.file_test(machine.vagrantfile_path, GLib.FileTest.IS_DIR)) {
+            global.log('[vagrant] path is not directory');
+        }
 
         if (!this.command || !GLib.file_test(this.command, GLib.FileTest.EXISTS) || !GLib.file_test(this.command, GLib.FileTest.IS_EXECUTABLE))
             throw new Exception(MESSAGE_VAGRANT_NOT_INSTALLED, 'Vagrant.Emulator');
@@ -498,7 +480,7 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Open terminal and execute vagrant command
+     * Open terminal and execute vagrant command.
      *
      * @param  {String} id     machine id
      * @param  {String} cmd    vagrant command (up|halt...)
@@ -508,10 +490,10 @@ var Emulator = class Emulator {
     _exec(id, cmd, action) {
         this._validate(id);
 
-        let index = this.monitor.index;
-        let cwd = index.machines[id].vagrantfile_path;
-        let name = 'name' in index.machines[id] ? index.machines[id].name : '';
-        let exe = '';
+        let index = this.monitor.index,
+            cwd = index.machines[id].vagrantfile_path,
+            name = 'name' in index.machines[id] ? index.machines[id].name : '',
+            exe = '';
 
         if (cmd instanceof Array)
             for (let i in cmd) {
@@ -533,7 +515,7 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Property monitor getter
+     * Monitor property getter.
      *
      * @return {Vagrant.Monitor}
      */
@@ -542,8 +524,8 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Property terminal getter:
-     * terminal emulator
+     * Terminal property getter:
+     * terminal emulator.
      *
      * @return {Terminal.Emulator}
      */
@@ -552,8 +534,8 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Property command getter:
-     * vagrant command path
+     * Command property getter:
+     * vagrant command path.
      *
      * @return {String}
      */
@@ -577,8 +559,8 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Property version getter:
-     * vagrant version
+     * Version property getter:
+     * vagrant version.
      *
      * @return {String}
      */
@@ -602,7 +584,7 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Execute system command
+     * Execute system command.
      *
      * @param  {String} id  machine id
      * @param  {Number} cmd CommandSystem enum
@@ -630,7 +612,7 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Execute vagrant command
+     * Execute vagrant command.
      *
      * @param  {String} id     machine id
      * @param  {Number} cmd    CommandVagrant enum
@@ -668,24 +650,23 @@ var Emulator = class Emulator {
 
     /**
      * Open terminal emulator and execute
-     * vagrant global-status {--prune}
+     * `vagrant global-status {--prune}`.
      *
      * @param  {Boolean} prune (optional)
      * @return {Void}
      */
     globalStatus(prune) {
-        let cwd = GLib.getenv('HOME');
-        let exe = ''
-            + this.command
-            + ' global-status'
-            + (prune ? ' --prune' : '');
+        let cwd = GLib.getenv('HOME'),
+            exe = ''
+                + this.command
+                + ' global-status'
+                + (prune ? ' --prune' : '');
 
         this.terminal.popup(cwd, exe);
     }
 
     /**
-     * Execute vagrant global-status {--prune}
-     * in the background
+     * Execute vagrant `global-status {--prune}` in the background.
      *
      * @param  {Boolean}  prune    (optional)
      * @param  {Function} callback (optional)
@@ -718,7 +699,7 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Async shell exec event handler
+     * Async shell exec event handler.
      *
      * @param  {Gio.Subprocess} source
      * @param  {Gio.Task}       resource
@@ -727,8 +708,8 @@ var Emulator = class Emulator {
      * @return {Void}
      */
     _handleGlobalStatus(source, resource, stdin, callback) {
-        let status = source.get_exit_status();
-        let [, stdout, stderr] = source.communicate_utf8_finish(resource);
+        let status = source.get_exit_status(),
+            [, stdout, stderr] = source.communicate_utf8_finish(resource);
 
         if (typeof callback === 'function')
             callback.call(this, {
@@ -740,7 +721,6 @@ var Emulator = class Emulator {
     }
 
     /* --- */
-
 };
 
 Signals.addSignalMethods(Emulator.prototype);

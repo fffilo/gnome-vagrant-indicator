@@ -1,41 +1,40 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 /*
-  Copyright (c) 2017, Franjo Filo <fffilo666@gmail.com>
+ Copyright (c) 2019, Franjo Filo <fffilo666@gmail.com>
 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the GNOME nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+   * Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+   * Neither the name of the GNOME nor the
+     names of its contributors may be used to endorse or promote products
+     derived from this software without specific prior written permission.
 
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// strict mode
+// Strict mode.
 'use strict';
 
-// import modules
-const GLib = imports.gi.GLib;
-const Gio = imports.gi.Gio;
+// Import modules.
+const {GLib, Gio} = imports.gi;
 
 /**
- * List of yet not tested terminal
- * emulators (work in progress)
+ * List of yet not tested terminal emulators
+ * (work in progress).
  *
  * @type {Array}
  */
@@ -55,11 +54,10 @@ const NOTESTED = [
     'tym',
     'BlackScreen',
     'altyo',
-]
+];
 
 /**
- * List of supported terminal
- * emulators
+ * List of supported terminal emulators.
  *
  * @type {Array}
  */
@@ -99,8 +97,7 @@ const SUPPORTED = [
 ];
 
 /**
- * List of unsupported terminal
- * emulators
+ * List of unsupported terminal emulators.
  *
  * @type {Array}
  */
@@ -113,15 +110,11 @@ const UNSUPPORTED = [
 ];
 
 /**
- * Terminal.Emulator constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Terminal.Emulator.
  */
 var Emulator = class Emulator {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @return {Void}
      */
@@ -130,7 +123,7 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Destructor
+     * Destructor.
      *
      * @return {Void}
      */
@@ -139,9 +132,8 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Get output of shell command (sync)
-     * without throwing exception (instead
-     * exception result is null)
+     * Get output of shell command (sync) without throwing exception (instead
+     * exception result is null).
      *
      * @param  {String} command command to execute
      * @return {String}         output string or null on fail
@@ -164,7 +156,7 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Open new terminal window
+     * Open new terminal window.
      *
      * @param  {String} cwd      (optional) working directory
      * @param  {String} command  (optional) command to execute
@@ -179,11 +171,11 @@ var Emulator = class Emulator {
         if (!terminal)
             throw 'Terminal.Emulator: Not supported.';
 
-        // command language interpreter
+        // Command language interpreter.
         let shell = GLib.getenv('SHELL') || 'bash';
         shell = this._shellOutput('which %s'.format(shell)) || 'bash';
 
-        // specific terminal emulators guake
+        // Specific terminal emulators guake.
         if (terminal.endsWith('guake')) {
             if (!this._shellOutput('pgrep -f guake.main'))
                 throw 'Terminal.Emulator: Guake terminal not started.'
@@ -198,10 +190,10 @@ var Emulator = class Emulator {
             return;
         }
 
-        // quote current working directory
+        // Quote current working directory.
         let qcwd = '"%s"'.format(cwd.replace(/\"/g, '\\\"'));
 
-        // terminal arguments
+        // Terminal arguments.
         let argv = [
             terminal,
             '-e',
@@ -210,14 +202,14 @@ var Emulator = class Emulator {
             'cd %s; %s; %s'.format(qcwd, command, shell),
         ];
 
-        // argument -e (command) not working with some
-        // terminals, replacing it with -x (execute)
-        [ 'gnome-terminal', 'mate-terminal', 'xfce4-terminal', 'terminator' ].forEach(function(item) {
+        // Argument -e (command) not working with some terminals, replacing
+        // it with -x (execute).
+        [ 'gnome-terminal', 'mate-terminal', 'xfce4-terminal', 'terminator' ].forEach(item => {
             if (argv[0].endsWith(item))
                 argv[1] = '-x';
         });
 
-        // more argument fixes
+        // More argument fixes.
         if (argv[0].endsWith('terminology')) {
             argv = [ terminal, '-d', cwd ];
 
@@ -229,7 +221,7 @@ var Emulator = class Emulator {
         if (argv[0].endsWith('vala-terminal'))
             argv = [ terminal, '-e', 'cd %s; %s'.format(qcwd, command) ];
 
-        // popup window
+        // Popup window.
         let subprocess = new Gio.Subprocess({
             argv: argv,
             flags: Gio.SubprocessFlags.STDOUT_PIPE,
@@ -238,12 +230,10 @@ var Emulator = class Emulator {
     }
 
     /**
-     * Property path getter:
-     * terminal emulator path
+     * Property path getter (terminal emulator path).
      *
-     * Find default terminal application from
-     * gsettings configuration tool. Try to find
-     * any known installed emulators on fail.
+     * Find default terminal application from gsettings configuration tool.
+     * Try to find any known installed emulators on fail.
      *
      * @return {Mixed} path (string) or null on fail
      */
@@ -252,27 +242,26 @@ var Emulator = class Emulator {
         result = result.replace(/^'|'$/g, '');
         result = this._shellOutput('which %s'.format(result));
 
-        // alternatives x-terminal-emulator
+        // Alternatives x-terminal-emulator.
         if (result && result.endsWith('x-terminal-emulator'))
             result = this._shellOutput('readlink /etc/alternatives/x-terminal-emulator');
 
-        // skip unsupported terminal emulators
+        // Akip unsupported terminal emulators.
         if (result)
-            UNSUPPORTED.forEach(function(item) {
+            UNSUPPORTED.forEach(item => {
                 if (result && result.endsWith(item))
                     result = null;
             });
 
-        // fallback - check if any common emulator installed
+        // Fallback - check if any common emulator installed.
         if (!result)
-            SUPPORTED.forEach(function(item) {
+            SUPPORTED.forEach((item => {
                 if (!result)
                     result = this._shellOutput('which %s'.format(item));
-            }.bind(this));
+            }).bind(this));
 
         return result;
     }
 
     /* --- */
-
 };

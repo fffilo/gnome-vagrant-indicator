@@ -1,47 +1,51 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// strict mode
+// Strict mode.
 'use strict';
 
-// import modules
-const GObject = imports.gi.GObject;
-const Gio = imports.gi.Gio;
-const IconTheme = imports.gi.Gtk.IconTheme;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+// Import modules.
+const {GObject, Gio} = imports.gi;
+const Me = imports.misc.extensionUtils.getCurrentExtension();
 
-// Icons
+/**
+ * Default icon.
+ *
+ * @type {String}
+ */
 var DEFAULT = 'gnome-vagrant-indicator-symbolic';
 
 /**
- * Append assets path to theme
+ * Get icon path (directory name). If filename argument is
+ * provided it will be appended to path. Note that there
+ * is no file exists check here.
  *
- * @return {Void}
+ * @param  {Mixed}  filename (optional)
+ * @return {String}
  */
-var init = function() {
-    IconTheme.get_default().append_search_path(Me.path + '/assets');
+var path = (filename=null) => {
+    let dirname =  `${Me.path}/assets`,
+        suffix = filename ? `/${filename}` : '';
+
+    return dirname + suffix;
 };
 
 /**
- * Icons.Icon constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Icons.Icon extends Gio.FileIcon.
  */
 var Icon = GObject.registerClass(class Icon extends Gio.FileIcon {
-
     /**
-     * Constructor
+     * Constructor.
      *
+     * @param  {Mixed} icon
      * @return {Void}
      */
-    _init(icon) {
-        let path = Me.path + '/assets/' + icon + '.svg';
-        let file = Gio.File.new_for_path(path);
+    _init(icon=null) {
+        let iconName = icon || DEFAULT,
+            iconPath = path(`${iconName}.svg`),
+            file = Gio.File.new_for_path(iconPath);
 
-        super._init({ file: file });
+        return super._init({ file: file });
     }
 
     /* --- */
-
 });

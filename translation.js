@@ -1,18 +1,16 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// strict mode
+// Strict mode.
 'use strict';
 
-// import modules
+// Import modules.
 const Gettext = imports.gettext;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Convenience = Me.imports.convenience;
 
 /**
  * Init translation for domain
- *
- * proxy for Convenience.initTranslations
+ * (proxy for Convenience.initTranslations).
  *
  * @param  {String} domain (optional)
  * @return {Void}
@@ -21,11 +19,10 @@ var init = Convenience.initTranslations;
 
 /**
  * Translate message
+ * (proxy for Gettext.gettext).
  *
- * proxy for Gettext.gettext
- *
- * note: make sure you call init()
- * on extension initialize
+ * Note:
+ * make sure you call init() on extension initialize.
  *
  * @param  {String} message
  * @return {String}

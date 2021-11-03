@@ -1,44 +1,40 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
 /*
-  Copyright (c) 2017, Franjo Filo <fffilo666@gmail.com>
+ Copyright (c) 2019, Franjo Filo <fffilo666@gmail.com>
 
-  Redistribution and use in source and binary forms, with or without
-  modification, are permitted provided that the following conditions are met:
-    * Redistributions of source code must retain the above copyright
-      notice, this list of conditions and the following disclaimer.
-    * Redistributions in binary form must reproduce the above copyright
-      notice, this list of conditions and the following disclaimer in the
-      documentation and/or other materials provided with the distribution.
-    * Neither the name of the GNOME nor the
-      names of its contributors may be used to endorse or promote products
-      derived from this software without specific prior written permission.
+ Redistribution and use in source and binary forms, with or without
+ modification, are permitted provided that the following conditions are met:
+   * Redistributions of source code must retain the above copyright
+     notice, this list of conditions and the following disclaimer.
+   * Redistributions in binary form must reproduce the above copyright
+     notice, this list of conditions and the following disclaimer in the
+     documentation and/or other materials provided with the distribution.
+   * Neither the name of the GNOME nor the
+     names of its contributors may be used to endorse or promote products
+     derived from this software without specific prior written permission.
 
-  THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
-  ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
-  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
-  DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
-  DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
-  (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
-  LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
-  ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
-  (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
-  SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+ ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+ WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+ DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER BE LIABLE FOR ANY
+ DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+ (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+ LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND
+ ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+ SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-// strict mode
+// Strict mode.
 'use strict';
 
 /**
- * Enum.Exception constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Enum.Exception.
  */
 var Exception = class Exception {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @return {Void}
      */
@@ -48,7 +44,7 @@ var Exception = class Exception {
     }
 
     /**
-     * Property message getter
+     * Message property getter.
      *
      * @return {String}
      */
@@ -57,7 +53,7 @@ var Exception = class Exception {
     }
 
     /**
-     * Property title getter
+     * Title property getter.
      *
      * @return {String}
      */
@@ -66,7 +62,7 @@ var Exception = class Exception {
     }
 
     /**
-     * Exception as string
+     * Exception as string.
      *
      * @return {String}
      */
@@ -78,19 +74,14 @@ var Exception = class Exception {
     }
 
     /* --- */
-
 };
 
 /**
- * Enum.Member constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Enum.Member.
  */
 var Member = class Member {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @param  {String} key
      * @param  {Number} value
@@ -107,7 +98,7 @@ var Member = class Member {
     }
 
     /**
-     * Property key getter
+     * Key property getter.
      *
      * @return {String}
      */
@@ -116,7 +107,7 @@ var Member = class Member {
     }
 
     /**
-     * Property value getter
+     * Value property getter.
      *
      * @return {Number}
      */
@@ -125,17 +116,15 @@ var Member = class Member {
     }
 
     /* --- */
-
 };
 
 /**
- * Enum.Enum constructor
+ * Enum.Enum.
  *
- * Constructor argument params must be of type
- * Object, Enum, Member, Array or String.
+ * Constructor argument params must be of type Object, Enum, Member, Array or
+ * String.
  *
- * For param type Object members are defined
- * for each key by it's value
+ * For param type Object members are defined for each key by it's value
  *     gjs> let a = new Enum({ 'ONE': 1, 'TWO': 2, 'THREE': 3, 'FOUR': 4 });
  *     gjs> a.ONE;
  *     1
@@ -146,8 +135,7 @@ var Member = class Member {
  *     gjs> a.FOUR;
  *     4
  *
- * For param type Enum members are defined
- * as members in param (cloned object)
+ * For param type Enum members are defined as members in param (cloned object)
  *     gjs> let b = new Enum(a);
  *     gjs> b.ONE;
  *     1
@@ -158,14 +146,13 @@ var Member = class Member {
  *     gjs> b.FOUR;
  *     4
  *
- * For param type Member only one member is defined
- * as members in param
+ * For param type Member only one member is defined as members in param
  *     gjs> let c = new Enum(b._members[1]);
  *     gjs> c.TWO;
  *     2
  *
- * For param type Array type members are defined
- * for each item with value of Math.pow(2, index)
+ * For param type Array type members are defined for each item with value of
+ * Math.pow(2, index)
  *     gjs> let d = new Enum([ 'ONE', 'TWO', 'THREE', 'FOUR' ]);
  *     gjs> d.ONE;
  *     1
@@ -176,19 +163,14 @@ var Member = class Member {
  *     gjs> d.FOUR;
  *     8
  *
- * For param type String only one member is defined
- * with value 1
+ * For param type String only one member is defined with value 1
  *     gjs> let e = new Enum('ONE');
  *     gjs> e.ONE;
  *     1
- *
- * @param  {Object}
- * @return {Class}
  */
 var Enum = class Enum {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @param  {Mixed} params
      * @return {Void}
@@ -196,8 +178,8 @@ var Enum = class Enum {
     constructor(params) {
         this._members = [];
 
-        let ptype = typeof params;
-        let props = {};
+        let ptype = typeof params,
+            props = {};
 
         if (ptype === 'string')
             props[params] = 1;
@@ -222,41 +204,40 @@ var Enum = class Enum {
     }
 
     /* --- */
-
 };
 
 /**
- * Check if item is instance of Enum
+ * Check if item is instance of Enum.
  *
  * @param  {Mixed}   item
  * @return {Boolean}
  */
-var isEnum = function(item) {
+var isEnum = (item) => {
     return item instanceof Enum;
-}
+};
 
 /**
- * Check if item is instance of Member
+ * Check if item is instance of Member.
  *
  * @param  {Mixed}   item
  * @return {Boolean}
  */
-var isMember = function(item) {
+var isMember = (item) => {
     return item instanceof Member;
-}
+};
 
 /**
  * Add member to enumeration.
  *
- * Info: instead of self/member you can pass
- * self/key/value arguments for same functionality.
+ * Info: instead of self/member you can pass self/key/value arguments for same
+ * functionality.
  *
  * @param  {Enum.Enum} eelf   Enum.Enum
  * @param  {Mixed}     key    Enum.Member or member key (string)
  * @param  {Number}    value  (optional) member value (ignored if key is member)
  * @return {Boolean}          success (always true)
  */
-var addMember = function(self, key, value) {
+var addMember = (self, key, value) => {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.addMember');
 
@@ -281,7 +262,7 @@ var addMember = function(self, key, value) {
         value: member.value,
     });
 
-    self._members.sort(function(a, b) {
+    self._members.sort((a, b) => {
         if (a.value < b.value)
             return -1;
         else if (a.value > b.value)
@@ -291,16 +272,16 @@ var addMember = function(self, key, value) {
     });
 
     return true;
-}
+};
 
 /**
- * Remove member from enumeration
+ * Remove member from enumeration.
  *
  * @param  {Enum.Enum} self   Enum.Enum
  * @param  {Mixed}     member Enum-Member, member key (string) or member value (number)
  * @return {Boolean}          success
  */
-var removeMember = function(self, member) {
+var removeMember = (self, member) => {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.removeMember');
 
@@ -312,90 +293,74 @@ var removeMember = function(self, member) {
     self._members.splice(index, 1);
 
     return true;
-}
+};
 
 /**
- * Get enumeration member(s) key(s)
+ * Get enumeration member(s) key(s).
  *
  * @param  {Enum.Enum} self   Enum
  * @param  {Mixed}     member (optional) Enum.Member or member value (number)
  * @return {Mixed}            member key string, null on fail or array of keys if member is not defined
  */
-var getKey = function(self, member) {
+var getKey = (self, member) => {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.getKey');
 
     if (typeof member === 'undefined') {
-        return self._members.map(function(e) {
-            return e.key;
-        });
+        return self._members.map(e => e.key);
     }
     else if (isMember(member)) {
-        let filter = self._members.filter(function(e) {
-            return e === member;
-        });
-
+        let filter = self._members.filter(e => e === member);
         if (!filter.length)
             throw new Exception('Argument member is not member of Enum.Enum', 'Enum.getKey');
 
         return getKey(self, filter[0].value);
     }
     else if (typeof member === 'number') {
-        let filter = self._members.filter(function(e) {
-            return e.value === member;
-        });
-
+        let filter = self._members.filter(e => e.value === member);
         return filter && filter.length ? filter[0].key : null;
     }
 
     throw new Exception('Argument member must be of type Enum.Member or Number', 'Enum.getKey');
-}
+};
 
 /**
- * Get enumeration member(s) value(s)
+ * Get enumeration member(s) value(s).
  *
  * @param  {Enum.Enum} self   Enum.Enum
  * @param  {Mixed}     member (optional) Enum.Member or member key (string)
  * @return {Mixed}            member value number, null on fail or array of values if member is not defined
  */
-var getValue = function(self, member) {
+var getValue = (self, member) => {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.getValue');
 
     if (typeof member === 'undefined') {
-        return self._members.map(function(e) {
-            return e.value;
-        });
+        return self._members.map(e => e.value);
     }
     else if (isMember(member)) {
-        let filter = self._members.filter(function(e) {
-            return e === member;
-        });
-
+        let filter = self._members.filter(e => e === member);
         if (!filter.length)
             throw new Exception('Argument member is not member of Enum.Enum', 'Enum.getValue');
 
         return getValue(self, filter[0].key);
     }
     else if (typeof member === 'string') {
-        let filter = self._members.filter(function(e) {
-            return e.key === member;
-        });
-
+        let filter = self._members.filter(e=> e.key === member);
         return filter && filter.length ? filter[0].value : null;
     }
 
     throw new Exception('Argument member must be of type Enum.Member or String', 'Enum.getValue');
-}
+};
 
 /**
- * Get enumeration member(s) index
+ * Get enumeration member(s) index.
  *
  * @param  {Enum.Enum} self   Enum.Enum
  * @param  {Mixed}     member Enum.Member, member key (string) or member value (number)
  * @return {Number}           member index
  */
-var getIndex = function(self, member) {
+var getIndex = (self, member) => {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.getIndex');
 
@@ -426,59 +391,59 @@ var getIndex = function(self, member) {
         throw new Exception('Argument member is not member of Enum.Enum', 'Enum.getIndex');
 
     return result * 1;
-}
+};
 
 /**
- * Convert enumeration members to object
+ * Convert enumeration members to object.
  *
  * @param  {Enum.Enum} self Enum.Enum
  * @return {Object}         members value/key object
  */
-var toObject = function(self) {
+var toObject = (self) => {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.toObject');
 
     let result = {};
-    forEach(self, function(key, value) {
+    forEach(self, (key, value) => {
         result[key] = value;
     });
 
     return result;
-}
+};
 
 /**
- * Get enumeration minimal value
+ * Get enumeration minimal value.
  *
  * @param  {Enum.Enum} self Enum.Enum
  * @return {Mixed}          member min value (number) or null on no members
  */
-var min = function(self) {
+var min = (self) => {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.min');
 
     return self._members.length ? self._members[0].value : null;
-}
+};
 
 /**
- * Get enumeration maximal value
+ * Get enumeration maximal value.
  *
  * @param  {Enum.Enum} self Enum.Enum
  * @return {Mixed}          member max value (number) or null on no members
  */
-var max = function(self) {
+var max = (self) => {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.max');
 
     return self._members.length ? self._members[self._members.length - 1].value : null;
-}
+};
 
 /**
- * Get enumeration sum of values
+ * Get enumeration sum of values.
  *
  * @param  {Enum.Enum} self Enum.Enum
  * @return {Mixed}          sum of member values (number) or null on no members
  */
-var sum = function(self) {
+var sum = (self) => {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.sum');
 
@@ -486,25 +451,25 @@ var sum = function(self) {
         return null;
 
     let result = 0;
-    forEach(self, function(key, value) {
+    forEach(self, (key, value) => {
         result += value;
     });
 
     return result;
-}
+};
 
 /**
  * Enumeration members iterator.
- * Callback method is called with member as
- * this argument and with member's key and
- * value as parameters. If callback result
- * is boolean true, loop will break.
+ *
+ * Callback method is called with member as this argument and with member's key
+ * and value as parameters. If callback result is boolean true, loop will
+ * break.
  *
  * @param  {Enum.Enum} self     Enum.Enum
  * @param  {Function}  callback method
  * @return {Void}
  */
-var forEach = function(self, callback) {
+var forEach = (self, callback) => {
     if (!isEnum(self))
         throw new Exception('Argument self must be of type Enum.Enum', 'Enum.forEach');
     if (typeof callback !== 'function')
@@ -514,4 +479,4 @@ var forEach = function(self, callback) {
         if (callback.call(this, self._members[i].key, self._members[i].value))
             break;
     }
-}
+};

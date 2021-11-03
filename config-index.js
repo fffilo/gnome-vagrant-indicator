@@ -1,13 +1,13 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// strict mode
+// Strict mode.
 'use strict';
 
-// import modules
+// Import modules.
 const System = imports.system;
 const GLib = imports.gi.GLib;
 
-// global properties
+// Global properties.
 const UUID = 'gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com';
 const VAGRANT_HOME = GLib.getenv('VAGRANT_HOME') || GLib.getenv('HOME') + '/.vagrant.d';
 const VAGRANT_INDEX = VAGRANT_HOME + '/data/machine-index/index';
@@ -34,7 +34,12 @@ const PROPERTIES = [
     'displayVagrantDestroy',
 ];
 
-// read file
+/**
+ * Read file.
+ *
+ * @param  {String} path
+ * @return {String}
+ */
 let read = function(path) {
     try {
         let [ok, content] = GLib.file_get_contents(path);
@@ -56,17 +61,17 @@ let read = function(path) {
     return null;
 }
 
-// parse vagrant index file
+// Parse vagrant index file.
 let parse = read(VAGRANT_INDEX);
 if (!parse || typeof parse !== 'object') {
     print('Error: unable to parse vagrant index file.');
     System.exit(1);
 }
 
-// get current config
+// Get current config.
 let config = read(CONFIG_PATH);
 
-// build json object
+// Build json object.
 let json = {};
 Object.keys(parse.machines || []).forEach(function(machine) {
     json[machine] = {};
@@ -80,6 +85,6 @@ Object.keys(parse.machines || []).forEach(function(machine) {
     });
 });
 
-// present json to user
+// Present json to user.
 let output = JSON.stringify(json, null, 4);
 print(output);

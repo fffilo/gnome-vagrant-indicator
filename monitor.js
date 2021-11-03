@@ -1,19 +1,22 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// strict mode
+// Strict mode.
 'use strict';
 
-// import modules
+// Import modules.
 const Mainloop = imports.mainloop;
 const Signals = imports.signals;
-const Gio = imports.gi.Gio;
-const GLib = imports.gi.GLib;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+const {Gio, GLib} = imports.gi;
+const Me = imports.misc.extensionUtils.getCurrentExtension();
 const Vagrant = Me.imports.vagrant;
 const Dict = Me.imports.dict;
 const Settings = Me.imports.settings;
 
+/**
+ * Monitor properties list.
+ *
+ * @type {Array}
+ */
 const PROPERTIES = [
     'autoGlobalStatusPrune',
     'order',
@@ -42,15 +45,11 @@ const PROPERTIES = [
 ];
 
 /**
- * Monitor.Schema constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Monitor.Schema.
  */
 var Schema = class Schema {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @return {Void}
      */
@@ -66,7 +65,7 @@ var Schema = class Schema {
     }
 
     /**
-     * Destructor
+     * Destructor.
      *
      * @return {Void}
      */
@@ -76,7 +75,7 @@ var Schema = class Schema {
     }
 
     /**
-     * Start monitoring
+     * Start monitoring.
      *
      * @return {Void}
      */
@@ -88,7 +87,7 @@ var Schema = class Schema {
     }
 
     /**
-     * Stop monitoring
+     * Stop monitoring.
      *
      * @return {Void}
      */
@@ -101,39 +100,35 @@ var Schema = class Schema {
     }
 
     /**
-     * Get value by key
+     * Get value by key.
      *
      * @param  {String} key
      * @return {Mixed}
      */
     getValue(key) {
-        // PROPERTIES is list of camel-case properties
-        key = key.replace(/\-([a-z])/g, function(match, group) {
-            return group.toUpperCase();
-        });
+        // PROPERTIES is list of camel-case properties.
+        key = key.replace(/\-([a-z])/g, (match, group) => group.toUpperCase());
 
-        // validate
+        // Validate.
         if (PROPERTIES.indexOf(key) === -1)
             return null;
         if (key === 'label' || key === 'order')
             return null;
 
-        // Gio.Settings use kebab-case properties
-        key = key.replace(/[A-Z]/g, function(match) {
-            return '-' + match.toLowerCase();
-        });
+        // Gio.Settings use kebab-case properties.
+        key = key.replace(/[A-Z]/g, match => '-' + match.toLowerCase());
 
-        // get and set
-        let value = this._settings.get_value(key);
-        let type = value.get_type_string();
-        let method = this._getMethod[type];
-        let result = this._settings[method](key);
+        // Get and set.
+        let value = this._settings.get_value(key),
+            type = value.get_type_string(),
+            method = this._getMethod[type],
+            result = this._settings[method](key);
 
         return result;
     }
 
     /**
-     * Gio.Settings changed event handler
+     * Gio.Settings changed event handler.
      *
      * @param  {Object} widget
      * @param  {String} key
@@ -146,21 +141,16 @@ var Schema = class Schema {
     }
 
     /* --- */
-
 };
 
 Signals.addSignalMethods(Schema.prototype);
 
 /**
- * Monitor.Config constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Monitor.Config.
  */
 var Config = class Config {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @return {Void}
      */
@@ -183,7 +173,7 @@ var Config = class Config {
     }
 
     /**
-     * Destructor
+     * Destructor.
      *
      * @return {Void}
      */
@@ -197,7 +187,7 @@ var Config = class Config {
     }
 
     /**
-     * Path getter
+     * Path property getter.
      *
      * @return {String}
      */
@@ -206,10 +196,10 @@ var Config = class Config {
     }
 
     /**
-     * Delay (in miliseconds) for event
-     * emitting. This will prevent same
-     * event emit on continuously file
-     * save every few miliseconds.
+     * Delay property getter.
+     *
+     * Number of miliseconds for event emitting. This will prevent same event
+     * emit on continuously file save every few miliseconds.
      *
      * @return {Number}
      */
@@ -218,7 +208,7 @@ var Config = class Config {
     }
 
     /**
-     * Start monitoring
+     * Start monitoring.
      *
      * @return {Void}
      */
@@ -231,7 +221,7 @@ var Config = class Config {
     }
 
     /**
-     * Stop monitoring
+     * Stop monitoring.
      *
      * @return {Void}
      */
@@ -244,7 +234,7 @@ var Config = class Config {
     }
 
     /**
-     * Get machine value by key
+     * Get machine value by key.
      *
      * @param  {String} machine
      * @param  {String} key
@@ -252,9 +242,7 @@ var Config = class Config {
      */
     getValue(machine, key) {
         if (key)
-            key = key.replace(/\-([a-z])/g, function(match, group) {
-                return group.toUpperCase();
-            });
+            key = key.replace(/\-([a-z])/g, (match, group) => group.toUpperCase());
 
         if (key === 'autoGlobalStatusPrune')
             return null;
@@ -270,9 +258,8 @@ var Config = class Config {
     }
 
     /**
-     * Get output of shell command (sync)
-     * without throwing exception (instead
-     * exception result is null)
+     * Get output of shell command (sync) without throwing exception (instead
+     * exception result is null).
      *
      * @param  {String} command command to execute
      * @return {String}         output string or null on fail
@@ -295,7 +282,7 @@ var Config = class Config {
     }
 
     /**
-     * Read json file
+     * Read json file.
      *
      * @return {Object}
      */
@@ -321,9 +308,8 @@ var Config = class Config {
     }
 
     /**
-     * Parse content of file, store it to
-     * this._config and return list of
-     * changed machines
+     * Parse content of file, store it to this._config and return list of
+     * changed machines.
      *
      * @return {Mixed}
      */
@@ -331,31 +317,31 @@ var Config = class Config {
         let config = Object.assign({}, this._config);
         this._config = this._read() || {};
 
-        // check if machine is missing
+        // Check if machine is missing.
         let result = null;
         for (let machine in config) {
             if (!(machine in this._config))
                 result = (result || []).concat([machine]);
         }
 
-        // check if machine is added
+        // Check if machine is added.
         for (let machine in this._config) {
             if (!(machine in config))
                 result = (result || []).concat([machine]);
         }
 
-        // check if config changed
+        // Check if config changed.
         for (let machine in this._config) {
             if (machine in config && !Dict.isEqual(this._config[machine], config[machine]))
                 result = (result || []).concat([machine]);
         }
 
-        // return changes
+        // Return changes.
         return result;
     }
 
     /**
-     * File monitor change event handler
+     * File monitor change event handler.
      *
      * @param  {GInotifyFileMonitor} monitor
      * @param  {GLocalFile}          file
@@ -367,8 +353,7 @@ var Config = class Config {
     }
 
     /**
-     * File monitor change event handler
-     * (delayed)
+     * File monitor change event handler (delayed).
      *
      * @return {Void}
      */
@@ -381,26 +366,21 @@ var Config = class Config {
                 id: changes,
             });
 
-        // stop repeating
+        // Stop repeating.
         return false;
     }
 
     /* --- */
-
 };
 
 Signals.addSignalMethods(Config.prototype);
 
 /**
- * Monitor.Monitor constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Monitor.Monitor.
  */
 var Monitor = class Monitor {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @param  {Vagrant.Monitor} vagrantMonitor (optional)
      * @param  {Monitor.Config}  configMonitor  (optional)
@@ -412,7 +392,7 @@ var Monitor = class Monitor {
         this._signal = {};
         this._data = null;
 
-        // use arguments or instance new objects
+        // Use arguments or instance new objects.
         if (!(vagrantMonitor instanceof Vagrant.Monitor)) {
             vagrantMonitor = new Vagrant.Monitor();
             this._destroy.push(vagrantMonitor);
@@ -426,12 +406,12 @@ var Monitor = class Monitor {
             this._destroy.push(schemaMonitor);
         }
 
-        // store
+        // Store.
         this._vagrant = vagrantMonitor;
         this._config = configMonitor;
         this._schema = schemaMonitor;
 
-        // connect signals
+        // Connect signals.
         this._signal.vagrantState = this._vagrant.connect('state', this._handleVagrantState.bind(this));
         this._signal.vagrantAdd = this._vagrant.connect('add', this._handleVagrantAdd.bind(this));
         this._signal.vagrantRemove = this._vagrant.connect('remove', this._handleVagrantRemove.bind(this));
@@ -440,7 +420,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Destructor
+     * Destructor.
      *
      * @return {Void}
      */
@@ -468,7 +448,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Start monitoring
+     * Start monitoring.
      *
      * @return {Void}
      */
@@ -481,7 +461,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Stop monitoring
+     * Stop monitoring.
      *
      * @return {Void}
      */
@@ -494,23 +474,23 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Get sorted machine list
+     * Get sorted machine list.
      *
      * @return {Array} null on fail
      */
     getMachineList() {
         var machines = this._vagrant && this._vagrant.index ? Object.keys(this._vagrant.index.machines) : null;
         if (machines)
-            machines.sort(function(id1, id2) {
-                // sort by order
-                let compare1 = this.getValue(id1, 'order') || 9999;
-                let compare2 = this.getValue(id2, 'order') || 9999;
+            machines.sort(((id1, id2) => {
+                // Sort by order.
+                let compare1 = this.getValue(id1, 'order') || 9999,
+                    compare2 = this.getValue(id2, 'order') || 9999;
                 if (compare1 < compare2)
                     return -1;
                 else if (compare1 > compare2)
                     return 1;
 
-                // order is equal, sort by machine path
+                // Order is equal, sort by machine path.
                 compare1 = this.getMachineDetail(id1, 'vagrantfile_path') || id1;
                 compare2 = this.getMachineDetail(id2, 'vagrantfile_path') || id2;
                 if (compare1 < compare2)
@@ -519,14 +499,13 @@ var Monitor = class Monitor {
                     return 1;
 
                 return 0;
-            }.bind(this));
+            }).bind(this));
 
         return machines;
     }
 
     /**
-     * Get machine detail (from vagrant
-     * index file)
+     * Get machine detail (from vagrant index file).
      *
      * @param  {String} machine
      * @param  {String} key     (optional)
@@ -543,7 +522,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Get value by key (from Schema object)
+     * Get value by key (from Schema object).
      *
      * @param  {String} key
      * @return {Mixed}
@@ -553,8 +532,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Get machine value by key (for
-     * Config object)
+     * Get machine value by key (for Config object).
      *
      * @param  {String} machine
      * @param  {String} key
@@ -565,9 +543,8 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Get machine value by key (get config
-     * value and use schema value as
-     * fallback)
+     * Get machine value by key (get config value and use schema value as
+     * fallback).
      *
      * @param  {String} machine
      * @param  {String} key
@@ -584,7 +561,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Update data
+     * Update data.
      *
      * @return {Void}
      */
@@ -598,14 +575,14 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Update data for specific machine
+     * Update data for specific machine.
      *
      * @param  {String} machine
      * @return {Void}
      */
     _updateMachine(machine) {
-        let machines = this.getMachineList() || [];
-        let index = machines.indexOf(machine);
+        let machines = this.getMachineList() || [],
+            index = machines.indexOf(machine);
         if (index !== -1) {
             this._data[machine] = {};
 
@@ -618,23 +595,19 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Update data for specific machine
-     * by key
+     * Update data for specific machine by key.
      *
      * @param  {String} machine
      * @param  {String} key
      * @return {Void}
      */
     _updateMachineKey(machine, key) {
-        let machines = this.getMachineList() || [];
-        let index = machines.indexOf(machine);
+        let machines = this.getMachineList() || [],
+            index = machines.indexOf(machine);
         if (index === -1)
             return;
 
-        key = key.replace(/\-([a-z])/g, function(match, group) {
-            return group.toUpperCase();
-        });
-
+        key = key.replace(/\-([a-z])/g, (match, group) => group.toUpperCase());
         index = PROPERTIES.indexOf(key);
         if (index === -1)
             return;
@@ -643,7 +616,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Vagrant state event handler
+     * Vagrant state event handler.
      *
      * @param  {Vagrant.Monitor} widget
      * @param  {Object}          event
@@ -654,7 +627,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Vagrant add event handler
+     * Vagrant add event handler.
      *
      * @param  {Vagrant.Monitor} widget
      * @param  {Object}          event
@@ -667,7 +640,7 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Vagrant remove event handler
+     * Vagrant remove event handler.
      *
      * @param  {Vagrant.Monitor} widget
      * @param  {Object}          event
@@ -680,31 +653,29 @@ var Monitor = class Monitor {
     }
 
     /**
-     * Config change event handler
+     * Config change event handler.
      *
      * @param  {Monitor.Config} widget
      * @param  {Object}         event
      * @return {Object}
      */
     _handleConfigChange(widget, event) {
-        // get machine list
-        let machines = this.getMachineList() || [];
-        let changes = event.id.filter(function(item) {
-            return machines.indexOf(item) !== -1;
-        });
+        // Get machine list.
+        let machines = this.getMachineList() || [],
+            changes = event.id.filter(item => machines.indexOf(item) !== -1);
 
-        // no changes on existing machines
+        // No changes on existing machines.
         if (!changes.length)
             return;
 
-        // get and update this._data
+        // Get and update this._data.
         let data = Dict.deepClone(this._data);
         for (let i = 0; i < changes.length; i++) {
             let machine = changes[i];
             this._updateMachine(machine);
         }
 
-        // compare and prepare emit object
+        // Compare and prepare emit object.
         let emit = {};
         for (let i = 0; i < changes.length; i++) {
             let machine = changes[i];
@@ -724,33 +695,31 @@ var Monitor = class Monitor {
                 delete emit[machine];
         }
 
-        // is there anything to emit?
+        // Is there anything to emit?
         if (Object.keys(emit).length)
             this.emit('change', emit);
     }
 
     /**
-     * Schema change event handler
+     * Schema change event handler.
      *
      * @param  {Monitor.Schema} widget
      * @param  {Object}         event
      * @return {Void}
      */
     _handleSchemaChange(widget, event) {
-        // get and update this._data
+        // Get and update this._data.
         let key = event.id;
-        key = key.replace(/\-([a-z])/g, function(match, group) {
-            return group.toUpperCase();
-        });
+        key = key.replace(/\-([a-z])/g, (match, group) => group.toUpperCase());
 
-        let machines = this.getMachineList() || [];
-        let data = Dict.deepClone(this._data);
+        let machines = this.getMachineList() || [],
+            data = Dict.deepClone(this._data);
         for (let i = 0; i < machines.length; i++) {
             let machine = machines[i];
             this._updateMachineKey(machine, key);
         }
 
-        // compare and prepare emit object
+        // Compare and prepare emit object.
         let emit = {};
         for (let i = 0; i < machines.length; i++) {
             let machine = machines[i];
@@ -763,13 +732,12 @@ var Monitor = class Monitor {
                 delete emit[machine];
         }
 
-        // is there anything to emit?
+        // Is there anything to emit?
         if (Object.keys(emit).length)
             this.emit('change', emit);
     }
 
     /* --- */
-
 };
 
 Signals.addSignalMethods(Monitor.prototype);

@@ -1,27 +1,20 @@
 /* -*- mode: js2; js2-basic-offset: 4; indent-tabs-mode: nil -*- */
 
-// strict mode
+// Strict mode.
 'use strict';
 
-// import modules
-const GObject = imports.gi.GObject;
-const Gio = imports.gi.Gio;
-const St = imports.gi.St;
+// Import modules.
+const {GObject, Gio, St} = imports.gi;
 const Main = imports.ui.main;
 const MessageTray = imports.ui.messageTray;
-const ExtensionUtils = imports.misc.extensionUtils;
-const Me = ExtensionUtils.getCurrentExtension();
+const Me = imports.misc.extensionUtils.getCurrentExtension();
 
 /**
- * Notification.Source constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Notification.Source.
  */
 var Source = GObject.registerClass(class Source extends MessageTray.Source {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @return {Void}
      */
@@ -32,7 +25,7 @@ var Source = GObject.registerClass(class Source extends MessageTray.Source {
     }
 
     /**
-     * Source icon getter
+     * Source icon getter.
      *
      * @return {Gio.Icon} (or null if not set)
      */
@@ -41,7 +34,7 @@ var Source = GObject.registerClass(class Source extends MessageTray.Source {
     }
 
     /**
-     * Source icon setter
+     * Source icon setter.
      *
      * @param  {Gio.Icon} value (or null)
      * @return {Void}
@@ -56,7 +49,7 @@ var Source = GObject.registerClass(class Source extends MessageTray.Source {
     }
 
     /**
-     * Overriding getIcon method
+     * Overriding getIcon method.
      *
      * @return {Gio.FileIcon}
      */
@@ -69,19 +62,14 @@ var Source = GObject.registerClass(class Source extends MessageTray.Source {
     }
 
     /* --- */
-
 });
 
 /**
- * Notification.Notification constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Notification.Notification.
  */
 var Notification = GObject.registerClass(class Notification extends MessageTray.Notification {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @param  {Source} source
      * @param  {String} title
@@ -93,35 +81,30 @@ var Notification = GObject.registerClass(class Notification extends MessageTray.
     }
 
     /**
-     * Overriding createBanner method
+     * Overriding createBanner method.
      *
      * @return {Gio.FileIcon}
      */
     createBanner(notification) {
-        let result = super.createBanner(notification);
-        let prefix = Me.metadata.uuid
-            .toLowerCase()
-            .replace(/@.*/, '')
-            .replace(/[^a-z0-9]+/g, '-')
+        let result = super.createBanner(notification),
+            prefix = Me.metadata.uuid
+                .toLowerCase()
+                .replace(/@.*/, '')
+                .replace(/[^a-z0-9]+/g, '-')
         result.add_style_class_name(prefix + '-notification-banner');
 
         return result;
     }
 
     /* --- */
-
 });
 
 /**
- * Notification.Notifier constructor
- *
- * @param  {Object}
- * @return {Class}
+ * Notification.Notifier.
  */
 var Notifier = class Notifier {
-
     /**
-     * Constructor
+     * Constructor.
      *
      * @return {Void}
      */
@@ -131,7 +114,7 @@ var Notifier = class Notifier {
     }
 
     /**
-     * Destructor
+     * Destructor.
      *
      * @return {Void}
      */
@@ -143,6 +126,11 @@ var Notifier = class Notifier {
         this._source = null;
     }
 
+    /**
+     * Source property getter.
+     *
+     * @return {Source}
+     */
     get source() {
         if (this._source)
             return this._source;
@@ -157,7 +145,7 @@ var Notifier = class Notifier {
     }
 
     /**
-     * Source icon getter
+     * Icon property getter.
      *
      * @return {Gio.Icon} (or null if not set)
      */
@@ -166,7 +154,7 @@ var Notifier = class Notifier {
     }
 
     /**
-     * Source icon setter
+     * Icon property setter.
      *
      * @param  {Gio.Icon} value (or null)
      * @return {Void}
@@ -182,7 +170,7 @@ var Notifier = class Notifier {
 
     /**
      * Source destroy event handler:
-     * clear source
+     * clear source.
      *
      * @return {Void}
      */
@@ -191,8 +179,7 @@ var Notifier = class Notifier {
     }
 
     /**
-     * Get existing notification from
-     * source or create new one
+     * Get existing notification from source or create new one.
      *
      * @param  {String}       title
      * @param  {String}       message
@@ -216,7 +203,7 @@ var Notifier = class Notifier {
     }
 
     /**
-     * Show notification
+     * Show notification.
      *
      * @param  {String}   title
      * @param  {String}   message
@@ -228,5 +215,4 @@ var Notifier = class Notifier {
     }
 
     /* --- */
-
 };
