@@ -5,8 +5,8 @@
 
 // Import modules.
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Translation = Me.imports.translation;
-const Indicator = Me.imports.indicator;
+const Translation = Me.imports.lib.extension.translation;
+const Indicator = Me.imports.lib.extension.indicator;
 
 /**
  * Global indicator object.

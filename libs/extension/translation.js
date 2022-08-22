@@ -6,7 +6,7 @@
 // Import modules.
 const Gettext = imports.gettext;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
+const Convenience = Me.imports.lib.extension.convenience;
 
 /**
  * Init translation for domain

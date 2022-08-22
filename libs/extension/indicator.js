@@ -10,13 +10,13 @@ const PanelMenu = imports.ui.panelMenu;
 const Util = imports.misc.util;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Menu = Me.imports.menu;
-const Notification = Me.imports.notification;
-const Enum = Me.imports.enum;
-const Vagrant = Me.imports.vagrant;
-const Monitor = Me.imports.monitor;
-const Icons = Me.imports.icons;
-const Translation = Me.imports.translation;
+const Menu = Me.imports.lib.extension.menu;
+const Notification = Me.imports.lib.extension.notification;
+const Enum = Me.imports.lib.extension.enum;
+const Vagrant = Me.imports.lib.extension.vagrant;
+const Monitor = Me.imports.lib.extension.monitor;
+const Icons = Me.imports.lib.extension.icons;
+const Translation = Me.imports.lib.extension.translation;
 const _ = Translation.translate;
 
 /**

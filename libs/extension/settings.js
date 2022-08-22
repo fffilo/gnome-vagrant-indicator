@@ -5,7 +5,7 @@
 
 // Import modules.
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Convenience = Me.imports.convenience;
+const Convenience = Me.imports.lib.extension.convenience;
 
 /**
  * Get settings for schema

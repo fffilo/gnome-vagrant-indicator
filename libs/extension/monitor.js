@@ -8,9 +8,9 @@ const Mainloop = imports.mainloop;
 const Signals = imports.signals;
 const {Gio, GLib} = imports.gi;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Vagrant = Me.imports.vagrant;
-const Dict = Me.imports.dict;
-const Settings = Me.imports.settings;
+const Vagrant = Me.imports.lib.extension.vagrant;
+const Dict = Me.imports.lib.extension.dict;
+const Settings = Me.imports.lib.extension.settings;
 
 /**
  * Monitor properties list.

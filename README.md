@@ -77,7 +77,7 @@ will use settings set in _Preferences_).
 
 To make things easier you can use `config-index` helper:
 
-	gjs ~/.local/share/gnome-shell/extensions/gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com/config-index.js
+	gjs ~/.local/share/gnome-shell/extensions/gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com/bin/config-index.js
 
 ...which will output your config (all machines with their current values)
 which you can paste in `config.json`.

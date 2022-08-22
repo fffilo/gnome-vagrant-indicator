@@ -7,9 +7,9 @@
 const {GObject, GLib} = imports.gi;
 const PopupMenu = imports.ui.popupMenu;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Enum = Me.imports.enum;
-const Vagrant = Me.imports.vagrant;
-const Translation = Me.imports.translation;
+const Enum = Me.imports.lib.extension.enum;
+const Vagrant = Me.imports.lib.extension.vagrant;
+const Translation = Me.imports.lib.extension.translation;
 const _ = Translation.translate;
 
 // PopupMenu elements.
