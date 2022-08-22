@@ -7,10 +7,9 @@
 const {GObject, GLib} = imports.gi;
 const PopupMenu = imports.ui.popupMenu;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Enum = Me.imports.enum;
-const Vagrant = Me.imports.vagrant;
-const Translation = Me.imports.translation;
-const _ = Translation.translate;
+const Enum = Me.imports.libs.extension.enum;
+const Vagrant = Me.imports.libs.extension.vagrant;
+const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 
 // PopupMenu elements.
 var Separator = PopupMenu.PopupSeparatorMenuItem;

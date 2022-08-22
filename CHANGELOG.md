@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 16 - 2022-08-22
+### Changed
+- Port extension to gnome shell 42
+- Preferences redesign
+- Directory structure
+
 ## Version 15 - 2022-08-22
 ### Changed
 - Port extension to gnome shell 41

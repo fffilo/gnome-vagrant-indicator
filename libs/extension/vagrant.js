@@ -34,9 +34,9 @@ const Mainloop = imports.mainloop;
 const Signals = imports.signals;
 const {GLib, Gio} = imports.gi;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Enum = Me.imports.enum;
-const Terminal = Me.imports.terminal;
-const Dict =  Me.imports.dict;
+const Enum = Me.imports.libs.extension.enum;
+const Terminal = Me.imports.libs.extension.terminal;
+const Dict =  Me.imports.libs.extension.dict;
 
 // Global properties.
 const VAGRANT_EXE = 'vagrant';

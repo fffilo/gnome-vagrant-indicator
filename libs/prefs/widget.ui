@@ -1,0 +1,543 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<interface>
+    <object class="AdwWindow">
+        <child>
+            <object class="AdwPreferencesPage" id="page-settings">
+                <style>
+                    <class name="page" />
+                    <class name="page--settings" />
+                </style>
+                <property name="title" translatable="yes">Settings</property>
+                <property name="icon-name">preferences-system-symbolic</property>
+                <child>
+                    <object class="AdwPreferencesGroup">
+                        <property name="title" translatable="yes">General</property>
+                        <property name="visible">true</property>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Show notifications</property>
+                                <property name="subtitle" translatable="yes">Display notification on vagrant machine state change.</property>
+                                <property name="activatable-widget">setting-notifications</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-notifications">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--notifications" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Show machine full path</property>
+                                <property name="subtitle" translatable="yes">Show machine full path as instance name.</property>
+                                <property name="activatable-widget">setting-machine-full-path</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-machine-full-path">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--machine-full-path" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Show machine name</property>
+                                <property name="subtitle" translatable="yes">Show machine name next to instance name.</property>
+                                <property name="activatable-widget">setting-machine-name</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-machine-name">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--machine-name" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwComboRow" id="setting-post-terminal-action">
+                                <style>
+                                    <class name="setting" />
+                                    <class name="setting--post-terminal-action" />
+                                </style>
+                                <property name="title" translatable="yes">Post terminal action</property>
+                                <property name="subtitle" translatable="yes">Terminal action after vagrant command execution.</property>
+                                <property name="model">
+                                    <object class="GtkStringList">
+                                        <items>
+                                            <item translatable="yes">NONE - Leave opened</item>
+                                            <item translatable="yes">EXIT - Close</item>
+                                            <item translatable="yes">BOTH - Wait for keypress and close</item>
+                                        </items>
+                                    </object>
+                                </property>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwPreferencesGroup">
+                        <property name="title" translatable="yes">Refresh machines status</property>
+                        <property name="header-suffix">action-global-status-prune</property>
+                        <child type="header-suffix">
+                            <object class="GtkButton" id="action-global-status-prune">
+                                <child>
+                                    <object class="AdwButtonContent">
+                                        <property name="label" translatable="yes">Execute</property>
+                                        <property name="icon-name">application-x-executable-symbolic</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Refresh machines status at startup</property>
+                                <property name="subtitle" translatable="yes">This will get state of all active Vagrant environments and prune invalid entries from the list. Note that this can be heavy task and can last some time if you have many boxes.</property>
+                                <property name="activatable-widget">setting-auto-global-status-prune</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-auto-global-status-prune">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--auto-global-status-prune" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+        <child>
+            <object class="AdwPreferencesPage" id="page-menu">
+                <style>
+                    <class name="page" />
+                    <class name="page--menu" />
+                </style>
+                <property name="title" translatable="yes">Menu</property>
+                <property name="icon-name">open-menu-symbolic</property>
+                <child>
+                    <object class="AdwPreferencesGroup">
+                        <property name="title" translatable="yes">Display Vagrant Commands</property>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Up</property>
+                                <property name="activatable-widget">setting-display-vagrant-up</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-vagrant-up">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-up" />
+                                        </style>
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-up" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Up and Provision</property>
+                                <property name="activatable-widget">setting-display-vagrant-up-provision</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-vagrant-up-provision">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-up" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Up and SSH</property>
+                                <property name="activatable-widget">setting-display-vagrant-up-ssh</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-vagrant-up-ssh">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-up" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Up and RDP</property>
+                                <property name="activatable-widget">setting-display-vagrant-up-rdp</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-vagrant-up-rdp">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-up" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Provision</property>
+                                <property name="activatable-widget">setting-display-vagrant-provision</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-vagrant-provision">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-provision" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">SSH</property>
+                                <property name="activatable-widget">setting-display-vagrant-ssh</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-vagrant-ssh">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-ssh" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">RDP</property>
+                                <property name="activatable-widget">setting-display-vagrant-rdp</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-vagrant-rdp">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-rdp" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Resume</property>
+                                <property name="activatable-widget">setting-display-vagrant-resume</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-vagrant-resume">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-resume" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Suspend</property>
+                                <property name="activatable-widget">setting-display-vagrant-suspend</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-vagrant-suspend">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-suspend" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Halt</property>
+                                <property name="activatable-widget">setting-display-vagrant-halt</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-vagrant-halt">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-halt" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Destroy</property>
+                                <property name="activatable-widget">setting-display-vagrant-destroy</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-vagrant-destroy">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-vagrant-destroy" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwPreferencesGroup">
+                        <property name="title" translatable="yes">Display System Commands</property>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Open in Terminal</property>
+                                <property name="activatable-widget">setting-display-system-terminal</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-system-terminal">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-system-terminal" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Open in File Manager</property>
+                                <property name="activatable-widget">setting-display-system-file-manager</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-system-file-manager">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-system-file" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Edit Vagrantfile</property>
+                                <property name="activatable-widget">setting-display-system-vagrantfile</property>
+                                <child>
+                                    <object class="GtkSwitch" id="setting-display-system-vagrantfile">
+                                        <style>
+                                            <class name="setting" />
+                                            <class name="setting--display-system-vagrantfile" />
+                                        </style>
+                                        <property name="active">True</property>
+                                        <property name="valign">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+        <child>
+            <object class="AdwPreferencesPage" id="page-about">
+                <style>
+                    <class name="page" />
+                    <class name="page--about" />
+                </style>
+                <property name="title" translatable="yes">About</property>
+                <property name="icon-name">dialog-information-symbolic</property>
+                <child>
+                    <object class="AdwPreferencesGroup">
+                        <child>
+                            <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="valign">center</property>
+                                <child>
+                                    <object class="GtkLabel" id="about-title">
+                                        <style>
+                                            <class name="about" />
+                                            <class name="about--title" />
+                                        </style>
+                                        <property name="label">Me.metadata.name</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="valign">center</property>
+                                <child>
+                                    <object class="GtkImage" id="about-icon">
+                                        <style>
+                                            <class name="about" />
+                                            <class name="about--icon" />
+                                        </style>
+                                        <property name="pixel-size">64</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="valign">center</property>
+                                <child>
+                                    <object class="GtkLabel" id="about-description">
+                                        <style>
+                                            <class name="about" />
+                                            <class name="about--description" />
+                                        </style>
+                                        <property name="label">Me.metadata.description</property>
+                                        <property name="use-markup">true</property>
+                                        <property name="wrap">true</property>
+                                        <property name="justify">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwPreferencesGroup">
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Extension Version</property>
+                                <child>
+                                    <object class="GtkLabel" id="about-version">
+                                        <style>
+                                            <class name="about" />
+                                            <class name="about--version" />
+                                        </style>
+                                        <property name="label">Me.metadata.version</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">GNOME Version</property>
+                                <child>
+                                    <object class="GtkLabel" id="about-gnome">
+                                        <style>
+                                            <class name="about" />
+                                            <class name="about--gnome" />
+                                        </style>
+                                        <property name="label">unknown</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="AdwActionRow">
+                                <property name="title" translatable="yes">Session Type</property>
+                                <child>
+                                    <object class="GtkLabel" id="about-session">
+                                        <style>
+                                            <class name="about" />
+                                            <class name="about--session" />
+                                        </style>
+                                        <property name="label">unknown</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+                <child>
+                    <object class="AdwPreferencesGroup">
+                        <child>
+                            <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="valign">center</property>
+                                <child>
+                                    <object class="GtkLabel" id="about-author">
+                                        <style>
+                                            <class name="about" />
+                                            <class name="about--author" />
+                                        </style>
+                                        <property name="label">Me.metadata.author</property>
+                                        <property name="use-markup">true</property>
+                                        <property name="wrap">true</property>
+                                        <property name="justify">center</property>
+                                    </object>
+                                </child>
+                                <child>
+                                    <object class="GtkLabel" id="about-webpage">
+                                        <style>
+                                            <class name="about" />
+                                            <class name="about--webpage" />
+                                        </style>
+                                        <property name="label">Me.metadata.webpage</property>
+                                        <property name="use-markup">true</property>
+                                        <property name="wrap">true</property>
+                                        <property name="justify">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                        <child>
+                            <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="valign">end</property>
+                                <property name="vexpand">true</property>
+                                <child>
+                                    <object class="GtkLabel" id="about-license">
+                                        <style>
+                                            <class name="about" />
+                                            <class name="about--license" />
+                                        </style>
+                                        <property name="label">Me.metadata.license</property>
+                                        <property name="use-markup">true</property>
+                                        <property name="wrap">true</property>
+                                        <property name="justify">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
+                    </object>
+                </child>
+            </object>
+        </child>
+        <child>
+            <object class="GtkLabel">
+                <property name="visible">false</property>
+                <property name="label">
+                    The root element should be AdwPreferencesWindow, but for some reason if we use AdwPreferencesWindow
+                    element all the content of each page is empty. Another strange thing is that if we do not have this
+                    additional child (GtkLabel), about (the last page) is empty... ?!?!?!
+                </property>
+            </object>
+        </child>
+    </object>
+</interface>

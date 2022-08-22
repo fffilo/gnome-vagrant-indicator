@@ -1,6 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <schemalist gettext-domain="gnome-vagrant-indicator">
     <schema path="/org/gnome/shell/extensions/gnome-vagrant-indicator/" id="org.gnome.shell.extensions.gnome-vagrant-indicator">
+        <key name="prefs-default-width" type="i">
+            <default>0</default>
+            <summary>Preferences window default width</summary>
+        </key>
+        <key name="prefs-default-height" type="i">
+            <default>0</default>
+            <summary>Preferences window default height</summary>
+        </key>
         <key name="notifications" type="b">
             <default>true</default>
             <summary>Show notifications</summary>

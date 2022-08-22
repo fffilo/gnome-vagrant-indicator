@@ -4,9 +4,9 @@
 'use strict';
 
 // Import modules.
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Translation = Me.imports.translation;
-const Indicator = Me.imports.indicator;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Indicator = Me.imports.libs.extension.indicator;
 
 /**
  * Global indicator object.
@@ -22,7 +22,7 @@ let indicator = null;
  * @return {Void}
  */
 var init = (extensionMeta) => {
-    Translation.init();
+    ExtensionUtils.initTranslations(Me.metadata['gettext-domain']);
 }
 
 /**

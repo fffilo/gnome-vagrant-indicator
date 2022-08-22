@@ -77,7 +77,7 @@ will use settings set in _Preferences_).
 
 To make things easier you can use `config-index` helper:
 
-	gjs ~/.local/share/gnome-shell/extensions/gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com/config-index.js
+	gjs ~/.local/share/gnome-shell/extensions/gnome-vagrant-indicator@gnome-shell-exstensions.fffilo.github.com/bin/config-index.js
 
 ...which will output your config (all machines with their current values)
 which you can paste in `config.json`.
@@ -110,6 +110,4 @@ which you can paste in `config.json`.
 ## Credits
 
 - [HashiCorp](https://www.hashicorp.com/), author of [vagrant](https://www.vagrantup.com/) tool for building and distributing virtualized development environments
-- unknown author of [indicator icon](https://www.vagrantup.com/assets/images/logo-hashicorp-e1aea9d4.svg) (modified by [Franjo Filo](https://github.com/fffilo/))
 - [Timur Rubeko](https://github.com/candidtim/), author of [vgapplet](https://github.com/candidtim/vagrant-appindicator) (for inspiration)
-- [Giovanni Campagna](https://github.com/gcampax/), author of [convenience.js](https://github.com/gcampax/gnome-shell-extensions/blob/master/lib/convenience.js)
