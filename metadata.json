@@ -1,9 +1,9 @@
 {
     "description": "Easily manage your vagrant machines from status area",
-    "description-html": "Inspired by <a href=\"https://github.com/candidtim/vagrant-appindicator\">vgapplet</a>,\n<b>GNOME Vagrant Indicator</b> lets you easily manage your vagrant machines from status area.",
+    "description-html": "Inspired by <a href=\"https://github.com/candidtim/vagrant-appindicator\">vgapplet</a>,<br /><b>GNOME Vagrant Indicator</b> lets you easily manage<br />your vagrant machines from status area.",
     "gettext-domain": "gnome-vagrant-indicator",
     "license": "GNU General Public License v3.0",
-    "license-html": "This program comes with ABSOLUTELY NO WARRANTY.\nSee the <a href=\"https:\/\/www.gnu.org\/licenses\/gpl-3.0.html\">GNU General Public License v3.0</a> for details.",
+    "license-html": "This program comes with ABSOLUTELY NO WARRANTY.<br />See the <a href=\"https:\/\/www.gnu.org\/licenses\/gpl-3.0.html\">GNU General Public License v3.0</a> for details.",
     "name": "GNOME Vagrant Indicator",
     "original-author": "Franjo Filo <fffilo666@gmail.com>",
     "original-author-html": "Franjo Filo <a href=\"mailto:fffilo666@gmail.com\">&lt;fffilo666@gmail.com&gt;</a>",

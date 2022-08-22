@@ -4,7 +4,7 @@
 'use strict';
 
 // Import modules.
-const {GObject, Gio} = imports.gi;
+const {GObject, Gtk, Gdk, Gio} = imports.gi;
 const Me = imports.misc.extensionUtils.getCurrentExtension();
 
 /**
@@ -30,6 +30,17 @@ var path = (filename=null) => {
 };
 
 /**
+ * Include icon path to icon theme search path.
+ *
+ * @return {Void}
+ */
+var include = () => {
+    let theme = Gtk.IconTheme.get_for_display(Gdk.Display.get_default());
+    if (!theme.get_search_path().includes(path()))
+        theme.add_search_path(path());
+}
+
+/**
  * Icons.Icon extends Gio.FileIcon.
  */
 var Icon = GObject.registerClass(class Icon extends Gio.FileIcon {
@@ -49,3 +60,4 @@ var Icon = GObject.registerClass(class Icon extends Gio.FileIcon {
 
     /* --- */
 });
+
