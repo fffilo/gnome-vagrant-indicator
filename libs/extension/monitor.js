@@ -7,10 +7,10 @@
 const Mainloop = imports.mainloop;
 const Signals = imports.signals;
 const {Gio, GLib} = imports.gi;
-const Me = imports.misc.extensionUtils.getCurrentExtension();
-const Vagrant = Me.imports.lib.extension.vagrant;
-const Dict = Me.imports.lib.extension.dict;
-const Settings = Me.imports.lib.extension.settings;
+const ExtensionUtils = imports.misc.extensionUtils;
+const Me = ExtensionUtils.getCurrentExtension();
+const Vagrant = Me.imports.libs.extension.vagrant;
+const Dict = Me.imports.libs.extension.dict;
 
 /**
  * Monitor properties list.
@@ -60,7 +60,7 @@ var Schema = class Schema {
             s: 'get_string',
         };
 
-        this._settings = Settings.settings();
+        this._settings = ExtensionUtils.getSettings(Me.metadata['settings-schema']);
         this._signal = null;
     }
 

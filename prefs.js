@@ -4,7 +4,7 @@
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Widget = Me.imports.lib.prefs.widget;
+const Widget = Me.imports.libs.prefs.widget;
 
 /**
  * Initialize extension preferences.

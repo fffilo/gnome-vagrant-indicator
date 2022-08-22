@@ -6,13 +6,9 @@ const { Gtk, Gdk, GLib, Gio, Adw } = imports.gi;
 const Mainloop = imports.mainloop;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Icons = Me.imports.lib.extension.icons;
-const Vagrant = Me.imports.lib.extension.vagrant;
-
-const Gettext = imports.gettext;
-const Domain = Gettext.domain(Me.metadata['gettext-domain']);
-const _ = Domain.gettext;
-const ngettext = Domain.ngettext;
+const Icons = Me.imports.libs.extension.icons;
+const Vagrant = Me.imports.libs.extension.vagrant;
+const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 
 /**
  * Preferences widget.
@@ -26,8 +22,8 @@ var Widget = class Widget {
      */
     constructor(window) {
         this._window = window;
-        this._settings = ExtensionUtils.getSettings(Me.metadata['settings-schema']);;
-        this._builder = Gtk.Builder.new_from_file(`${Me.path}/lib/prefs/widget.ui`);
+        this._settings = ExtensionUtils.getSettings(Me.metadata['settings-schema']);
+        this._builder = Gtk.Builder.new_from_file(`${Me.path}/libs/prefs/widget.ui`);
 
         this._loadStylesheet();
         this._includeIcons();
@@ -87,7 +83,7 @@ var Widget = class Widget {
      */
     _loadStylesheet() {
         const provider = new Gtk.CssProvider();
-        provider.load_from_path(`${Me.path}/lib/prefs/widget.css`);
+        provider.load_from_path(`${Me.path}/libs/prefs/widget.css`);
 
         Gtk.StyleContext.add_provider_for_display(Gdk.Display.get_default(), provider, Gtk.STYLE_PROVIDER_PRIORITY_APPLICATION);
     }

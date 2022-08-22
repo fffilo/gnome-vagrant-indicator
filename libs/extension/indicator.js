@@ -10,14 +10,13 @@ const PanelMenu = imports.ui.panelMenu;
 const Util = imports.misc.util;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Menu = Me.imports.lib.extension.menu;
-const Notification = Me.imports.lib.extension.notification;
-const Enum = Me.imports.lib.extension.enum;
-const Vagrant = Me.imports.lib.extension.vagrant;
-const Monitor = Me.imports.lib.extension.monitor;
-const Icons = Me.imports.lib.extension.icons;
-const Translation = Me.imports.lib.extension.translation;
-const _ = Translation.translate;
+const Menu = Me.imports.libs.extension.menu;
+const Notification = Me.imports.libs.extension.notification;
+const Enum = Me.imports.libs.extension.enum;
+const Vagrant = Me.imports.libs.extension.vagrant;
+const Monitor = Me.imports.libs.extension.monitor;
+const Icons = Me.imports.libs.extension.icons;
+const _ = imports.gettext.domain(Me.metadata['gettext-domain']).gettext;
 
 /**
  * Indicator.Base.
