@@ -75,9 +75,9 @@
                                 <property name="model">
                                     <object class="GtkStringList">
                                         <items>
-                                            <item translatable="yes">NONE - Leave opened</item>
-                                            <item translatable="yes">EXIT - Close</item>
-                                            <item translatable="yes">BOTH - Wait for keypress and close</item>
+                                            <item translatable="yes">Leave opened</item>
+                                            <item translatable="yes">Close</item>
+                                            <item translatable="yes">Keypress and close</item>
                                         </items>
                                     </object>
                                 </property>
