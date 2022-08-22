@@ -13,10 +13,10 @@ const Translation = Me.imports.translation;
 const _ = Translation.translate;
 
 // PopupMenu elements.
-const Separator = PopupMenu.PopupSeparatorMenuItem;
-const Item = PopupMenu.PopupMenuItem;
-const SubMenu = PopupMenu.PopupSubMenuMenuItem;
-const Section = PopupMenu.PopupMenuSection;
+var Separator = PopupMenu.PopupSeparatorMenuItem;
+var Item = PopupMenu.PopupMenuItem;
+var SubMenu = PopupMenu.PopupSubMenuMenuItem;
+var Section = PopupMenu.PopupMenuSection;
 
 // Display enums.
 var DisplayVagrant = Vagrant.CommandVagrant;

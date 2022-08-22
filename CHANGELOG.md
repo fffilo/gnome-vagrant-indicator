@@ -1,5 +1,13 @@
 # Changelog
 
+## Version 15 - 2022-08-22
+### Changed
+- Port extension to gnome shell 41
+
+## Version 14 - 2021-11-03
+### Changed
+- Port extension to gnome shell 40
+
 ## Version 13 - 2020-05-19
 ### Changed
 - Code refactoring (gnome-shell 3.36 support)
