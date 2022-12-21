@@ -4,7 +4,6 @@
 
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
-const Widget = Me.imports.libs.prefs.widget;
 
 /**
  * Initialize extension preferences.
@@ -22,5 +21,6 @@ var init = () => {
  * @return {Void}
  */
 var fillPreferencesWindow = (window) => {
+    const Widget = Me.imports.libs.prefs.widget;
     new Widget.Widget(window);
 }

@@ -4,8 +4,8 @@
         <child>
             <object class="AdwPreferencesPage" id="page-settings">
                 <style>
-                    <class name="page" />
-                    <class name="page--settings" />
+                    <class name="gnome-vagrant-indicator-prefs__page" />
+                    <class name="gnome-vagrant-indicator-prefs__page--settings" />
                 </style>
                 <property name="title" translatable="yes">Settings</property>
                 <property name="icon-name">preferences-system-symbolic</property>
@@ -21,8 +21,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-notifications">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--notifications" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--notifications" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -38,8 +38,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-machine-full-path">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--machine-full-path" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--machine-full-path" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -55,8 +55,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-machine-name">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--machine-name" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--machine-name" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -67,8 +67,8 @@
                         <child>
                             <object class="AdwComboRow" id="setting-post-terminal-action">
                                 <style>
-                                    <class name="setting" />
-                                    <class name="setting--post-terminal-action" />
+                                    <class name="gnome-vagrant-indicator-prefs__setting" />
+                                    <class name="gnome-vagrant-indicator-prefs__setting--post-terminal-action" />
                                 </style>
                                 <property name="title" translatable="yes">Post terminal action</property>
                                 <property name="subtitle" translatable="yes">Terminal action after vagrant command execution.</property>
@@ -107,8 +107,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-auto-global-status-prune">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--auto-global-status-prune" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--auto-global-status-prune" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -123,8 +123,8 @@
         <child>
             <object class="AdwPreferencesPage" id="page-menu">
                 <style>
-                    <class name="page" />
-                    <class name="page--menu" />
+                    <class name="gnome-vagrant-indicator-prefs__page" />
+                    <class name="gnome-vagrant-indicator-prefs__page--menu" />
                 </style>
                 <property name="title" translatable="yes">Menu</property>
                 <property name="icon-name">open-menu-symbolic</property>
@@ -138,12 +138,12 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-vagrant-up">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-up" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-up" />
                                         </style>
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-up" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-up" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -158,8 +158,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-vagrant-up-provision">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-up" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-up" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -174,8 +174,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-vagrant-up-ssh">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-up" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-up" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -190,8 +190,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-vagrant-up-rdp">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-up" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-up" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -206,8 +206,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-vagrant-provision">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-provision" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-provision" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -222,8 +222,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-vagrant-ssh">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-ssh" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-ssh" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -238,8 +238,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-vagrant-rdp">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-rdp" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-rdp" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -254,8 +254,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-vagrant-resume">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-resume" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-resume" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -270,8 +270,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-vagrant-suspend">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-suspend" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-suspend" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -286,8 +286,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-vagrant-halt">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-halt" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-halt" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -302,8 +302,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-vagrant-destroy">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-vagrant-destroy" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-vagrant-destroy" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -323,8 +323,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-system-terminal">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-system-terminal" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-system-terminal" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -339,8 +339,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-system-file-manager">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-system-file" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-system-file" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -355,8 +355,8 @@
                                 <child>
                                     <object class="GtkSwitch" id="setting-display-system-vagrantfile">
                                         <style>
-                                            <class name="setting" />
-                                            <class name="setting--display-system-vagrantfile" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting" />
+                                            <class name="gnome-vagrant-indicator-prefs__setting--display-system-vagrantfile" />
                                         </style>
                                         <property name="active">True</property>
                                         <property name="valign">center</property>
@@ -371,8 +371,8 @@
         <child>
             <object class="AdwPreferencesPage" id="page-about">
                 <style>
-                    <class name="page" />
-                    <class name="page--about" />
+                    <class name="gnome-vagrant-indicator-prefs__page" />
+                    <class name="gnome-vagrant-indicator-prefs__page--about" />
                 </style>
                 <property name="title" translatable="yes">About</property>
                 <property name="icon-name">dialog-information-symbolic</property>
@@ -385,8 +385,8 @@
                                 <child>
                                     <object class="GtkLabel" id="about-title">
                                         <style>
-                                            <class name="about" />
-                                            <class name="about--title" />
+                                            <class name="gnome-vagrant-indicator-prefs__about" />
+                                            <class name="gnome-vagrant-indicator-prefs__about--title" />
                                         </style>
                                         <property name="label">Me.metadata.name</property>
                                     </object>
@@ -400,8 +400,8 @@
                                 <child>
                                     <object class="GtkImage" id="about-icon">
                                         <style>
-                                            <class name="about" />
-                                            <class name="about--icon" />
+                                            <class name="gnome-vagrant-indicator-prefs__about" />
+                                            <class name="gnome-vagrant-indicator-prefs__about--icon" />
                                         </style>
                                         <property name="pixel-size">64</property>
                                     </object>
@@ -415,8 +415,8 @@
                                 <child>
                                     <object class="GtkLabel" id="about-description">
                                         <style>
-                                            <class name="about" />
-                                            <class name="about--description" />
+                                            <class name="gnome-vagrant-indicator-prefs__about" />
+                                            <class name="gnome-vagrant-indicator-prefs__about--description" />
                                         </style>
                                         <property name="label">Me.metadata.description</property>
                                         <property name="use-markup">true</property>
@@ -436,8 +436,8 @@
                                 <child>
                                     <object class="GtkLabel" id="about-version">
                                         <style>
-                                            <class name="about" />
-                                            <class name="about--version" />
+                                            <class name="gnome-vagrant-indicator-prefs__about" />
+                                            <class name="gnome-vagrant-indicator-prefs__about--version" />
                                         </style>
                                         <property name="label">Me.metadata.version</property>
                                     </object>
@@ -450,8 +450,8 @@
                                 <child>
                                     <object class="GtkLabel" id="about-gnome">
                                         <style>
-                                            <class name="about" />
-                                            <class name="about--gnome" />
+                                            <class name="gnome-vagrant-indicator-prefs__about" />
+                                            <class name="gnome-vagrant-indicator-prefs__about--gnome" />
                                         </style>
                                         <property name="label">unknown</property>
                                     </object>
@@ -464,8 +464,8 @@
                                 <child>
                                     <object class="GtkLabel" id="about-session">
                                         <style>
-                                            <class name="about" />
-                                            <class name="about--session" />
+                                            <class name="gnome-vagrant-indicator-prefs__about" />
+                                            <class name="gnome-vagrant-indicator-prefs__about--session" />
                                         </style>
                                         <property name="label">unknown</property>
                                     </object>
@@ -483,8 +483,8 @@
                                 <child>
                                     <object class="GtkLabel" id="about-author">
                                         <style>
-                                            <class name="about" />
-                                            <class name="about--author" />
+                                            <class name="gnome-vagrant-indicator-prefs__about" />
+                                            <class name="gnome-vagrant-indicator-prefs__about--author" />
                                         </style>
                                         <property name="label">Me.metadata.author</property>
                                         <property name="use-markup">true</property>
@@ -495,8 +495,8 @@
                                 <child>
                                     <object class="GtkLabel" id="about-webpage">
                                         <style>
-                                            <class name="about" />
-                                            <class name="about--webpage" />
+                                            <class name="gnome-vagrant-indicator-prefs__about" />
+                                            <class name="gnome-vagrant-indicator-prefs__about--webpage" />
                                         </style>
                                         <property name="label">Me.metadata.webpage</property>
                                         <property name="use-markup">true</property>
@@ -514,8 +514,8 @@
                                 <child>
                                     <object class="GtkLabel" id="about-license">
                                         <style>
-                                            <class name="about" />
-                                            <class name="about--license" />
+                                            <class name="gnome-vagrant-indicator-prefs__about" />
+                                            <class name="gnome-vagrant-indicator-prefs__about--license" />
                                         </style>
                                         <property name="label">Me.metadata.license</property>
                                         <property name="use-markup">true</property>

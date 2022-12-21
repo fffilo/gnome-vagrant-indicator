@@ -215,7 +215,7 @@ var Widget = class Widget {
             widget.set_active(this.settings.get_boolean(property));
             this.settings.bind(property, widget, 'active', Gio.SettingsBindFlags.DEFAULT);
         }
-        else if (widget.get_style_context().has_class('setting--post-terminal-action')) {
+        else if (widget.get_style_context().has_class('gnome-vagrant-indicator-prefs__setting--post-terminal-action')) {
             widget.set_selected(this._postTerminalActionStringToIndex(this.settings.get_string(property)));
             widget.connect('notify::selected', (widget, event) => this.settings.set_string(property, this._postTerminalActionIndexToString(widget.get_selected())));
             // @todo - two way binding?
