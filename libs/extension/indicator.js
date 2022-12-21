@@ -399,10 +399,7 @@ var Base = GObject.registerClass(class Base extends PanelMenu.Button {
      * @return {Void}
      */
     _handlePreferences(widget, event) {
-        if (typeof ExtensionUtils.openPrefs === 'function')
-            ExtensionUtils.openPrefs();
-        else
-            Util.spawn(['gnome-shell-extension-prefs', Me.metadata.uuid]);
+        ExtensionUtils.openPrefs();
     }
 
     /* --- */

@@ -2,7 +2,7 @@
 
 'use strict';
 
-const { Gtk, Gdk, GLib, Gio, Adw } = imports.gi;
+const { Gtk, Gdk, GLib, Gio } = imports.gi;
 const Mainloop = imports.mainloop;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
@@ -195,6 +195,7 @@ var Widget = class Widget {
         this._findChild('about-session').set_label(sessionType);
         this._findChild('about-author').set_label(this._getMetadataProperty('original-author-html', 'original-author'));
         this._findChild('about-webpage').set_label(webpage);
+        this._findChild('about-donation').set_label(this._getMetadataProperty('donation-html', 'donation'));
         this._findChild('about-license').set_label(this._getMetadataProperty('license-html', 'license'));
     }
 
@@ -215,7 +216,7 @@ var Widget = class Widget {
             widget.set_active(this.settings.get_boolean(property));
             this.settings.bind(property, widget, 'active', Gio.SettingsBindFlags.DEFAULT);
         }
-        else if (widget.get_style_context().has_class('setting--post-terminal-action')) {
+        else if (widget.get_style_context().has_class('gnome-vagrant-indicator-prefs__setting--post-terminal-action')) {
             widget.set_selected(this._postTerminalActionStringToIndex(this.settings.get_string(property)));
             widget.connect('notify::selected', (widget, event) => this.settings.set_string(property, this._postTerminalActionIndexToString(widget.get_selected())));
             // @todo - two way binding?

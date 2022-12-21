@@ -1,5 +1,11 @@
 # Changelog
 
+## Version 17 - 2022-12-21
+### Added
+- Preferences donation link
+### Changed
+- Minor refactor
+
 ## Version 16 - 2022-08-22
 ### Changed
 - Port extension to gnome shell 42
