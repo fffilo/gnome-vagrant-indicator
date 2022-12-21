@@ -195,6 +195,7 @@ var Widget = class Widget {
         this._findChild('about-session').set_label(sessionType);
         this._findChild('about-author').set_label(this._getMetadataProperty('original-author-html', 'original-author'));
         this._findChild('about-webpage').set_label(webpage);
+        this._findChild('about-donation').set_label(this._getMetadataProperty('donation-html', 'donation'));
         this._findChild('about-license').set_label(this._getMetadataProperty('license-html', 'license'));
     }
 

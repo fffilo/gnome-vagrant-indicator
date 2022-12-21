@@ -10,7 +10,7 @@ const Me = ExtensionUtils.getCurrentExtension();
  *
  * @return {Void}
  */
-var init = () => {
+function init() {
     ExtensionUtils.initTranslations(Me.metadata['gettext-domain']);
 }
 
@@ -20,7 +20,7 @@ var init = () => {
  * @param  {ExtensionPrefsDialog} window
  * @return {Void}
  */
-var fillPreferencesWindow = (window) => {
+function fillPreferencesWindow(window) {
     const Widget = Me.imports.libs.prefs.widget;
     new Widget.Widget(window);
 }

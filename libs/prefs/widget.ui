@@ -426,6 +426,26 @@
                                 </child>
                             </object>
                         </child>
+                        <child>
+                            <object class="GtkBox">
+                                <property name="orientation">vertical</property>
+                                <property name="valign">end</property>
+                                <property name="vexpand">true</property>
+                                <child>
+                                    <object class="GtkLabel" id="about-donation">
+                                        <style>
+                                            <class name="gnome-vagrant-indicator-prefs__about" />
+                                            <class name="gnome-vagrant-indicator-prefs__about--donation" />
+                                        </style>
+                                        <property name="label">Me.metadata.donation</property>
+                                        <property name="label"></property>
+                                        <property name="use-markup">true</property>
+                                        <property name="wrap">true</property>
+                                        <property name="justify">center</property>
+                                    </object>
+                                </child>
+                            </object>
+                        </child>
                     </object>
                 </child>
                 <child>
