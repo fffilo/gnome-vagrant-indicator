@@ -2,7 +2,7 @@
 
 'use strict';
 
-const { Gtk, Gdk, GLib, Gio, Adw } = imports.gi;
+const { Gtk, Gdk, GLib, Gio } = imports.gi;
 const Mainloop = imports.mainloop;
 const ExtensionUtils = imports.misc.extensionUtils;
 const Me = ExtensionUtils.getCurrentExtension();
